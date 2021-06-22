@@ -1,0 +1,55 @@
+{
+  "TAX":{
+    "description":"Copies the current contents of the accumulator into the X Register.",
+    "modes":{
+      "implied":{
+        "opcode":"AA",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      } 
+    },
+    "flags":"N,Z",
+    "tags":["Transfer", "Accumulator", "X Register"]
+  },
+  "TAY":{
+    "description":"Copies the current contents of the accumulator into the Y Register.",
+    "modes":{
+      "implied":{
+        "opcode":"A8",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      } 
+    },
+    "flags":"N,Z",
+    "tags":["Transfer", "Accumulator", "Y Register"]
+  },
+  "TXA":{
+    "description":"Copies the current contents of the X Register into the Accumulator.",
+    "modes":{
+      "implied":{
+        "opcode":"8A",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      } 
+    },
+    "flags":"N,Z",
+    "tags":["Transfer", "Accumulator", "X Register"]
+  },
+  "TAX":{
+    "description":"Copies the current contents of the accumulator into the Y Register.",
+    "modes":{
+      "implied":{
+        "opcode":"98",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      } 
+    },
+    "flags":"N,Z",
+    "tags":["Transfer", "Accumulator", "Y Register"]
+  } 
+}
+

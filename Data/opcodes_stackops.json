@@ -1,0 +1,83 @@
+{
+  "TSX":{
+    "description":"Copies the current contents of the Stack Register into the X Register.",
+    "modes":{
+      "implied":{
+        "opcode":"BA",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      } 
+    },
+    "flags":"N,Z",
+    "tags":["Transfer", "Stack", "Stack Register", "X Register"]
+  },
+
+  "TXS":{
+    "description":"Copies the current contents of the X Register into the Stack Register.",
+    "modes":{
+      "implied":{
+        "opcode":"9A",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      } 
+    },
+    "flags":"",
+    "tags":["Transfer", "Stack", "Stack Register", "X Register"]
+  },
+
+  "PHA":{
+    "description":"Push a copy of the accumulator onto the stack",
+    "modes":{
+      "implied":{
+        "opcode":"48",
+        "bytes":1,
+        "cycles":3,
+        "pagecross":0
+      } 
+    },
+    "flags":"",
+    "tags":["Push", "Stack", "Accumulator"]
+  },
+  "PHP":{
+    "description":"Push a copy of the processor flags onto the stack",
+    "modes":{
+      "implied":{
+        "opcode":"08",
+        "bytes":1,
+        "cycles":3,
+        "pagecross":0
+      } 
+    },
+    "flags":"",
+    "tags":["Push", "Stack", "Flags"]
+  },
+  "PLA":{
+    "description":"Pulls an 8 bit value from the stack into the accumulator.",
+    "modes":{
+      "implied":{
+        "opcode":"68",
+        "bytes":1,
+        "cycles":4,
+        "pagecross":0
+      } 
+    },
+    "flags":"N,Z",
+    "tags":["Pull", "Stack", "Accumulator"]
+  },
+  "PLP":{
+    "description":"Pulls an 8 bit value from the stack into the processor flags",
+    "modes":{
+      "implied":{
+        "opcode":"28",
+        "bytes":1,
+        "cycles":4,
+        "pagecross":0
+      } 
+    },
+    "flags":"C,Z,I,D,B,V,N",
+    "tags":["Pull", "Stack", "Flags"]
+  }
+}
+
