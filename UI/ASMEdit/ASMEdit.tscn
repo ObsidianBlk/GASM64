@@ -1,0 +1,35 @@
+[gd_scene format=2]
+
+[node name="ASMEdit" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBC" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlaceHolder" type="Container" parent="VBC"]
+margin_right = 1920.0
+
+[node name="EditorArea" type="HBoxContainer" parent="VBC"]
+margin_top = 4.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+size_flags_vertical = 3
+
+[node name="TextEdit" type="TextEdit" parent="VBC/EditorArea"]
+margin_right = 1920.0
+margin_bottom = 1076.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+syntax_highlighting = true
+show_line_numbers = true
+breakpoint_gutter = true
+smooth_scrolling = true
+minimap_draw = true
