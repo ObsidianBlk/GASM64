@@ -1,0 +1,122 @@
+{
+  "INC":{
+    "description":"Adds one to the value held at a specified memory location.",
+    "modes":{
+      "zero_page":{
+        "opcode":"E6",
+        "bytes":2,
+        "cycles":5,
+        "pagecross":0
+      },
+      "zero_page_x":{
+        "opcode":"F6",
+        "bytes":2,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute":{
+        "opcode":"EE",
+        "bytes":3,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute_x":{
+        "opcode":"FE",
+        "bytes":3,
+        "cycles":7,
+        "pagecross":0
+      }    
+    },
+    "flags":"N,Z",
+    "tags":["Increment"]
+  },
+
+  "INX":{
+    "description":"Adds one to the value of the X Register.",
+    "modes":{
+      "implied":{
+        "opcode":"E8",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"N,Z",
+    "tags":["Increment", "X Register"]
+  },
+
+  "INY":{
+    "description":"Adds one to the value of the Y Register.",
+    "modes":{
+      "implied":{
+        "opcode":"C8",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"N,Z",
+    "tags":["Increment", "Y Register"]
+  },
+
+  "DEC":{
+    "description":"Decrements one to the value held at a specified memory location.",
+    "modes":{
+      "zero_page":{
+        "opcode":"C6",
+        "bytes":2,
+        "cycles":5,
+        "pagecross":0
+      },
+      "zero_page_x":{
+        "opcode":"D6",
+        "bytes":2,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute":{
+        "opcode":"CE",
+        "bytes":3,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute_x":{
+        "opcode":"DE",
+        "bytes":3,
+        "cycles":7,
+        "pagecross":0
+      }    
+    },
+    "flags":"N,Z",
+    "tags":["Decrement"]
+  },
+
+  "DEX":{
+    "description":"Decrements one to the value of the X Register.",
+    "modes":{
+      "implied":{
+        "opcode":"CA",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"N,Z",
+    "tags":["Decrement", "X Register"]
+  },
+
+  "DEY":{
+    "description":"Decrements one to the value of the Y Register.",
+    "modes":{
+      "implied":{
+        "opcode":"88",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"N,Z",
+    "tags":["Decrement", "Y Register"]
+  }
+}
+
