@@ -1,0 +1,107 @@
+{
+  "CLC":{
+    "name":"Clear Carry Flag",
+    "description":"Set the carry flag to zero.",
+    "modes":{
+      "implied":{
+        "opcode":"18",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"C",
+    "tags":["Clear", "Carry", "Flag"]
+  },
+
+  "CLD":{
+    "name":"Clear Decimal Mode Flag",
+    "description":"Sets the decimal mode flag to zero.",
+    "modes":{
+      "implied":{
+        "opcode":"D8",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"D",
+    "tags":["Clear", "Decimal", "Flag"]
+  },
+
+  "CLI":{
+    "name":"Clear Interrupt Disable Flag",
+    "description":"Clears the interrupt disable flag allowing normal interrupt requests to be serviced.",
+    "modes":{
+      "implied":{
+        "opcode":"58",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"I",
+    "tags":["Clear", "Interrupt", "Flag"]
+  },
+
+  "CLV":{
+    "name":"Clear Overflow Flag",
+    "description":"Clears the overflow flag.",
+    "modes":{
+      "implied":{
+        "opcode":"B8",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"V",
+    "tags":["Clear", "Overflow", "Flag"]
+  },
+
+  "SEC":{
+    "name":"Set Carry Flag",
+    "description":"Set the carry flag to one.",
+    "modes":{
+      "implied":{
+        "opcode":"38",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"C",
+    "tags":["Set", "Carry", "Flag"]
+  },
+
+  "SED":{
+    "name":"Set Decimal Mode Flag",
+    "description":"Set the decimal mode flag to one.",
+    "modes":{
+      "implied":{
+        "opcode":"F8",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"D",
+    "tags":["Set", "Decimal", "Flag"]
+  },
+
+  "SEI":{
+    "name":"Set Interrupt Disable Flag",
+    "description":"Set the interrupt disable flag to one.",
+    "modes":{
+      "implied":{
+        "opcode":"78",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      }
+    },
+    "flags":"I",
+    "tags":["Set", "Interrupt", "Flag"]
+  }
+}
+

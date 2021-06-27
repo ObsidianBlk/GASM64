@@ -1,6 +1,7 @@
 {
   "TSX":{
-    "description":"Copies the current contents of the Stack Register into the X Register.",
+    "name":"Transfer Stack Pointer to X",
+    "description":"Copies the current contents of the Stack Register into the X Register and sets the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
         "opcode":"BA",
@@ -14,6 +15,7 @@
   },
 
   "TXS":{
+    "name":"Transfer X to Stack Pointer",
     "description":"Copies the current contents of the X Register into the Stack Register.",
     "modes":{
       "implied":{
@@ -28,6 +30,7 @@
   },
 
   "PHA":{
+    "name":"Push Accumulator on Stack",
     "description":"Push a copy of the accumulator onto the stack",
     "modes":{
       "implied":{
@@ -40,7 +43,9 @@
     "flags":"",
     "tags":["Push", "Stack", "Accumulator"]
   },
+  
   "PHP":{
+    "name":"Push Processor Status on Stack",
     "description":"Push a copy of the processor flags onto the stack",
     "modes":{
       "implied":{
@@ -53,8 +58,10 @@
     "flags":"",
     "tags":["Push", "Stack", "Flags"]
   },
+  
   "PLA":{
-    "description":"Pulls an 8 bit value from the stack into the accumulator.",
+    "name":"Pull Accumulator from Stack",
+    "description":"Pulls an 8 bit value from the stack into the accumulator. The zero and negative flags are set as appropriate.",
     "modes":{
       "implied":{
         "opcode":"68",
@@ -66,8 +73,10 @@
     "flags":"N,Z",
     "tags":["Pull", "Stack", "Accumulator"]
   },
+  
   "PLP":{
-    "description":"Pulls an 8 bit value from the stack into the processor flags",
+    "name":"Pull Processor Status from Stack",
+    "description":"Pulls an 8 bit value from the stack into the processor flags. The flags will take on new states as determined by the value pulled.",
     "modes":{
       "implied":{
         "opcode":"28",

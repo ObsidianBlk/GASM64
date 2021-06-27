@@ -1,0 +1,130 @@
+{
+  "BCC":{
+    "name":"Branch if Carry Flag Clear",
+    "description":"If the carry flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"90",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Carry", "Flag"]
+  },
+
+  "BCS":{
+    "name":"Branch if Carry Flag Set",
+    "description":"If the carry flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"B0",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Carry", "Flag"]
+  },
+
+  "BEQ":{
+    "name":"Branch if Zero Flag Set",
+    "description":"If the zero flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"F0",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Zero", "Flag"]
+  },
+
+  "BMI":{
+    "name":"Branch if Negative Flag Set",
+    "description":"If the negative flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"30",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Negative", "Flag"]
+  },
+
+  "BNE":{
+    "name":"Branch if Zero Flag Clear",
+    "description":"If the zero flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"D0",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Zero", "Flag"]
+  },
+
+  "BPL":{
+    "name":"Branch if Negative Flag Clear",
+    "description":"If the negative flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"10",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Negative", "Flag"]
+  },
+
+  "BVC":{
+    "name":"Branch if Overflow Flag Clear",
+    "description":"If the overflow flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"50",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Overflow", "Flag"]
+  },
+
+  "BVS":{
+    "name":"Branch if Overflow Flag Set",
+    "description":"If the overflow flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
+    "modes":{
+      "relative":{
+        "opcode":"70",
+        "bytes":2,
+        "cycles":2,
+        "pagecross":2,
+        "success": 1
+      }
+    },
+    "flags":"",
+    "tags":["Branch", "Overflow", "Flag"]
+  }
+}
+

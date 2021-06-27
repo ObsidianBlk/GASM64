@@ -1,6 +1,7 @@
 {
   "INC":{
-    "description":"Adds one to the value held at a specified memory location.",
+    "name":"Increment a memory location",
+    "description":"Adds one to the value held at a specified memory location setting the zero and negative flags as appropriate.",
     "modes":{
       "zero_page":{
         "opcode":"E6",
@@ -32,7 +33,8 @@
   },
 
   "INX":{
-    "description":"Adds one to the value of the X Register.",
+    "name":"Increment the X register",
+    "description":"Adds one to the value of the X Register setting the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
         "opcode":"E8",
@@ -46,7 +48,8 @@
   },
 
   "INY":{
-    "description":"Adds one to the value of the Y Register.",
+    "name":"Increment the Y register",
+    "description":"Adds one to the value of the Y Register setting the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
         "opcode":"C8",
@@ -60,7 +63,8 @@
   },
 
   "DEC":{
-    "description":"Decrements one to the value held at a specified memory location.",
+    "name":"Decrement a memory location",
+    "description":"Decrements one to the value held at a specified memory location setting the zero and negative flags as appropriate.",
     "modes":{
       "zero_page":{
         "opcode":"C6",
@@ -92,7 +96,8 @@
   },
 
   "DEX":{
-    "description":"Decrements one to the value of the X Register.",
+    "name":"Decrement the X register",
+    "description":"Decrements one to the value of the X Register setting the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
         "opcode":"CA",
@@ -106,7 +111,8 @@
   },
 
   "DEY":{
-    "description":"Decrements one to the value of the Y Register.",
+    "name":"Decrement the Y register",
+    "description":"Decrements one to the value of the Y Register setting the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
         "opcode":"88",

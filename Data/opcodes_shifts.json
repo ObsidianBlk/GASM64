@@ -1,0 +1,159 @@
+{
+  "ASL":{
+    "name":"Arithmetic Shift Left",
+    "description":"This operation shifts all the bits of the accumulator or memory contents one bit left. Bit 0 is set to 0 and bit 7 is placed in the carry flag. The effect of this operation is to multiply the memory contents by 2 (ignoring 2's complement considerations), setting the carry if the result will not fit in 8 bits.",
+    "modes":{
+      "accumulator":{
+        "opcode":"0A",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      },
+      "zero_page":{
+        "opcode":"06",
+        "bytes":2,
+        "cycles":5,
+        "pagecross":0
+      },
+      "zero_page_x":{
+        "opcode":"16",
+        "bytes":2,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute":{
+        "opcode":"0E",
+        "bytes":3,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute_x":{
+        "opcode":"1E",
+        "bytes":3,
+        "cycles":7,
+        "pagecross":0
+      }    
+    },
+    "flags":"C,N,Z",
+    "tags":["Arithmetic", "Shift", "Left"]
+  },
+
+  "LSR":{
+    "name":"Logical Shift Right",
+    "description":"Each of the bits in A or M is shift one place to the right. The bit that was in bit 0 is shifted into the carry flag. Bit 7 is set to zero.",
+    "modes":{
+      "accumulator":{
+        "opcode":"4A",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      },
+      "zero_page":{
+        "opcode":"46",
+        "bytes":2,
+        "cycles":5,
+        "pagecross":0
+      },
+      "zero_page_x":{
+        "opcode":"56",
+        "bytes":2,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute":{
+        "opcode":"4E",
+        "bytes":3,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute_x":{
+        "opcode":"5E",
+        "bytes":3,
+        "cycles":7,
+        "pagecross":0
+      }    
+    },
+    "flags":"C,N,Z",
+    "tags":["Logical", "Shift", "Right"]
+  },
+
+  "ROL":{
+    "name":"Rotate Left",
+    "description":"Move each of the bits in either A or M one place to the left. Bit 0 is filled with the current value of the carry flag whilst the old bit 7 becomes the new carry flag value.",
+    "modes":{
+      "accumulator":{
+        "opcode":"2A",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      },
+      "zero_page":{
+        "opcode":"26",
+        "bytes":2,
+        "cycles":5,
+        "pagecross":0
+      },
+      "zero_page_x":{
+        "opcode":"36",
+        "bytes":2,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute":{
+        "opcode":"2E",
+        "bytes":3,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute_x":{
+        "opcode":"3E",
+        "bytes":3,
+        "cycles":7,
+        "pagecross":0
+      }    
+    },
+    "flags":"C,N,Z",
+    "tags":["Rotate", "Shift", "Left"]
+  },
+
+  "ROR":{
+    "name":"Rotate Left",
+    "description":"Move each of the bits in either A or M one place to the right. Bit 7 is filled with the current value of the carry flag whilst the old bit 0 becomes the new carry flag value.",
+    "modes":{
+      "accumulator":{
+        "opcode":"6A",
+        "bytes":1,
+        "cycles":2,
+        "pagecross":0
+      },
+      "zero_page":{
+        "opcode":"66",
+        "bytes":2,
+        "cycles":5,
+        "pagecross":0
+      },
+      "zero_page_x":{
+        "opcode":"76",
+        "bytes":2,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute":{
+        "opcode":"6E",
+        "bytes":3,
+        "cycles":6,
+        "pagecross":0
+      },
+      "absolute_x":{
+        "opcode":"7E",
+        "bytes":3,
+        "cycles":7,
+        "pagecross":0
+      }    
+    },
+    "flags":"C,N,Z",
+    "tags":["Rotate", "Shift", "Right"]
+  }
+  
+}
+

@@ -1,6 +1,7 @@
 {
   "ADC":{
-    "description":"Add with Carry",
+    "name":"Add with Carry",
+    "description":"A logical AND is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
     "modes":{
       "immediate":{
         "opcode":"69",
@@ -55,7 +56,8 @@
     "tags":["Arithmetic", "Accumulator"]
   },
   "SBC":{
-    "description":"Subtract with Carry",
+    "name":"Subtract with Carry",
+    "description":"Subtracts the contents of a memory location to the accumulator together with the not of the carry bit. If overflow occurs the carry bit is clear, this enables multiple byte subtraction to be performed.",
     "modes":{
       "immediate":{
         "opcode":"E9",
@@ -109,8 +111,10 @@
     "flags":"C,V,N,Z",
     "tags":["Arithmetic", "Accumulator"]
   },
+  
   "CMP":{
-    "description":"Compare with Accumulator",
+    "name":"Compare with Accumulator",
+    "description":"Compares the contents of the accumulator with another memory held value and sets the zero and carry flags as appropriate.",
     "modes":{
       "immediate":{
         "opcode":"C9",
@@ -164,8 +168,10 @@
     "flags":"C,N,Z",
     "tags":["Arithmetic", "Compare", "Accumulator"]
   },
+  
   "CPX":{
-    "description":"Compare with X Register",
+    "name":"Compare with X Register",
+    "description":"Compares the contents of the X register with another memory held value and sets the zero and carry flags as appropriate.",
     "modes":{
       "immediate":{
         "opcode":"E0",
@@ -189,8 +195,10 @@
     "flags":"C,N,Z",
     "tags":["Arithmetic", "X Register"]
   },
+  
   "CPY":{
-    "description":"Compare with Y Register",
+    "name":"Compare with Y Register",
+    "description":"Compares the contents of the Y register with another memory held value and sets the zero and carry flags as appropriate.",
     "modes":{
       "immediate":{
         "opcode":"C0",
