@@ -15,6 +15,10 @@ config/description="Generally Awesome Simulated Machine 64k Edition!"
 run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+SysInfo="*res://Scripts/Auto/SysInfo.gd"
+
 [display]
 
 window/size/width=1920
