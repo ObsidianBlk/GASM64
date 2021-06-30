@@ -219,7 +219,7 @@
   },
 
   "STY":{
-    "description":"Store Y Register",
+    "name":"Store Y Register",
     "description":"Stores the contents of the Y register into memory.",
     "modes":{
       "zero_page":{
