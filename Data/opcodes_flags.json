@@ -1,6 +1,7 @@
 {
   "CLC":{
     "name":"Clear Carry Flag",
+    "category":"Flags",
     "description":"Set the carry flag to zero.",
     "modes":{
       "implied":{
@@ -16,6 +17,7 @@
 
   "CLD":{
     "name":"Clear Decimal Mode Flag",
+    "category":"Flags",
     "description":"Sets the decimal mode flag to zero.",
     "modes":{
       "implied":{
@@ -31,6 +33,7 @@
 
   "CLI":{
     "name":"Clear Interrupt Disable Flag",
+    "category":"Flags",
     "description":"Clears the interrupt disable flag allowing normal interrupt requests to be serviced.",
     "modes":{
       "implied":{
@@ -46,6 +49,7 @@
 
   "CLV":{
     "name":"Clear Overflow Flag",
+    "category":"Flags",
     "description":"Clears the overflow flag.",
     "modes":{
       "implied":{
@@ -61,6 +65,7 @@
 
   "SEC":{
     "name":"Set Carry Flag",
+    "category":"Flags",
     "description":"Set the carry flag to one.",
     "modes":{
       "implied":{
@@ -76,6 +81,7 @@
 
   "SED":{
     "name":"Set Decimal Mode Flag",
+    "category":"Flags",
     "description":"Set the decimal mode flag to one.",
     "modes":{
       "implied":{
@@ -91,6 +97,7 @@
 
   "SEI":{
     "name":"Set Interrupt Disable Flag",
+    "category":"Flags",
     "description":"Set the interrupt disable flag to one.",
     "modes":{
       "implied":{

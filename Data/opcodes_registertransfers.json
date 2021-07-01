@@ -1,6 +1,7 @@
 {
   "TAX":{
     "name":"Transfer Accumulator to X",
+    "category":"Register Ops",
     "description":"Copies the current contents of the accumulator into the X Register and sets the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
@@ -15,6 +16,7 @@
   },
   "TAY":{
     "name":"Transfer Accumulator to Y",
+    "category":"Register Ops",
     "description":"Copies the current contents of the accumulator into the Y Register and sets the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
@@ -30,6 +32,7 @@
   
   "TXA":{
     "name":"Transfer X to Accumulator",
+    "category":"Register Ops",
     "description":"Copies the current contents of the X Register into the Accumulator and sets the zero and negative flags as appropriate.",
     "modes":{
       "implied":{
@@ -44,6 +47,7 @@
   },
   "TAX":{
     "name":"Transfer Y to Accumulator",
+    "category":"Register Ops",
     "description":"Copies the current contents of the accumulator into the Y Register and sets the zero and negative flags as appropriate.",
     "modes":{
       "implied":{

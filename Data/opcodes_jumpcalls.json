@@ -1,6 +1,7 @@
 {
   "JMP":{
     "name":"Jump to Another Location",
+    "category":"Jumps",
     "description":"Sets the program counter to the address specified by the operand.",
     "modes":{
       "absolute":{
@@ -22,6 +23,7 @@
 
   "JSR":{
     "name":"Jump to Subroutine",
+    "category":"Jumps",
     "description":"The JSR instruction pushes the address (minus one) of the return point on to the stack and then sets the program counter to the target memory address.",
     "modes":{
       "absolute":{
@@ -37,6 +39,7 @@
 
   "RTS":{
     "name":"Return from Subroutine",
+    "category":"Jumps",
     "description":"The RTS instruction is used at the end of a subroutine to return to the calling routine. It pulls the program counter (minus one) from the stack.",
     "modes":{
       "implied":{

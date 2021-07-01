@@ -1,6 +1,7 @@
 {
   "BRK":{
     "name":"Force an Interrupt",
+    "category":"Sys Ops",
     "description":"The BRK instruction forces the generation of an interrupt request. The program counter and processor status are pushed on the stack then the IRQ interrupt vector at $FFFE/F is loaded into the PC and the break flag in the status set to one.",
     "modes":{
       "implied":{
@@ -16,6 +17,7 @@
 
   "NOP":{
     "name":"No Operation",
+    "category":"Sys Ops",
     "description":"The NOP instruction causes no changes to the processor other than the normal incrementing of the program counter to the next instruction.",
     "modes":{
       "implied":{
@@ -31,6 +33,7 @@
 
   "RTI":{
     "name":"Return from Interrupt",
+    "category":"Sys Ops",
     "description":"The RTI instruction is used at the end of an interrupt processing routine. It pulls the processor flags from the stack followed by the program counter.",
     "modes":{
       "implied":{

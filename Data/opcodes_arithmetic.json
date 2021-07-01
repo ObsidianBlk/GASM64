@@ -1,6 +1,7 @@
 {
   "ADC":{
     "name":"Add with Carry",
+    "category":"Arithmatic",
     "description":"A logical AND is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
     "modes":{
       "immediate":{
@@ -57,6 +58,7 @@
   },
   "SBC":{
     "name":"Subtract with Carry",
+    "category":"Arithmatic",
     "description":"Subtracts the contents of a memory location to the accumulator together with the not of the carry bit. If overflow occurs the carry bit is clear, this enables multiple byte subtraction to be performed.",
     "modes":{
       "immediate":{
@@ -114,6 +116,7 @@
   
   "CMP":{
     "name":"Compare with Accumulator",
+    "category":"Arithmatic",
     "description":"Compares the contents of the accumulator with another memory held value and sets the zero and carry flags as appropriate.",
     "modes":{
       "immediate":{
@@ -171,6 +174,7 @@
   
   "CPX":{
     "name":"Compare with X Register",
+    "category":"Arithmatic",
     "description":"Compares the contents of the X register with another memory held value and sets the zero and carry flags as appropriate.",
     "modes":{
       "immediate":{
@@ -198,6 +202,7 @@
   
   "CPY":{
     "name":"Compare with Y Register",
+    "category":"Arithmatic",
     "description":"Compares the contents of the Y register with another memory held value and sets the zero and carry flags as appropriate.",
     "modes":{
       "immediate":{

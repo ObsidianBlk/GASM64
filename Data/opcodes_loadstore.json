@@ -1,6 +1,7 @@
 {
   "LDA":{
     "name":"Load Accumulator",
+    "category":"Load / Store",
     "description":"Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate.",
     "modes":{
       "immediate":{
@@ -58,6 +59,7 @@
 
   "LDX":{
     "name":"Load X Register",
+    "category":"Load / Store",
     "description":"Loads a byte of memory into the X register setting the zero and negative flags as appropriate.",
     "modes":{
       "immediate":{
@@ -103,6 +105,7 @@
 
   "LDY":{
     "name":"Load Y Register",
+    "category":"Load / Store",
     "description":"Loads a byte of memory into the Y register setting the zero and negative flags as appropriate.",
     "modes":{
       "immediate":{
@@ -142,6 +145,7 @@
 
   "STA":{
     "name":"Store Accumulator",
+    "category":"Load / Store",
     "description":"Stores the contents of the accumulator into memory.",
     "modes":{
       "zero_page":{
@@ -193,6 +197,7 @@
 
   "STX":{
     "name":"Store X Register",
+    "category":"Load / Store",
     "description":"Stores the contents of the X register into memory.",
     "modes":{
       "zero_page":{
@@ -220,6 +225,7 @@
 
   "STY":{
     "name":"Store Y Register",
+    "category":"Load / Store",
     "description":"Stores the contents of the Y register into memory.",
     "modes":{
       "zero_page":{

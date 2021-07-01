@@ -1,6 +1,7 @@
 {
   "BCC":{
     "name":"Branch if Carry Flag Clear",
+    "category":"Branches",
     "description":"If the carry flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{
@@ -17,6 +18,7 @@
 
   "BCS":{
     "name":"Branch if Carry Flag Set",
+    "category":"Branches",
     "description":"If the carry flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{
@@ -33,6 +35,7 @@
 
   "BEQ":{
     "name":"Branch if Zero Flag Set",
+    "category":"Branches",
     "description":"If the zero flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{
@@ -49,6 +52,7 @@
 
   "BMI":{
     "name":"Branch if Negative Flag Set",
+    "category":"Branches",
     "description":"If the negative flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{
@@ -65,6 +69,7 @@
 
   "BNE":{
     "name":"Branch if Zero Flag Clear",
+    "category":"Branches",
     "description":"If the zero flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{
@@ -81,6 +86,7 @@
 
   "BPL":{
     "name":"Branch if Negative Flag Clear",
+    "category":"Branches",
     "description":"If the negative flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{
@@ -97,6 +103,7 @@
 
   "BVC":{
     "name":"Branch if Overflow Flag Clear",
+    "category":"Branches",
     "description":"If the overflow flag is clear then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{
@@ -113,6 +120,7 @@
 
   "BVS":{
     "name":"Branch if Overflow Flag Set",
+    "category":"Branches",
     "description":"If the overflow flag is set then add the relative displacement to the program counter to cause a branch to a new location.",
     "modes":{
       "relative":{

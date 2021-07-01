@@ -1,6 +1,7 @@
 {
   "AND":{
     "name":"Logical AND",
+    "category":"Logical",
     "description":"A logical AND is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
     "modes":{
       "immediate":{
@@ -58,6 +59,7 @@
   
   "EOR":{
     "name":"Exclusive OR",
+    "category":"Logical",
     "description":"An exclusive OR is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
     "modes":{
       "immediate":{
@@ -115,6 +117,7 @@
   
   "ORA":{
     "name":"Logical Inclusive OR",
+    "category":"Logical",
     "description":"An inclusive OR is performed, bit by bit, on the accumulator contents using the contents of a byte of memory.",
     "modes":{
       "immediate":{
@@ -172,6 +175,7 @@
   
   "BIT":{
     "name":"Bit Test",
+    "category":"Logical",
     "description":"This instructions is used to test if one or more bits are set in a target memory location. The mask pattern in A is ANDed with the value in memory to set or clear the zero flag, but the result is not kept. Bits 7 and 6 of the value from memory are copied into the N and V flags.",
     "modes":{
       "zero_page":{
