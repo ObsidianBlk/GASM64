@@ -1,0 +1,134 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://UI/ASMEdit/OPCard.gd" type="Script" id=1]
+
+[node name="OPCard" type="PanelContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 480, 0 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MC" type="MarginContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 1913.0
+margin_bottom = 1400.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="HBox" type="HBoxContainer" parent="MC"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 1896.0
+margin_bottom = 1383.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LBL_OP" type="Label" parent="MC/HBox"]
+margin_right = 64.0
+margin_bottom = 1373.0
+rect_min_size = Vector2( 64, 0 )
+size_flags_vertical = 3
+custom_colors/font_color = Color( 1, 0.305882, 0, 1 )
+text = "OPP"
+align = 1
+
+[node name="Info" type="VBoxContainer" parent="MC/HBox"]
+margin_left = 68.0
+margin_right = 1886.0
+margin_bottom = 1373.0
+size_flags_horizontal = 3
+
+[node name="Info_Name" type="HBoxContainer" parent="MC/HBox/Info"]
+margin_right = 1818.0
+margin_bottom = 14.0
+
+[node name="Label" type="Label" parent="MC/HBox/Info/Info_Name"]
+margin_right = 46.0
+margin_bottom = 14.0
+text = "NAME: "
+
+[node name="Text" type="Label" parent="MC/HBox/Info/Info_Name"]
+margin_left = 50.0
+margin_right = 177.0
+margin_bottom = 14.0
+custom_colors/font_color = Color( 0.972549, 1, 0.498039, 1 )
+text = "Yeah, you know me!"
+
+[node name="Info_Category" type="HBoxContainer" parent="MC/HBox/Info"]
+margin_top = 18.0
+margin_right = 1818.0
+margin_bottom = 32.0
+
+[node name="Label" type="Label" parent="MC/HBox/Info/Info_Category"]
+margin_right = 75.0
+margin_bottom = 14.0
+text = "CATEGORY: "
+
+[node name="Text" type="Label" parent="MC/HBox/Info/Info_Category"]
+margin_left = 79.0
+margin_right = 147.0
+margin_bottom = 14.0
+custom_colors/font_color = Color( 0.972549, 1, 0.498039, 1 )
+text = "Something"
+
+[node name="Info_Description" type="HBoxContainer" parent="MC/HBox/Info"]
+margin_top = 36.0
+margin_right = 1818.0
+margin_bottom = 50.0
+
+[node name="Label" type="Label" parent="MC/HBox/Info/Info_Description"]
+margin_right = 94.0
+margin_bottom = 14.0
+text = "DESCRIPTION: "
+
+[node name="Text" type="Label" parent="MC/HBox/Info/Info_Description"]
+margin_left = 98.0
+margin_right = 1818.0
+margin_bottom = 14.0
+size_flags_horizontal = 11
+size_flags_vertical = 5
+custom_colors/font_color = Color( 0.972549, 1, 0.498039, 1 )
+text = "And so it is as it was and as it should be once more, so says the hamburgaler!"
+autowrap = true
+
+[node name="Info_Flags" type="HBoxContainer" parent="MC/HBox/Info"]
+margin_top = 54.0
+margin_right = 1818.0
+margin_bottom = 68.0
+
+[node name="Label" type="Label" parent="MC/HBox/Info/Info_Flags"]
+margin_right = 114.0
+margin_bottom = 14.0
+text = "AFFECTED FLAGS: "
+
+[node name="Text" type="Label" parent="MC/HBox/Info/Info_Flags"]
+margin_left = 118.0
+margin_right = 149.0
+margin_bottom = 14.0
+size_flags_horizontal = 9
+custom_colors/font_color = Color( 0.972549, 1, 0.498039, 1 )
+text = "C,V,S"
+
+[node name="Info_Tags" type="HBoxContainer" parent="MC/HBox/Info"]
+margin_top = 72.0
+margin_right = 1818.0
+margin_bottom = 86.0
+
+[node name="Label" type="Label" parent="MC/HBox/Info/Info_Tags"]
+margin_right = 41.0
+margin_bottom = 14.0
+text = "TAGS: "
+
+[node name="Text" type="Label" parent="MC/HBox/Info/Info_Tags"]
+margin_left = 45.0
+margin_right = 113.0
+margin_bottom = 14.0
+size_flags_horizontal = 9
+custom_colors/font_color = Color( 0.972549, 1, 0.498039, 1 )
+text = "Right, Stuff"

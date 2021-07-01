@@ -1,0 +1,61 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://UI/ASMEdit/Documentation.gd" type="Script" id=1]
+
+[node name="Documentation" type="VBoxContainer"]
+rect_min_size = Vector2( 480, 800 )
+size_flags_vertical = 3
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FilterBox" type="Panel" parent="."]
+margin_right = 480.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 0, 200 )
+
+[node name="MC" type="MarginContainer" parent="FilterBox"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 6
+custom_constants/margin_top = 6
+custom_constants/margin_left = 6
+custom_constants/margin_bottom = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FilterList" type="VBoxContainer" parent="FilterBox/MC"]
+margin_left = 6.0
+margin_top = 6.0
+margin_right = 474.0
+margin_bottom = 194.0
+
+[node name="FilterCategory" type="HBoxContainer" parent="FilterBox/MC/FilterList"]
+margin_right = 468.0
+margin_bottom = 20.0
+
+[node name="Label" type="Label" parent="FilterBox/MC/FilterList/FilterCategory"]
+margin_top = 3.0
+margin_right = 59.0
+margin_bottom = 17.0
+text = "Category:"
+
+[node name="Options" type="OptionButton" parent="FilterBox/MC/FilterList/FilterCategory"]
+margin_left = 63.0
+margin_right = 468.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="Display" type="TextEdit" parent="."]
+margin_top = 204.0
+margin_right = 480.0
+margin_bottom = 800.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+readonly = true
+syntax_highlighting = true
+wrap_enabled = true
+
+[connection signal="item_selected" from="FilterBox/MC/FilterList/FilterCategory/Options" to="." method="_on_Category_item_selected"]

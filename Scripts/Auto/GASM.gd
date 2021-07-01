@@ -3,7 +3,7 @@ extends Node
 
 const OPCODE_PREFIX = "opcodes_"
 const OPCODE_EXT = ".json"
-const OP_KEYS = ["name", "description", "modes", "flags", "tags"]
+const OP_KEYS = ["name", "category", "description", "modes", "flags", "tags"]
 const MODE_KEYS = ["opcode", "bytes", "cycles", "pagecross"]
 const MODES = [
 	"implied",
@@ -17,6 +17,7 @@ const MODES = [
 
 var DATA = {
 	"OP": {},
+	"CATEGORIES": {},
 	"MODES": {},
 	"TAGS": {}
 }
@@ -58,6 +59,7 @@ func _store_opdata(data : Dictionary) -> void:
 			if _obj_has_keys(data[key], OP_KEYS):
 				var op = {
 					"name": data[key].name,
+					"category": data[key].category,
 					"description": data[key].description,
 					"modes":{},
 					"flags": data[key].flags,
@@ -72,7 +74,8 @@ func _store_opdata(data : Dictionary) -> void:
 							"opval": hex_to_int(data[key].modes[mode].opcode),
 							"bytes": data[key].modes[mode].bytes,
 							"cycles": data[key].modes[mode].cycles,
-							"pagecross": data[key].modes[mode].pagecross
+							"pagecross": data[key].modes[mode].pagecross,
+							"success": 0
 						}
 						if "success" in data[key].modes[mode]:
 							op.modes[mode].success = data[key].modes[mode].success
@@ -83,6 +86,9 @@ func _store_opdata(data : Dictionary) -> void:
 				
 				if process:
 					DATA.OP[key] = op
+					if not (op.category in DATA.CATEGORIES):
+						DATA.CATEGORIES[op.category] = []
+					DATA.CATEGORIES[op.category].append(key)
 					for mode in op.modes:
 						if not (mode in DATA.MODES):
 							DATA.MODES[mode] = []
@@ -106,6 +112,51 @@ func hex_to_int(hex : String) -> int:
 
 func is_valid_opcode(code : int) -> bool:
 	return (get_modeinfo_from_code(code)).op != ""
+
+func get_op_info(op_name : String) -> Dictionary:
+	var opi = {
+		"name": "",
+		"category": "",
+		"description": "",
+		"modes":null,
+		"flags": "",
+		"tags":null
+	}
+	
+	if op_name in DATA.OP:
+		var op = DATA.OP[op_name]
+		opi.name = op.name
+		opi.category = op.category
+		opi.description = op.description
+		opi.flags = op.flags
+		opi.tags = []
+		opi.modes = {}
+		for i in range(0, op.tags.size()):
+			opi.tags.append(op.tags[i])
+		for mode in op.modes:
+			opi.modes[mode] = {
+				"opcode": op.modes[mode].opcode,
+				"opval": op.modes[mode].opval,
+				"bytes": op.modes[mode].bytes,
+				"cycles": op.modes[mode].cycles,
+				"pagecross": op.modes[mode].pagecross,
+				"success": op.modes[mode].success
+			}
+	
+	return opi
+
+func get_ops() -> Array:
+	return DATA.OP.keys()
+
+func get_categories() -> Array:
+	return DATA.CATEGORIES.keys()
+
+func get_ops_from_category(cat_name : String) -> Array:
+	var oplist = []
+	if cat_name in DATA.CATEGORIES:
+		for i in range(0, DATA.CATEGORIES[cat_name].size()):
+			oplist.append(DATA.CATEGORIES[cat_name][i])
+	return oplist
 
 func get_modeinfo_from_code(code : int) -> Dictionary:
 	var modeinfo = {
