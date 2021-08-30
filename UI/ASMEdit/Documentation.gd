@@ -30,8 +30,8 @@ func _ready() -> void:
 	for i in range(0, ops.size()):
 		display_node.add_keyword_color(ops[i], OP_COLOR)
 
-	for i in range(0, GASM.MODES.size()):
-		display_node.add_keyword_color(GASM.MODES[i], MODE_COLOR)
+	for i in range(0, GASM.MODE_NAMES.size()):
+		display_node.add_keyword_color(GASM.MODE_NAMES[i], MODE_COLOR)
 	
 	# -- Filling the category dropdown list...
 	filtercat_node.add_item("All Categories", -1)

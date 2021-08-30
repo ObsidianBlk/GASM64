@@ -1,0 +1,68 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://UI/OpChart/OpInfoBox.gd" type="Script" id=1]
+[ext_resource path="res://UI/OpChart/OutlinePanel_Style.tres" type="StyleBox" id=2]
+
+[node name="OpInfoBox" type="PanelContainer"]
+margin_right = 1920.0
+margin_bottom = 1080.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = ExtResource( 2 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBC" type="VBoxContainer" parent="."]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 1912.0
+margin_bottom = 1072.0
+
+[node name="Name" type="HBoxContainer" parent="VBC"]
+margin_right = 1904.0
+margin_bottom = 14.0
+
+[node name="OpName" type="Label" parent="VBC/Name"]
+margin_right = 29.0
+margin_bottom = 14.0
+custom_colors/font_color = Color( 0.529412, 0.933333, 1, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "OPN"
+
+[node name="VSeparator" type="VSeparator" parent="VBC/Name"]
+margin_left = 33.0
+margin_right = 37.0
+margin_bottom = 14.0
+
+[node name="Code" type="Label" parent="VBC/Name"]
+margin_left = 41.0
+margin_right = 49.0
+margin_bottom = 14.0
+text = "0"
+
+[node name="OpMode" type="Label" parent="VBC"]
+margin_top = 18.0
+margin_right = 1904.0
+margin_bottom = 32.0
+custom_colors/font_color = Color( 0.552941, 1, 0.811765, 1 )
+text = "ModeName"
+
+[node name="Info" type="GridContainer" parent="VBC"]
+margin_top = 36.0
+margin_right = 1904.0
+margin_bottom = 50.0
+columns = 2
+
+[node name="Bytes" type="Label" parent="VBC/Info"]
+margin_right = 8.0
+margin_bottom = 14.0
+text = "0"
+
+[node name="Cycles" type="Label" parent="VBC/Info"]
+margin_left = 12.0
+margin_right = 20.0
+margin_bottom = 14.0
+text = "0"

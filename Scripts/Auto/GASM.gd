@@ -5,7 +5,7 @@ const OPCODE_PREFIX = "opcodes_"
 const OPCODE_EXT = ".json"
 const OP_KEYS = ["name", "category", "description", "modes", "flags", "tags"]
 const MODE_KEYS = ["opcode", "bytes", "cycles", "pagecross"]
-const MODES = [
+const MODE_NAMES = [
 	"implied",
 	"immediate",
 	"indirect",
@@ -13,7 +13,10 @@ const MODES = [
 	"accumulator",
 	"zero_page", "zero_page_x", "zero_page_y",
 	"absolute", "absolute_x", "absolute_y",
-	"indirect_x", "indirect_y"]
+	"indirect_x", "indirect_y"
+]
+enum MODES {IMP=0, IMM=1, IND=2, REL=3, ACC=4, ZP=5, ZPX=6, ZPY=7, ABS=8, ABSX=9, ABSY=10, INDX=11, INDY=12}
+
 
 var DATA = {
 	"OP": {},
@@ -21,8 +24,11 @@ var DATA = {
 	"MODES": {},
 	"TAGS": {}
 }
+var CODE_LIST = []
 
 func _ready():
+	for _i in range(256):
+		CODE_LIST.append(null)
 	_load_opcode_data("res://Data")
 
 
@@ -68,8 +74,10 @@ func _store_opdata(data : Dictionary) -> void:
 				
 				var process = true
 				for mode in data[key].modes.keys():
-					if mode in MODES and _obj_has_keys(data[key].modes[mode], MODE_KEYS):
+					if mode in MODE_NAMES and _obj_has_keys(data[key].modes[mode], MODE_KEYS):
 						op.modes[mode] = {
+							"op": key,
+							"mode_id": get_mode_id_from_name(mode),
 							"opcode": data[key].modes[mode].opcode,
 							"opval": hex_to_int(data[key].modes[mode].opcode),
 							"bytes": data[key].modes[mode].bytes,
@@ -93,6 +101,7 @@ func _store_opdata(data : Dictionary) -> void:
 						if not (mode in DATA.MODES):
 							DATA.MODES[mode] = []
 						DATA.MODES[mode].append(key)
+						CODE_LIST[op.modes[mode].opval] = op.modes[mode]
 					for tag in data[key].tags:
 						op.tags.append(tag)
 						if not (tag in DATA.TAGS):
@@ -109,6 +118,32 @@ func hex_to_int(hex : String) -> int:
 		hex = "0x" + hex
 		return hex.hex_to_int()
 	return -1
+
+func int_to_hex(v : int, minlen : int = 0) -> String:
+	var s = sign(v)
+	v = abs(v)
+	var hex = ""
+	while v > 0:
+		var code = v & 0xF
+		match code:
+			10:
+				hex = "A" + hex
+			11:
+				hex = "B" + hex
+			12:
+				hex = "C" + hex
+			13:
+				hex = "D" + hex
+			14:
+				hex = "E" + hex
+			15:
+				hex = "F" + hex
+			_:
+				hex = String(code) + hex
+		v = v >> 4
+	while hex.length() < minlen:
+		hex = "0" + hex
+	return hex
 
 func is_valid_opcode(code : int) -> bool:
 	return (get_modeinfo_from_code(code)).op != ""
@@ -159,27 +194,31 @@ func get_ops_from_category(cat_name : String) -> Array:
 	return oplist
 
 func get_modeinfo_from_code(code : int) -> Dictionary:
-	var modeinfo = {
-		"op": "",
-		"mode": "",
-		"bytes": 0,
-		"cycles": 0,
-		"pagecross":0,
-		"success":0
-	}
-	
-	for key in DATA.OP:
-		for mode in DATA.OP[key].modes:
-			if DATA.OP[key].modes[mode].codeval == code:
-				modeinfo.op = key
-				modeinfo.mode = mode
-				modeinfo.bytes = DATA.OP[key].modes[mode].bytes
-				modeinfo.cycles = DATA.OP[key].modes[mode].cycles
-				modeinfo.pagecross = DATA.OP[key].modes[mode].pagecross
-				if "success" in DATA.OP[key].modes[mode]:
-					modeinfo.success = DATA.OP[key].modes[mode].success
-				return modeinfo
-	return modeinfo
+	if code >= 0 and code < CODE_LIST.size():
+		return CODE_LIST[code]
+	return {"op":""}
+#	var modeinfo = {
+#		"op": "",
+#		"mode": "",
+#		"bytes": 0,
+#		"cycles": 0,
+#		"pagecross":0,
+#		"success":0
+#	}
+#
+#	for key in DATA.OP:
+#		for mode in DATA.OP[key].modes:
+#			if DATA.OP[key].modes[mode].codeval == code:
+#				modeinfo.op = key
+#				modeinfo.mode = mode
+#				modeinfo.bytes = DATA.OP[key].modes[mode].bytes
+#				modeinfo.cycles = DATA.OP[key].modes[mode].cycles
+#				modeinfo.pagecross = DATA.OP[key].modes[mode].pagecross
+#				if "success" in DATA.OP[key].modes[mode]:
+#					modeinfo.success = DATA.OP[key].modes[mode].success
+#				return modeinfo
+#	return modeinfo
+
 
 func get_opcodes_by_tag(tag : String) -> Array:
 	var opcodes = []
@@ -205,4 +244,17 @@ func get_opcodes_by_tags(tags : Array) -> Array:
 					break;
 	
 	return opcodes
+
+func get_mode_id_from_name(mode_name : String) -> int:
+	for i in range(MODE_NAMES.size()):
+		if MODE_NAMES[i] == mode_name:
+			return i
+	return -1
+
+func get_mode_name_from_ID(mode_id : int) -> String:
+	if mode_id >= 0 and mode_id < MODE_NAMES.size():
+		return MODE_NAMES[mode_id]
+	return ""
+
+
 
