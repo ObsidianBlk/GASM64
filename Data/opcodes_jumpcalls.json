@@ -43,7 +43,7 @@
     "description":"The RTS instruction is used at the end of a subroutine to return to the calling routine. It pulls the program counter (minus one) from the stack.",
     "modes":{
       "implied":{
-        "opcode":"20",
+        "opcode":"60",
         "bytes":1,
         "cycles":6,
         "pagecross":0
