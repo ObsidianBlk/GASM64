@@ -145,8 +145,11 @@ func int_to_hex(v : int, minlen : int = 0) -> String:
 		hex = "0" + hex
 	return hex
 
+
 func is_valid_opcode(code : int) -> bool:
-	return (get_modeinfo_from_code(code)).op != ""
+	if code >= 0 and code < CODE_LIST.size():
+		return CODE_LIST[code] != null
+	return false
 
 func get_op_info(op_name : String) -> Dictionary:
 	var opi = {
@@ -195,30 +198,27 @@ func get_ops_from_category(cat_name : String) -> Array:
 
 func get_modeinfo_from_code(code : int) -> Dictionary:
 	if code >= 0 and code < CODE_LIST.size():
-		return CODE_LIST[code]
+		if CODE_LIST[code] != null:
+			return CODE_LIST[code]
 	return {"op":""}
-#	var modeinfo = {
-#		"op": "",
-#		"mode": "",
-#		"bytes": 0,
-#		"cycles": 0,
-#		"pagecross":0,
-#		"success":0
-#	}
-#
-#	for key in DATA.OP:
-#		for mode in DATA.OP[key].modes:
-#			if DATA.OP[key].modes[mode].codeval == code:
-#				modeinfo.op = key
-#				modeinfo.mode = mode
-#				modeinfo.bytes = DATA.OP[key].modes[mode].bytes
-#				modeinfo.cycles = DATA.OP[key].modes[mode].cycles
-#				modeinfo.pagecross = DATA.OP[key].modes[mode].pagecross
-#				if "success" in DATA.OP[key].modes[mode]:
-#					modeinfo.success = DATA.OP[key].modes[mode].success
-#				return modeinfo
-#	return modeinfo
 
+func get_op_cycles(code : int) -> int:
+	if code >= 0 and code < CODE_LIST.size():
+		if CODE_LIST[code] != null:
+			return CODE_LIST[code].cycles
+	return 2
+
+func get_op_bytes(code : int) -> int:
+	if code >= 0 and code < CODE_LIST.size():
+		if CODE_LIST[code] != null:
+			return CODE_LIST[code].bytes
+	return 1
+
+func get_op_mode_id(code : int) -> int:
+	if code >= 0 and code < CODE_LIST.size():
+		if CODE_LIST[code] != null:
+			return CODE_LIST[code].mode_id
+	return -1
 
 func get_opcodes_by_tag(tag : String) -> Array:
 	var opcodes = []

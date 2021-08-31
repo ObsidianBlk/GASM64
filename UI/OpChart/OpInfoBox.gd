@@ -20,7 +20,7 @@ func set_op_code(c : int) -> void:
 		op_code = c
 		if ready:
 			var cinfo = GASM.get_modeinfo_from_code(c)
-			if cinfo != null:
+			if cinfo.op != "":
 				info_node.visible = true
 				opmode_node.visible = true
 				sep_node.visible = true

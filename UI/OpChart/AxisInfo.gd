@@ -23,7 +23,6 @@ func set_text(t : String) -> void:
 func set_axis_mode(m : int) -> void:
 	if m >= 0 and m < 3:
 		axis_mode = m
-		print("Setting Axis Mode")
 		match axis_mode:
 			AXISMODE.CORNER:
 				set("custom_styles/panel", style_corner)

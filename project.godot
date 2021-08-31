@@ -8,6 +8,22 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Node",
+"class": "Bus",
+"language": "GDScript",
+"path": "res://Scripts/Com/Bus.gd"
+}, {
+"base": "Node",
+"class": "CPU6502",
+"language": "GDScript",
+"path": "res://Scripts/Com/CPU6502.gd"
+} ]
+_global_script_class_icons={
+"Bus": "",
+"CPU6502": ""
+}
+
 [application]
 
 config/name="GASM64"

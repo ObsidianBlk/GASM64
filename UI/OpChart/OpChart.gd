@@ -6,13 +6,11 @@ var AXISINFO = preload("res://UI/OpChart/AxisInfo.tscn")
 onready var chart_node = get_node("Chart")
 
 func _ready() -> void:
-	print("Starting")
 	var ai = AXISINFO.instance()
 	ai.axis_mode = 0
 	ai.text = "Across: LSB\nDown: MSB"
 	chart_node.add_child(ai)
 	
-	print("Adding across")
 	for i in range(16):
 		var aix = AXISINFO.instance()
 		aix.axis_mode = 1
