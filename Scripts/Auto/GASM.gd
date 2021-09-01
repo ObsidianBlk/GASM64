@@ -220,6 +220,12 @@ func get_op_mode_id(code : int) -> int:
 			return CODE_LIST[code].mode_id
 	return -1
 
+func get_op_asm_name(code : int) -> String:
+	if code >= 0 and code < CODE_LIST.size():
+		if CODE_LIST[code] != null:
+			return CODE_LIST[code].op
+	return ""
+
 func get_opcodes_by_tag(tag : String) -> Array:
 	var opcodes = []
 	if tag in DATA.TAGS:
