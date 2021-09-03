@@ -208,70 +208,129 @@ func _AddrIndirectY() -> bool:
 # Private Instruction Methods
 # --------------------------------------------------------------------------
 func _LDA() -> void:
-	pass
+	_Reg[R.A] = _fetched
+	set_flag(FLAG.Z, 1 if _fetched == 0 else 0)
+	set_flag(FLAG.N, 1 if _fetched & 0x80 == 0x80 else 0)
 
 func _LDX() -> void:
-	pass
+	_Reg[R.X] = _fetched
+	set_flag(FLAG.Z, 1 if _fetched == 0 else 0)
+	set_flag(FLAG.N, 1 if _fetched & 0x80 == 0x80 else 0)
 
 func _LDY() -> void:
-	pass
+	_Reg[R.Y] = _fetched
+	set_flag(FLAG.Z, 1 if _fetched == 0 else 0)
+	set_flag(FLAG.N, 1 if _fetched & 0x80 == 0x80 else 0)
 
 func _STA() -> void:
-	pass
+	_Bus.write(_addr, _Reg[R.A])
 
 func _STX() -> void:
-	pass
+	_Bus.write(_addr, _Reg[R.X])
 
 func _STY() -> void:
-	pass
+	_Bus.write(_addr, _Reg[R.Y])
 
 func _TAX() -> void:
-	pass
+	_Reg[R.X] = _Reg[R.A]
+	set_flag(FLAG.Z, 1 if _Reg[R.X] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.X] & 0x80 == 0x80 else 0)
 
 func _TAY() -> void:
-	pass
+	_Reg[R.Y] = _Reg[R.A]
+	set_flag(FLAG.Z, 1 if _Reg[R.Y] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.Y] & 0x80 == 0x80 else 0)
 
 func _TXA() -> void:
-	pass
+	_Reg[R.A] = _Reg[R.X]
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 
 func _TYA() -> void:
-	pass
+	_Reg[R.A] = _Reg[R.Y]
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 
 func _TXS() -> void:
-	pass
+	_Reg[R.STK] = _Reg[R.X]
 
 func _TSX() -> void:
-	pass
+	_Reg[R.X] = _Reg[R.STK]
+	set_flag(FLAG.Z, 1 if _Reg[R.X] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.X] & 0x80 == 0x80 else 0)
 
 func _PHA() -> void:
-	pass
+	_Bus.write(0x0100 | _Reg[R.STK], _Reg[R.A])
+	match _Reg[R.STK]:
+		0:
+			_Reg[R.STK] = 0xFF
+		_:
+			_Reg[R.STK] -= 1
 
 func _PHP() -> void:
-	pass
+	_Bus.write(0x0100 | _Reg[R.STK], _Reg[R.FLAGS])
+	match _Reg[R.STK]:
+		0:
+			_Reg[R.STK] = 0xFF
+		_:
+			_Reg[R.STK] -= 1
 
 func _PLA() -> void:
-	pass
+	_Reg[R.A] = _Bus.read(0x0100 | _Reg[R.STK])
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	match _Reg[R.STK]:
+		0xFF:
+			_Reg[R.STK] = 0
+		_:
+			_Reg[R.STK] += 1
 
 func _PLP() -> void:
-	pass
+	_Reg[R.FLAGS] = _Bus.read(0x0100 | _Reg[R.STK])
+	match _Reg[R.STK]:
+		0xFF:
+			_Reg[R.STK] = 0
+		_:
+			_Reg[R.STK] += 1
 
 func _AND() -> void:
-	pass
+	_Reg[R.A] = _Reg[R.A] & _fetched
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 
 func _EOR() -> void:
-	pass
+	_Reg[R.A] = _Reg[R.A] ^ _fetched
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 
 func _ORA() -> void:
-	pass
+	_Reg[R.A] = _Reg[R.A] | _fetched
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 
 func _BIT() -> void:
-	pass
+	var res = _Reg[R.A] & _fetched
+	set_flag(FLAG.Z, 1 if res == 0 else 0)
+	_Reg[R.FLAGS] = (_Reg[R.FLAGS] & ~0x20) | (_fetched & 0x20) # Setting Bit 6
+	_Reg[R.FLAGS] = (_Reg[R.FLAGS] & ~0x40) | (_fetched & 0x40) # Setting Bit 7
 
 func _ADC() -> void:
-	pass
+	var r = _Reg[R.A] + _fetched + get_flag(FLAG.C)
+	set_flag(FLAG.C, 1 if r > 255 else 0)
+	var overflow : bool = (_Reg[R.A] & 0x80) == (_fetched & 0x80) && (_fetched & 0x80) != (r & 0x80)
+	set_flag(FLAG.V, 1 if overflow else 0)
+	_Reg[R.A] = r & 0xFF
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 
 func _SBC() -> void:
-	pass
+	var r = _Reg[R.A] + ((_fetched & 0x00FF) ^ 0x00FF) + get_flag(FLAG.C)
+	set_flag(FLAG.C, 1 if r > 255 else 0)
+	var overflow : bool = (_Reg[R.A] & 0x80) == (_fetched & 0x80) && (_fetched & 0x80) != (r & 0x80)
+	set_flag(FLAG.V, 1 if overflow else 0)
+	_Reg[R.A] = r & 0xFF
+	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
+	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 
 func _CMP() -> void:
 	pass
@@ -395,7 +454,7 @@ func clock() -> void:
 			_opcycles = GASM.get_op_cycles(_opcode)
 			_opbytes = GASM.get_op_bytes(_opcode) - 1
 			_cycle = 1
-			_addr = -1
+			#_addr = -1
 		CYCLE_STATE.MODE:
 			var mode = GASM.get_op_mode_id(_opcode)
 			if mode >= 0 and _AddrModeLUT[mode] != "":
