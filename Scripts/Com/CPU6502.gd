@@ -157,12 +157,20 @@ func _AddrZeroPage() -> bool:
 	return true
 
 func _AddrZeroPageX() -> bool:
-	_addr = (_fetched + _Reg[R.X]) & 0x00FF
-	return true
+	match _cycle:
+		2:
+			_addr = (_fetched + _Reg[R.X]) & 0x00FF
+		_:
+			return true
+	return false
 
 func _AddrZeroPageY() -> bool:
-	_addr = (_fetched + _Reg[R.Y]) & 0x00FF
-	return true
+	match _cycle:
+		2:
+			_addr = (_fetched + _Reg[R.Y]) & 0x00FF
+		_:
+			return true
+	return false
 
 func _AddrIndirect() -> bool:
 	match _cycle:
@@ -209,18 +217,18 @@ func _AddrIndirectY() -> bool:
 # --------------------------------------------------------------------------
 func _LDA() -> void:
 	_Reg[R.A] = _fetched
-	set_flag(FLAG.Z, 1 if _fetched == 0 else 0)
-	set_flag(FLAG.N, 1 if _fetched & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _fetched == 0)
+	set_flag(FLAG.N, _fetched & 0x80)
 
 func _LDX() -> void:
 	_Reg[R.X] = _fetched
-	set_flag(FLAG.Z, 1 if _fetched == 0 else 0)
-	set_flag(FLAG.N, 1 if _fetched & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _fetched == 0)
+	set_flag(FLAG.N, _fetched & 0x80)
 
 func _LDY() -> void:
 	_Reg[R.Y] = _fetched
-	set_flag(FLAG.Z, 1 if _fetched == 0 else 0)
-	set_flag(FLAG.N, 1 if _fetched & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _fetched == 0)
+	set_flag(FLAG.N, _fetched & 0x80)
 
 func _STA() -> void:
 	_Bus.write(_addr, _Reg[R.A])
@@ -233,31 +241,31 @@ func _STY() -> void:
 
 func _TAX() -> void:
 	_Reg[R.X] = _Reg[R.A]
-	set_flag(FLAG.Z, 1 if _Reg[R.X] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.X] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.X] == 0)
+	set_flag(FLAG.N, _Reg[R.X] & 0x80)
 
 func _TAY() -> void:
 	_Reg[R.Y] = _Reg[R.A]
-	set_flag(FLAG.Z, 1 if _Reg[R.Y] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.Y] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.Y] == 0)
+	set_flag(FLAG.N, _Reg[R.Y] & 0x80)
 
 func _TXA() -> void:
 	_Reg[R.A] = _Reg[R.X]
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _TYA() -> void:
 	_Reg[R.A] = _Reg[R.Y]
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _TXS() -> void:
 	_Reg[R.STK] = _Reg[R.X]
 
 func _TSX() -> void:
 	_Reg[R.X] = _Reg[R.STK]
-	set_flag(FLAG.Z, 1 if _Reg[R.X] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.X] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.X] == 0)
+	set_flag(FLAG.N, _Reg[R.X] & 0x80)
 
 func _PHA() -> void:
 	_Bus.write(0x0100 | _Reg[R.STK], _Reg[R.A])
@@ -276,109 +284,233 @@ func _PHP() -> void:
 			_Reg[R.STK] -= 1
 
 func _PLA() -> void:
-	_Reg[R.A] = _Bus.read(0x0100 | _Reg[R.STK])
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
 	match _Reg[R.STK]:
 		0xFF:
 			_Reg[R.STK] = 0
 		_:
 			_Reg[R.STK] += 1
+	_Reg[R.A] = _Bus.read(0x0100 | _Reg[R.STK])
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _PLP() -> void:
-	_Reg[R.FLAGS] = _Bus.read(0x0100 | _Reg[R.STK])
 	match _Reg[R.STK]:
 		0xFF:
 			_Reg[R.STK] = 0
 		_:
 			_Reg[R.STK] += 1
+	_Reg[R.FLAGS] = _Bus.read(0x0100 | _Reg[R.STK])
 
 func _AND() -> void:
 	_Reg[R.A] = _Reg[R.A] & _fetched
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _EOR() -> void:
 	_Reg[R.A] = _Reg[R.A] ^ _fetched
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _ORA() -> void:
 	_Reg[R.A] = _Reg[R.A] | _fetched
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _BIT() -> void:
 	var res = _Reg[R.A] & _fetched
-	set_flag(FLAG.Z, 1 if res == 0 else 0)
+	set_flag(FLAG.Z, res == 0)
 	_Reg[R.FLAGS] = (_Reg[R.FLAGS] & ~0x20) | (_fetched & 0x20) # Setting Bit 6
 	_Reg[R.FLAGS] = (_Reg[R.FLAGS] & ~0x40) | (_fetched & 0x40) # Setting Bit 7
 
 func _ADC() -> void:
 	var r = _Reg[R.A] + _fetched + get_flag(FLAG.C)
-	set_flag(FLAG.C, 1 if r > 255 else 0)
+	set_flag(FLAG.C, r & 0x100)
 	var overflow : bool = (_Reg[R.A] & 0x80) == (_fetched & 0x80) && (_fetched & 0x80) != (r & 0x80)
-	set_flag(FLAG.V, 1 if overflow else 0)
+	set_flag(FLAG.V, overflow)
 	_Reg[R.A] = r & 0xFF
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _SBC() -> void:
+	# NOTE: ((_fetched & 0x00FF) ^ 0x00FF) = _fetched inverted
+	#  Based on an idea from https://www.youtube.com/watch?v=8XmxKPJDGU0&t=3141s
 	var r = _Reg[R.A] + ((_fetched & 0x00FF) ^ 0x00FF) + get_flag(FLAG.C)
-	set_flag(FLAG.C, 1 if r > 255 else 0)
+	set_flag(FLAG.C, r & 0x100)
 	var overflow : bool = (_Reg[R.A] & 0x80) == (_fetched & 0x80) && (_fetched & 0x80) != (r & 0x80)
-	set_flag(FLAG.V, 1 if overflow else 0)
+	set_flag(FLAG.V, overflow)
 	_Reg[R.A] = r & 0xFF
-	set_flag(FLAG.Z, 1 if _Reg[R.A] == 0 else 0)
-	set_flag(FLAG.N, 1 if _Reg[R.A] & 0x80 == 0x80 else 0)
+	set_flag(FLAG.Z, _Reg[R.A] == 0)
+	set_flag(FLAG.N, _Reg[R.A] & 0x80)
 
 func _CMP() -> void:
-	pass
+	var r = _Reg[R.A] - _fetched
+	set_flag(FLAG.C, r & 0x100)
+	set_flag(FLAG.Z, r == 0)
+	set_flag(FLAG.N, (r & 0x80))
 
 func _CPX() -> void:
-	pass
+	var r = _Reg[R.X] - _fetched
+	set_flag(FLAG.C, r & 0x100)
+	set_flag(FLAG.Z, r == 0)
+	set_flag(FLAG.N, (r & 0x80))
 
 func _CPY() -> void:
-	pass
+	var r = _Reg[R.Y] - _fetched
+	set_flag(FLAG.C, r & 0x100)
+	set_flag(FLAG.Z, r == 0)
+	set_flag(FLAG.N, (r & 0x80))
 
 func _INC() -> void:
-	pass
+	var r = (_fetched + 1) & 0xFF
+	var uf = (_fetched & 0xFF00) >> 8
+	if _addr >= 0:
+		if uf != r :
+			_fetched = _fetched | (r << 8)
+		else:
+			set_flag(FLAG.Z, uf == 0)
+			set_flag(FLAG.N, uf & 0x80)
+			_Bus.write(_addr, uf)
+			_addr = -1
 
 func _INX() -> void:
-	pass
+	_Reg[R.X] = (_Reg[R.X] + 1) & 0xFF
+	set_flag(FLAG.Z, _Reg[R.X] == 0)
+	set_flag(FLAG.N, _Reg[R.X] & 0x80)
 
 func _INY() -> void:
-	pass
+	_Reg[R.Y] = (_Reg[R.Y] + 1) & 0xFF
+	set_flag(FLAG.Z, _Reg[R.Y] == 0)
+	set_flag(FLAG.N, _Reg[R.Y] & 0x80)
 
 func _DEC() -> void:
-	pass
+	var r = (_fetched - 1) & 0xFF
+	var uf = (_fetched & 0xFF00) >> 8
+	if _addr >= 0:
+		if uf != r :
+			_fetched = _fetched | (r << 8)
+		else:
+			set_flag(FLAG.Z, uf == 0)
+			set_flag(FLAG.N, uf & 0x80)
+			_Bus.write(_addr, uf)
+			_addr = -1
 
 func _DEX() -> void:
-	pass
+	_Reg[R.X] = (_Reg[R.X] - 1) & 0xFF
+	set_flag(FLAG.Z, _Reg[R.X] == 0)
+	set_flag(FLAG.N, _Reg[R.X] & 0x80)
 
 func _DEY() -> void:
-	pass
+	_Reg[R.Y] = (_Reg[R.Y] - 1) & 0xFF
+	set_flag(FLAG.Z, _Reg[R.Y] == 0)
+	set_flag(FLAG.N, _Reg[R.Y] & 0x80)
 
 func _ASL() -> void:
-	pass
+	match _opcode:
+		0x0A: # Accumulator mode
+			set_flag(FLAG.C, _Reg[R.A] & 0x80)
+			_Reg[R.A] = (_Reg[R.A] << 1) & 0xFF
+			set_flag(FLAG.Z, _Reg[R.A] == 0)
+			set_flag(FLAG.N, _Reg[R.A] & 0x80)
+		_: # All other addressing modes! We're working with a memory address here!
+			var oc = _opcycles - _cycle
+			match oc:
+				2:
+					set_flag(FLAG.C, _fetched & 0x80)
+					_fetched = (_fetched << 1) & 0xFF
+				1:
+					set_flag(FLAG.Z, _fetched == 0)
+					set_flag(FLAG.N, _fetched & 0x80)
+					_Bus.write(_addr, _fetched)
+
 
 func _LSR() -> void:
-	pass
+	match _opcode:
+		0x4A: # Accumulator mode
+			set_flag(FLAG.C, _Reg[R.A] & 0x01)
+			_Reg[R.A] = (_Reg[R.A] >> 1) & 0xFF
+			set_flag(FLAG.Z, _Reg[R.A] == 0)
+			set_flag(FLAG.N, _Reg[R.A] & 0x80)
+		_: # All other addressing modes! We're working with a memory address here!
+			var oc = _opcycles - _cycle
+			match oc:
+				2:
+					set_flag(FLAG.C, _fetched & 0x01)
+					_fetched = (_fetched >> 1) & 0xFF
+				1:
+					set_flag(FLAG.Z, _fetched == 0)
+					set_flag(FLAG.N, _fetched & 0x80)
+					_Bus.write(_addr, _fetched)
 
 func _ROL() -> void:
-	pass
+	match _opcode:
+		0x2A: # Accumulator mode
+			var c = _Reg[R.FLAGS] & 0x01
+			set_flag(FLAG.C, _Reg[R.A] & 0x80)
+			_Reg[R.A] = ((_Reg[R.A] << 1) & 0xFF) | c
+			set_flag(FLAG.Z, _Reg[R.A] == 0)
+			set_flag(FLAG.N, _Reg[R.A] & 0x80)
+		_: # All other addressing modes! We're working with a memory address here!
+			var oc = _opcycles - _cycle
+			match oc:
+				2:
+					var c = _Reg[R.FLAGS] & 0x01
+					set_flag(FLAG.C, _fetched & 0x80)
+					_fetched = ((_fetched << 1) & 0xFF) | c
+				1:
+					set_flag(FLAG.Z, _fetched == 0)
+					set_flag(FLAG.N, _fetched & 0x80)
+					_Bus.write(_addr, _fetched)
 
 func _ROR() -> void:
-	pass
+	match _opcode:
+		0x6A: # Accumulator mode
+			var c = _Reg[R.FLAGS] & 0x01
+			set_flag(FLAG.C, _Reg[R.A] & 0x01)
+			_Reg[R.A] = ((_Reg[R.A] >> 1) & 0xFF) | (c << 7)
+			set_flag(FLAG.Z, _Reg[R.A] == 0)
+			set_flag(FLAG.N, _Reg[R.A] & 0x80)
+		_: # All other addressing modes! We're working with a memory address here!
+			var oc = _opcycles - _cycle
+			match oc:
+				2:
+					var c = _Reg[R.FLAGS] & 0x01
+					set_flag(FLAG.C, _fetched & 0x01)
+					_fetched = ((_fetched >> 1) & 0xFF) | (c << 7)
+				1:
+					set_flag(FLAG.Z, _fetched == 0)
+					set_flag(FLAG.N, _fetched & 0x80)
+					_Bus.write(_addr, _fetched)
 
 func _JMP() -> void:
-	pass
+	_PC = _addr
 
 func _JSR() -> void:
-	pass
+	var oc = _opcycles - _cycle
+	match oc:
+		2:
+			_Bus.write(0x0100 | _Reg[R.STK], ((_PC - 1) & 0xFF00) >> 8)
+			_Reg[R.STK] = (_Reg[R.STK] - 1) & 0xFF
+		1:
+			_Bus.write(0x0100 | _Reg[R.STK], (_PC - 1) & 0xFF)
+			_Reg[R.STK] = (_Reg[R.STK] - 1) & 0xFF
+		0:
+			_PC = _addr
 
 func _RTS() -> void:
-	pass
+	var oc = _opcycles - _cycle
+	match oc:
+		5:
+			_Reg[R.STK] = (_Reg[R.STK] + 1) & 0xFF
+		4:
+			_addr = _Bus.read(0x0100 | _Reg[R.STK])
+		3:
+			_Reg[R.STK] = (_Reg[R.STK] + 1) & 0xFF
+		2:
+			_addr = _addr | (_Bus.read(0x0100 | _Reg[R.STK]) << 8)
+		1:
+			_PC = _addr
+		0:
+			_PC += 1
 
 func _BCC() -> void:
 	pass
