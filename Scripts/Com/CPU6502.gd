@@ -764,9 +764,7 @@ func _HandleReset() -> void:
 
 func _Interrupted() -> bool:
 	if _cycle_state == CYCLE_STATE.INST:
-		if _NMI:
-			return true
-		if get_flag(FLAG.I) == 1 and _IRQ:
+		if _NMI or _IRQ:
 			return true
 	return false
 
@@ -778,6 +776,13 @@ func reset() -> void:
 	_cycle_state = CYCLE_STATE.RESET
 	_opcycles = 8
 	_cycle = 1
+
+func interrupt() -> void:
+	if get_flag(FLAG.I) == 1:
+		_IRQ = true
+
+func nmi() -> void:
+	_NMI = true
 
 func clock() -> void:
 	if not _Bus:
