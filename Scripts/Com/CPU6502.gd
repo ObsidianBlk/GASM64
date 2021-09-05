@@ -6,7 +6,7 @@ class_name CPU6502
 # --------------------------------------------------------------------------
 # Enums
 # --------------------------------------------------------------------------
-enum CYCLE_STATE {INST=0, MODE=1, ADDR=2, OP=3}
+enum CYCLE_STATE {INST=0, MODE=1, ADDR=2, OP=3, RESET=4}
 enum R {A=0, X=1, Y=2, STK=3,FLAGS=4}
 enum FLAG {C=0, Z=1, I=2, D=3, B=4, V=6, N=7}
 
@@ -45,6 +45,8 @@ var _AddrModeLUT : Dictionary = {
 
 # Variables used for processing operations
 var _cycle_state = CYCLE_STATE.CODE
+var _IRQ : bool = false
+var _NMI : bool = false
 
 var _fetched : int = 0
 var _opcode : int = -1
@@ -513,74 +515,285 @@ func _RTS() -> void:
 			_PC += 1
 
 func _BCC() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x01 == 0:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _BCS() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x01 == 1:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _BEQ() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x02 == 0x02:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _BMI() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x80 == 0x80:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _BNE() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x02 != 0x02:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _BPL() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x80 != 0x80:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _BVC() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x40 != 0x40:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _BVS() -> void:
-	pass
+	match _cycle:
+		2:
+			if _Reg[R.FLAGS] & 0x40 == 0x40:
+				_opcycles += 1
+		3:
+			_addr = _PC
+			if _fetched & 0x80 == 0x80:
+				_addr -= (_fetched ^ 0xFF) & 0xEF
+			else:
+				_addr += _fetched
+			if (_addr & 0xFF00) != (_PC & 0xFF00):
+				_opcycles += 1
+			else:
+				_PC = _addr
+		4:
+			_PC = _addr
 
 func _CLC() -> void:
-	pass
+	set_flag(FLAG.C, 0)
 
 func _CLD() -> void:
-	pass
+	set_flag(FLAG.D, 0)
 
 func _CLI() -> void:
-	pass
+	set_flag(FLAG.I, 0)
 
 func _CLV() -> void:
-	pass
+	set_flag(FLAG.V, 0)
 
 func _SEC() -> void:
-	pass
+	set_flag(FLAG.C, 1)
 
 func _SED() -> void:
-	pass
+	set_flag(FLAG.D, 1)
 
 func _SEI() -> void:
-	pass
+	set_flag(FLAG.I, 1)
 
 func _BRK() -> void:
-	pass
+	# NOTE: While this method is to handle the BRK instruction, it can also be
+	#  used to handle NMI and IRQ interrupts as well
+	match _cycle:
+		2:
+			set_flag(FLAG.B, 1)
+			_Bus.write(0x0100 | _Reg[R.STK], (_PC & 0xFF00) >> 8)
+			_Reg[R.STK] = (_Reg[R.STK] - 1) & 0xFF
+		3:
+			_Bus.write(0x0100 | _Reg[R.STK], (_PC & 0xFF) >> 8)
+			_Reg[R.STK] = (_Reg[R.STK] - 1) & 0xFF
+		4:
+			_Bus.write(0x0100 | _Reg[R.STK], _Reg[R.FLAGS])
+			_Reg[R.STK] = (_Reg[R.STK] - 1) & 0xFF
+		5:
+			if _NMI:
+				_addr = _Bus.read(0xFFFA)
+			else:
+				_addr = _Bus.read(0xFFFE)
+		6:
+			if _NMI:
+				_addr = _addr | (_Bus.read(0xFFFB) << 8)
+			else:
+				_addr = _addr | (_Bus.read(0xFFFF) << 8)
+		7:
+			if _NMI or _IRQ:
+				_NMI = false
+				_IRQ = false
+				set_flag(FLAG.B, 0)
+			else:
+				set_flag(FLAG.B, 1)
+			_PC = _addr
 
 func _NOP() -> void:
-	pass
+	pass # HEY! It's already written!
 
 func _RTI() -> void:
-	pass
+	match _cycle:
+		2:
+			_Reg[R.STK] = (_Reg[R.STK] + 1) & 0xFF
+			_Reg[R.FLAGS] = _Bus.read(0x0100 | _Reg[R.STK])
+		3:
+			_Reg[R.STK] = (_Reg[R.STK] + 1) & 0xFF
+			_PC = _Bus.read(0x0100 | _Reg[R.STK])
+		4:
+			_Reg[R.STK] = (_Reg[R.STK] + 1) & 0xFF
+			_PC = _Bus.read(0x0100 | _Reg[R.STK]) << 8
+		5:
+			pass
+		6:
+			pass
 
+# --------------------------------------------------------------------------
+# Private Methods
+# --------------------------------------------------------------------------
+
+func _HandleReset() -> void:
+	# NOTE: All of the values used in this cycle list is just
+	#  me trying to match the sequence of events as defined...
+	#  https://www.pagetable.com/?p=410
+	#
+	# Realistically, this is meaningless at the moment and all I really needed
+	# to do was put in the final values, but, hell, I'll stay accurate for now.
+	match _cycle:
+		1:
+			_Reg[R.STK] = 0
+			_Reg[R.FLAGS] = 0x02
+			_Reg[R.A] = 0xAA
+			_Reg[R.X] = 0
+			_Reg[R.Y] = 0
+		4:
+			_Reg[R.STK] = 0xFF
+		5:
+			_Reg[R.STK] = 0xFE
+			_Reg[R.FLAGS] = 0x06
+		6:
+			_Reg[R.STK] = 0xFD
+		7:
+			_PC = _Bus.read(0xFFFC)
+			_Reg[R.FLAGS] = 0x16
+		8:
+			_PC = _PC | (_Bus.read(0xFFFD) << 8)
+
+func _Interrupted() -> bool:
+	if _cycle_state == CYCLE_STATE.INST:
+		if _NMI:
+			return true
+		if get_flag(FLAG.I) == 1 and _IRQ:
+			return true
+	return false
 
 # --------------------------------------------------------------------------
 # Public Methods
 # --------------------------------------------------------------------------
 
+func reset() -> void:
+	_cycle_state = CYCLE_STATE.RESET
+	_opcycles = 8
+	_cycle = 1
+
 func clock() -> void:
 	if not _Bus:
 		return
 	
-	if _opbytes > 0 or _cycle_state == CYCLE_STATE.CODE:
-		_fetched = _Bus.read(_PC)
+	if _Interrupted():
+		_fetched = 0x00 # We're abusing the BRK instruction :D
+		_cycle_state = CYCLE_STATE.INST
+	elif _opbytes > 0 or _cycle_state == CYCLE_STATE.INST:
 		_PC += 1
+		_fetched = _Bus.read(_PC)
 		_opbytes -= 1
 
 	match _cycle_state:
+		CYCLE_STATE.RESET:
+			_HandleReset()
 		CYCLE_STATE.INST:
 			_opcode = _fetched
 			_opcycles = GASM.get_op_cycles(_opcode)
