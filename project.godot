@@ -18,10 +18,28 @@ _global_script_classes=[ {
 "class": "CPU6502",
 "language": "GDScript",
 "path": "res://Scripts/Com/CPU6502.gd"
+}, {
+"base": "Node",
+"class": "Clock",
+"language": "GDScript",
+"path": "res://Scripts/Com/Clock.gd"
+}, {
+"base": "Node",
+"class": "MemDevice",
+"language": "GDScript",
+"path": "res://Scripts/Com/MemDevice.gd"
+}, {
+"base": "MemDevice",
+"class": "Memory",
+"language": "GDScript",
+"path": "res://Scripts/Com/Memory.gd"
 } ]
 _global_script_class_icons={
 "Bus": "",
-"CPU6502": ""
+"CPU6502": "",
+"Clock": "",
+"MemDevice": "",
+"Memory": ""
 }
 
 [application]
