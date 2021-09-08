@@ -44,7 +44,7 @@ var _AddrModeLUT : Dictionary = {
 }
 
 # Variables used for processing operations
-var _cycle_state = CYCLE_STATE.CODE
+var _cycle_state = CYCLE_STATE.RESET
 var _IRQ : bool = false
 var _NMI : bool = false
 
@@ -53,7 +53,7 @@ var _opcode : int = -1
 var _opcycles : int = 0
 var _opbytes : int = 0
 
-var _cycle : int = 0
+var _cycle : int = 1
 var _addr : int = 0
 #var _process_addr : bool = false
 var _reladdr : int = 0
@@ -788,26 +788,29 @@ func clock() -> void:
 	if not _Bus:
 		return
 	
+	print ("6502 Cycle: ", _PC)
 	if _Interrupted():
 		_fetched = 0x00 # We're abusing the BRK instruction :D
 		_cycle_state = CYCLE_STATE.INST
 	elif _opbytes > 0 or _cycle_state == CYCLE_STATE.INST:
-		_PC += 1
+		_PC = (_PC + 1) & 0xFFFF
 		_fetched = _Bus.read(_PC)
 		_opbytes -= 1
 
 	match _cycle_state:
 		CYCLE_STATE.RESET:
+			_opcycles = 8 # This is a whee hack. Do not touch!
 			_HandleReset()
 		CYCLE_STATE.INST:
 			_opcode = _fetched
 			_opcycles = GASM.get_op_cycles(_opcode)
 			_opbytes = GASM.get_op_bytes(_opcode) - 1
 			_cycle = 1
+			_cycle_state = CYCLE_STATE.MODE
 			#_addr = -1
 		CYCLE_STATE.MODE:
 			var mode = GASM.get_op_mode_id(_opcode)
-			if mode >= 0 and _AddrModeLUT[mode] != "":
+			if mode >= 0 and mode in _AddrModeLUT:
 				if call(_AddrModeLUT[mode]):
 					_cycle_state = CYCLE_STATE.ADDR
 			else:
@@ -819,10 +822,12 @@ func clock() -> void:
 	
 	if _cycle_state == CYCLE_STATE.OP:
 		var inst = "_" + GASM.get_op_asm_name(_opcode)
+		print("Calling Op: ", inst, " | Cycles: ", _opcycles, " | Op Code: ", _opcode)
 		if has_method(inst):
 			call(inst)
 	
 	if _cycle == _opcycles:
+		print("Instruction time!")
 		_cycle_state = CYCLE_STATE.INST
 	_cycle += 1
 

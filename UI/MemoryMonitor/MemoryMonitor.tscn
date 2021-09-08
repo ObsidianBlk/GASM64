@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://UI/MemoryMonitor/PageDisplay/PageDisplay.tscn" type="PackedScene" id=1]
+[ext_resource path="res://UI/MemoryMonitor/MemoryMonitor.gd" type="Script" id=2]
+
+[node name="MemoryMonitor" type="PanelContainer"]
+anchor_bottom = 1.0
+margin_right = 14.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBC" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 461.0
+margin_bottom = 1073.0
+
+[node name="Label" type="Label" parent="VBC"]
+margin_right = 454.0
+margin_bottom = 14.0
+text = "Memory Page Monitor"
+
+[node name="HBC" type="HBoxContainer" parent="VBC"]
+margin_top = 18.0
+margin_right = 454.0
+margin_bottom = 754.0
+
+[node name="PDSlider" type="VSlider" parent="VBC/HBC"]
+margin_right = 16.0
+margin_bottom = 736.0
+max_value = 253.0
+value = 253.0
+
+[node name="PDContainer" type="PanelContainer" parent="VBC/HBC"]
+self_modulate = Color( 0.333333, 0.333333, 0.333333, 1 )
+margin_left = 20.0
+margin_right = 454.0
+margin_bottom = 736.0
+
+[node name="VBC" type="VBoxContainer" parent="VBC/HBC/PDContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 427.0
+margin_bottom = 729.0
+
+[node name="PD1" parent="VBC/HBC/PDContainer/VBC" instance=ExtResource( 1 )]
+anchor_bottom = 0.0
+margin_right = 420.0
+margin_bottom = 359.0
+
+[node name="PD2" parent="VBC/HBC/PDContainer/VBC" instance=ExtResource( 1 )]
+anchor_bottom = 0.0
+margin_top = 363.0
+margin_right = 420.0
+margin_bottom = 722.0
+
+[connection signal="value_changed" from="VBC/HBC/PDSlider" to="." method="_on_PDSlider_value_changed"]

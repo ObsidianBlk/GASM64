@@ -8,7 +8,6 @@ class_name Clock
 export var hertz : float = 1.0			setget set_hertz
 export var cpu_path : NodePath = ""		setget set_cpu_path
 
-
 # --------------------------------------------------------------------------
 # Variables
 # --------------------------------------------------------------------------
@@ -37,6 +36,7 @@ func set_cpu_path(p : NodePath) -> void:
 # Override Methods
 # --------------------------------------------------------------------------
 func _ready() -> void:
+	set_process(false)
 	if cpu_node == null and cpu_path != "":
 		set_cpu_path(cpu_path)
 
@@ -46,6 +46,7 @@ func _process(delta : float) -> void:
 	
 	_dtime += delta
 	var cycles = floor(_dtime * hertz)
+	#print("DTime: ", _dtime, " | Cycles: ", cycles)
 	if cycles > 0:
 		_dtime -= cycles
 		for _i in range(cycles):
@@ -56,4 +57,14 @@ func _process(delta : float) -> void:
 # private Methods
 # --------------------------------------------------------------------------
 
+
+# --------------------------------------------------------------------------
+# public Methods
+# --------------------------------------------------------------------------
+func enable(e : bool = true) -> void:
+	set_process(e)
+
+# --------------------------------------------------------------------------
+# Handler Methods
+# --------------------------------------------------------------------------
 

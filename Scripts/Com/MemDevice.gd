@@ -37,6 +37,10 @@ func write(idx : int, val : int) -> void:
 func set_mem_addr(idx : int, val : int) -> void:
 	pass
 
+func page_dump(offset : int) -> PoolByteArray:
+	return PoolByteArray([])
+
+
 func mem_dump(offset : int = -1, pages : int = -1) -> PoolByteArray:
 	return PoolByteArray([])
 

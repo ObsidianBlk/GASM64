@@ -19,8 +19,8 @@ var _mempool : PoolByteArray = PoolByteArray([0])
 # ---------------------------------------------------------------------------
 func set_page_count(count : int) -> void:
 	.set_page_count(count)
-	if _mempool.size() != (255 * page_count):
-		_mempool.resize(255 * page_count)
+	if _mempool.size() != (256 * page_count):
+		_mempool.resize(256 * page_count)
 
 # ---------------------------------------------------------------------------
 # Override Methods
@@ -47,6 +47,12 @@ func set_mem_addr(idx : int, val : int) -> void:
 func fill_mem(val : int) -> void:
 	for i in range(_mempool.size()):
 		_mempool[i] = val
+
+func page_dump(offset : int) -> PoolByteArray:
+	if offset >= 0 and offset < page_count:
+		var idx = offset * 256
+		return _mempool.subarray(idx, idx + 255)
+	return PoolByteArray([])
 
 func mem_dump(offset : int = -1, pages : int = -1) -> PoolByteArray:
 	offset = max(0, offset)
