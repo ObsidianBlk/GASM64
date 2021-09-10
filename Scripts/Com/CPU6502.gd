@@ -777,7 +777,7 @@ func reset() -> void:
 	_opcycles = 8
 	_cycle = 1
 
-func interrupt() -> void:
+func irq() -> void:
 	if get_flag(FLAG.I) == 1:
 		_IRQ = true
 
@@ -831,3 +831,13 @@ func clock() -> void:
 		_cycle_state = CYCLE_STATE.INST
 	_cycle += 1
 
+
+func get_state_info() -> Dictionary:
+	return {
+		"PC": _PC,
+		"Status": _Reg[R.FLAGS],
+		"SP": _Reg[R.STK],
+		"A": _Reg[R.A],
+		"X": _Reg[R.X],
+		"Y": _Reg[R.Y]
+	}

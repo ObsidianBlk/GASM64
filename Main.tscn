@@ -53,3 +53,4 @@ visible = false
 
 [node name="MemoryMonitor" parent="UI" instance=ExtResource( 9 )]
 bus_node_path = NodePath("../../Computer/Bus")
+cpu_node_path = NodePath("../../Computer/CPU6502")

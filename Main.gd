@@ -8,5 +8,5 @@ func _ready() -> void:
 	bus.set_mem_addr(0xFFFD, 0x02)
 	
 	var clock = $Computer/Clock
-	#clock.enable()
+	clock.enable()
 
