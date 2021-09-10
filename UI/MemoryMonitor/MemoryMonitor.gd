@@ -79,6 +79,6 @@ func _UpdatePageDisplays() -> void:
 # --------------------------------------------------------------------------
 
 func _on_PDSlider_value_changed(value):
-	_pageOffset = 253 - int(value)
+	_pageOffset = 254 - int(value)
 	if not (_bus and PD1_node and PD2_node):
 		_UpdatePageDisplays()

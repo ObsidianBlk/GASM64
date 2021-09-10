@@ -51,7 +51,7 @@ func set_mem_addr(addr : int, val : int) -> void:
 				_mem_devices[key].set_mem_addr(addr - (key[0] << 8), val)
 
 func page_dump(page : int) -> PoolByteArray:
-	if page >= 0 and page < 0xFF:
+	if page >= 0 and page <= 0xFF:
 		for key in _mem_devices.keys():
 			if page >= key[0] and page < key[1]:
 				return _mem_devices[key].page_dump(page - key[0])

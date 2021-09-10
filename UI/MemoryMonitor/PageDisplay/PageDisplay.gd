@@ -17,13 +17,21 @@ func set_data(data : PoolByteArray, offset : int = 0) -> void:
 	
 	var idx : int = 0
 	for child in page_data_node.get_children():
+		var line = ""
+		var inred = false
 		for _i in range(16):
-			var line = ""
 			if idx + offset >= 0 and idx + offset < data.size():
+				if inred:
+					inred = false
+					line += "[/color]"
 				line += GASM.int_to_hex(data[idx + offset], 2) + " "
 			else:
+				if not inred:
+					inred = true
+					line += "[color=#FF5500]"
 				line += "00 "
-				print("WARNING: Data index out of bounds at: ", idx + offset)
 			idx += 1
-			child.get_node("Data").text = line
+		if inred:
+			line += "[/color]"
+		child.get_node("Data").bbcode_text = line
 
