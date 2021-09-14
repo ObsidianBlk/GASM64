@@ -73,6 +73,7 @@ func set_updates_per_second(u : int) -> void:
 # --------------------------------------------------------------------------
 
 func _ready() -> void:
+	set_updates_per_second(updates_per_second)
 	if bus_node_path != "" and _bus == null:
 		set_bus_node_path(bus_node_path)
 	if cpu_node_path != "" and _cpu == null:
@@ -111,7 +112,6 @@ func _UpdateCPUDisplays() -> void:
 	STK_node.text = GASM.int_to_hex(info.SP, 2)
 	PC_node.text = GASM.int_to_hex(info.PC, 4)
 	
-	print("Status: ", info.Status)
 	Carry_node.pressed = (info.Status & 0x01) == 0x01
 	Zero_node.pressed = (info.Status & 0x02) == 0x02
 	IRQD_node.pressed = (info.Status & 0x04) == 0x04

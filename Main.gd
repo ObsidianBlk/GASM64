@@ -12,3 +12,6 @@ func _ready() -> void:
 	var clock = $Computer/Clock
 	clock.enable()
 
+
+func _on_quit():
+	get_tree().quit()

@@ -788,7 +788,6 @@ func clock() -> void:
 	if not _Bus:
 		return
 	
-	print ("6502 Cycle: ", _PC)
 	if _Interrupted():
 		_fetched = 0x00 # We're abusing the BRK instruction :D
 		_cycle_state = CYCLE_STATE.INST
