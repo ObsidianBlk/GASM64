@@ -98,6 +98,7 @@ bus_node_path = NodePath("../../../../Computer/Bus")
 cpu_node_path = NodePath("../../../../Computer/CPU6502")
 
 [node name="ASMEdit" parent="UI/EditorModeUI/Main" instance=ExtResource( 1 )]
+visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_right = 1920.0
