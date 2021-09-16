@@ -24,6 +24,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scripts/Com/Clock.gd"
 }, {
+"base": "Reference",
+"class": "Lexer",
+"language": "GDScript",
+"path": "res://Scripts/Assembler/Lexer/Lexer.gd"
+}, {
 "base": "Node",
 "class": "MemDevice",
 "language": "GDScript",
@@ -38,6 +43,7 @@ _global_script_class_icons={
 "Bus": "",
 "CPU6502": "",
 "Clock": "",
+"Lexer": "",
 "MemDevice": "",
 "Memory": ""
 }
