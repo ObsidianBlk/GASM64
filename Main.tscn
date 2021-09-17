@@ -1,6 +1,5 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=10 format=2]
 
-[ext_resource path="res://UI/ASMEdit/ASMEdit.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Main.gd" type="Script" id=2]
 [ext_resource path="res://UI/OpChart/OpChart.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scripts/UI/EditorMenuBar/Menu_File.gd" type="Script" id=4]
@@ -96,13 +95,6 @@ margin_right = 480.0
 margin_bottom = 843.0
 bus_node_path = NodePath("../../../../Computer/Bus")
 cpu_node_path = NodePath("../../../../Computer/CPU6502")
-
-[node name="ASMEdit" parent="UI/EditorModeUI/Main" instance=ExtResource( 1 )]
-visible = false
-anchor_right = 0.0
-anchor_bottom = 0.0
-margin_right = 1920.0
-size_flags_horizontal = 3
 
 [node name="OpChart" parent="UI" instance=ExtResource( 3 )]
 visible = false
