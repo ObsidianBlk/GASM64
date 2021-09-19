@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://UI/ASMEdit/DataView/DataView.gd" type="Script" id=1]
+
+[node name="DataView" type="PanelContainer"]
+self_modulate = Color( 0.501961, 0.501961, 0.501961, 1 )
+anchor_bottom = 1.0
+margin_right = 14.0
+size_flags_vertical = 3
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Lines" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 7.0
+margin_bottom = 1073.0

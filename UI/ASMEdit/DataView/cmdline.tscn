@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Theme/Fonts/RaMono_16pt.tres" type="DynamicFont" id=1]
+[ext_resource path="res://UI/ASMEdit/DataView/cmdline.gd" type="Script" id=2]
+
+[node name="cmdline" type="HBoxContainer"]
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="cmd" type="Label" parent="."]
+margin_right = 16.0
+margin_bottom = 17.0
+custom_fonts/font = ExtResource( 1 )
+text = "00"
+
+[node name="VSeparator" type="VSeparator" parent="."]
+margin_left = 20.0
+margin_right = 24.0
+margin_bottom = 17.0
+
+[node name="byte1" type="Label" parent="."]
+margin_left = 28.0
+margin_right = 44.0
+margin_bottom = 17.0
+custom_fonts/font = ExtResource( 1 )
+text = "00"
+
+[node name="VSeparator2" type="VSeparator" parent="."]
+margin_left = 48.0
+margin_right = 52.0
+margin_bottom = 17.0
+
+[node name="byte2" type="Label" parent="."]
+margin_left = 56.0
+margin_right = 72.0
+margin_bottom = 17.0
+custom_fonts/font = ExtResource( 1 )
+text = "00"
