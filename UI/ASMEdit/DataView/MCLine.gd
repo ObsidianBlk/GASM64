@@ -1,4 +1,6 @@
 extends Container
+class_name MCLine
+# MCLine : Machine Code Line
 
 
 # -----------------------------------------------------------------------------

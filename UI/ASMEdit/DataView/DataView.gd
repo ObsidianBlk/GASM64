@@ -1,6 +1,6 @@
 extends Container
 
-const CMDLINE = preload("res://UI/ASMEdit/DataView/cmdline.tscn")
+const CMDLINE = preload("res://UI/ASMEdit/DataView/MCLine.tscn")
 
 # -----------------------------------------------------------------------------
 # Export Variables
@@ -14,7 +14,7 @@ export var available_lines : int = 0				setget set_available_lines
 # -----------------------------------------------------------------------------
 # Variables
 # -----------------------------------------------------------------------------
-var _cmdlines : Array = []
+var _mclines : Array = []
 
 # -----------------------------------------------------------------------------
 # Onready Variables
@@ -52,23 +52,23 @@ func _ready() -> void:
 # Private Methods
 # -----------------------------------------------------------------------------
 func _UpdateCmdLines() -> void:
-	if available_lines != _cmdlines.size():
+	if available_lines != _mclines.size():
 		if lines_node:
-			if available_lines > _cmdlines.size():
-				for _i in range(available_lines - _cmdlines.size()):
+			if available_lines > _mclines.size():
+				for _i in range(available_lines - _mclines.size()):
 					var cl = CMDLINE.instance()
 					cl.font_size = font_size
 					cl.command_color = command_color
 					cl.byte_color = byte_color
 					lines_node.add_child(cl)
-					_cmdlines.append(cl)
+					_mclines.append(cl)
 			else:
-				for _i in range(_cmdlines.size() - available_lines):
-					var cl = _cmdlines.pop_back()
+				for _i in range(_mclines.size() - available_lines):
+					var cl = _mclines.pop_back()
 					lines_node.remove_child(cl)
 					cl.queue_free()
 	else:
-		for line in _cmdlines:
+		for line in _mclines:
 			line.font_size = font_size
 			line.command_color = command_color
 			line.byte_color = byte_color
@@ -77,24 +77,24 @@ func _UpdateCmdLines() -> void:
 # Public Methods
 # -----------------------------------------------------------------------------
 func clear() -> void:
-	for i in range(_cmdlines.size()):
+	for i in range(_mclines.size()):
 		set_line(i)
 
 func clear_line(idx : int) -> void:
 	set_line(idx)
 
 func set_line(idx : int, cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
-	if idx >= 0 and idx < _cmdlines.size():
-		_cmdlines[idx].set_line_bytes(cmd, byte1, byte2)
+	if idx >= 0 and idx < _mclines.size():
+		_mclines[idx].set_line_bytes(cmd, byte1, byte2)
 
 func push_line_top(cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
-	for i in range(_cmdlines.size()-1, 0, -1):
-		_cmdlines[i].set_from_cmdline(_cmdlines[i-1])
-	_cmdlines[0].set_line_bytes(cmd, byte1, byte2) 
+	for i in range(_mclines.size()-1, 0, -1):
+		_mclines[i].set_from_cmdline(_mclines[i-1])
+	_mclines[0].set_line_bytes(cmd, byte1, byte2) 
 
 func push_line_bottom(cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
-	for i in range(1, _cmdlines.size()):
-		_cmdlines[i-1].set_from_cmdline(_cmdlines[i])
-	_cmdlines[_cmdlines.size() - 1].set_line_bytes(cmd, byte1, byte2)
+	for i in range(1, _mclines.size()):
+		_mclines[i-1].set_from_cmdline(_mclines[i])
+	_mclines[_mclines.size() - 1].set_line_bytes(cmd, byte1, byte2)
 
 
