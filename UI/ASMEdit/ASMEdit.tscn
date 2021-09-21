@@ -21,10 +21,11 @@ size_flags_vertical = 3
 
 [node name="DataView" parent="Editor" instance=ExtResource( 1 )]
 anchor_bottom = 0.0
+margin_right = 8.0
 margin_bottom = 1080.0
 
 [node name="CodeEditor" type="TextEdit" parent="Editor"]
-margin_left = 18.0
+margin_left = 12.0
 margin_right = 1920.0
 margin_bottom = 1080.0
 size_flags_horizontal = 3
@@ -32,3 +33,6 @@ custom_fonts/font = ExtResource( 2 )
 syntax_highlighting = true
 minimap_draw = true
 script = ExtResource( 3 )
+
+[connection signal="line_change" from="Editor/CodeEditor" to="." method="_on_CodeEditor_line_change"]
+[connection signal="resized" from="Editor/CodeEditor" to="." method="_on_CodeEditor_resized"]

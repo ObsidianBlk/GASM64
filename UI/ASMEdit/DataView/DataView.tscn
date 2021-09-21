@@ -1,19 +1,29 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://UI/ASMEdit/DataView/DataView.gd" type="Script" id=1]
 
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 4.0
+content_margin_right = 4.0
+content_margin_top = 2.0
+bg_color = Color( 0.0901961, 0.0901961, 0.0901961, 1 )
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [node name="DataView" type="PanelContainer"]
-self_modulate = Color( 0.501961, 0.501961, 0.501961, 1 )
 anchor_bottom = 1.0
 margin_right = 14.0
 size_flags_vertical = 3
+custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Lines" type="VBoxContainer" parent="."]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 7.0
-margin_bottom = 1073.0
+margin_left = 4.0
+margin_top = 2.0
+margin_right = 10.0
+margin_bottom = 1080.0

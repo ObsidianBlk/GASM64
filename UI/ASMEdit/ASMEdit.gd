@@ -1,4 +1,5 @@
 extends Control
+class_name ASMEdit
 
 
 # ---------------------------------------------------------------------------
@@ -27,7 +28,10 @@ onready var codeeditor_node = get_node("Editor/CodeEditor")
 # ---------------------------------------------------------------------------
 # Override Methods
 # ---------------------------------------------------------------------------
-
+func _ready() -> void:
+	print("Yo bro!")
+	dataview_node.available_lines = 10
+	dataview_node.set_line(0, 255, 110, 96)
 
 
 # ---------------------------------------------------------------------------
@@ -45,7 +49,8 @@ func add_font_override(name : String, font : Font) -> void:
 			if font is DynamicFont:
 				dataview_node.font_size = font.size
 			var fheight = font.get_height()
-			var lines = codeeditor_node.get_rect().h / fheight
+			var cerect = codeeditor_node.get_rect()
+			var lines = cerect.size.y / fheight
 			dataview_node.available_lines = lines
 
 func get_font(name : String, node_type : String = "") -> Font:
@@ -67,4 +72,10 @@ func get_color(name : String, node_type : String = "") -> Color:
 # Handler Methods
 # ---------------------------------------------------------------------------
 
+func _on_CodeEditor_resized():
+	var cerect = codeeditor_node.get_rect()
+	if cerect.size.y < 5000:
+		dataview_node.set_available_lines_to_height(cerect.size.y)
 
+func _on_CodeEditor_line_change(line_num, line_text):
+	print("Line Number ", line_num, " text is now \"", line_text, "\"")

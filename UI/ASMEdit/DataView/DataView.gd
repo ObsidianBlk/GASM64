@@ -1,13 +1,10 @@
 extends Container
 
-const CMDLINE = preload("res://UI/ASMEdit/DataView/MCLine.tscn")
+const MCLINE = preload("res://UI/ASMEdit/DataView/MCLine.tscn")
 
 # -----------------------------------------------------------------------------
 # Export Variables
 # -----------------------------------------------------------------------------
-export var font_size : int = 16						setget set_font_size
-export var command_color : Color = Color(1,1,1,1)	setget set_command_color
-export var byte_color : Color = Color(1,1,1,1)		setget set_byte_color
 export var available_lines : int = 0				setget set_available_lines
 
 
@@ -15,6 +12,9 @@ export var available_lines : int = 0				setget set_available_lines
 # Variables
 # -----------------------------------------------------------------------------
 var _mclines : Array = []
+var _font_size : int = 16
+var _cmd_color : Color = Color(1,1,1)
+var _num_color : Color = Color(1,1,1) 
 
 # -----------------------------------------------------------------------------
 # Onready Variables
@@ -24,19 +24,8 @@ onready var lines_node = get_node("Lines")
 # -----------------------------------------------------------------------------
 # Setters / Getters
 # -----------------------------------------------------------------------------
-func set_font_size(s : int) -> void:
-	font_size = s
-	_UpdateCmdLines()
-
-func set_command_color(c : Color) -> void:
-	command_color = c
-	_UpdateCmdLines()
-
-func set_byte_color(c : Color) -> void:
-	byte_color = c
-	_UpdateCmdLines()
-
 func set_available_lines(l : int) -> void:
+	print("Available lines: ", l)
 	if l >= 0:
 		available_lines = l
 		_UpdateCmdLines()
@@ -46,20 +35,38 @@ func set_available_lines(l : int) -> void:
 # Override Methods
 # -----------------------------------------------------------------------------
 func _ready() -> void:
-	_UpdateCmdLines()
+	call_deferred("_UpdateView")
 
 # -----------------------------------------------------------------------------
 # Private Methods
 # -----------------------------------------------------------------------------
+func _findASM() -> ASMEdit:
+	var node = get_parent()
+	while node != null and not (node is ASMEdit):
+		node = node.get_parent()
+	return node
+
+ 
+func _UpdateView() -> void:
+	var parent = _findASM()
+	if parent:
+		var fnt = parent.get_font("font", "ASMEdit")
+		if fnt is DynamicFont:
+			_font_size = fnt.size
+		_cmd_color = parent.get_color("function_color", "ASMEdit")
+		_num_color = parent.get_color("number_color", "ASMEdit")
+	_UpdateCmdLines()
+
+
 func _UpdateCmdLines() -> void:
 	if available_lines != _mclines.size():
 		if lines_node:
 			if available_lines > _mclines.size():
 				for _i in range(available_lines - _mclines.size()):
-					var cl = CMDLINE.instance()
-					cl.font_size = font_size
-					cl.command_color = command_color
-					cl.byte_color = byte_color
+					var cl = MCLINE.instance()
+					cl.font_size = _font_size
+					cl.command_color = _cmd_color
+					cl.byte_color = _num_color
 					lines_node.add_child(cl)
 					_mclines.append(cl)
 			else:
@@ -69,9 +76,9 @@ func _UpdateCmdLines() -> void:
 					cl.queue_free()
 	else:
 		for line in _mclines:
-			line.font_size = font_size
-			line.command_color = command_color
-			line.byte_color = byte_color
+			line.font_size = _font_size
+			line.command_color = _cmd_color
+			line.byte_color = _num_color
 
 # -----------------------------------------------------------------------------
 # Public Methods
@@ -82,6 +89,26 @@ func clear() -> void:
 
 func clear_line(idx : int) -> void:
 	set_line(idx)
+
+func set_available_lines_to_height(height : int) -> void:
+	var mclheight = 0
+	var rect = null
+	if _mclines.size() <= 0:
+		var mcl = MCLINE.instance()
+		mcl.font_size = _font_size
+		rect = mcl.get_rect()
+		mcl.queue_free()
+	else:
+		rect = _mclines[0].get_rect()
+	
+	var sep = lines_node.get_constant("separation")
+	mclheight = rect.size.y + sep
+	if mclheight > 0:
+		var lines = floor(height / mclheight)
+		set_available_lines(lines)
+	else:
+		set_available_lines(0)
+
 
 func set_line(idx : int, cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
 	if idx >= 0 and idx < _mclines.size():
