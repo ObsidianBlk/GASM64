@@ -24,3 +24,22 @@ func call_deferred_once(method : String, obj = null, args : Array = []) -> void:
 			"args":args
 		}
 		call_deferred("_call_and_release", key)
+
+func is_valid_binary(v : String) -> bool:
+	if v.length() > 0:
+		for c in v:
+			if c != "1" and c != "0":
+				return false
+		return true
+	return false
+
+func binary_to_int(v : String) -> int:
+	var ex = v.length() - 1
+	var val = 0
+	for c in v:
+		if c == "1":
+			val += pow(2, ex)
+		ex -= 1
+	return val
+
+

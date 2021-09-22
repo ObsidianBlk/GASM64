@@ -185,6 +185,9 @@ func get_op_info(op_name : String) -> Dictionary:
 	
 	return opi
 
+func is_op(op_name : String) -> bool:
+	return op_name.to_lower() in DATA.OP
+
 func get_ops() -> Array:
 	return DATA.OP.keys()
 
@@ -263,121 +266,3 @@ func get_mode_name_from_ID(mode_id : int) -> String:
 	if mode_id >= 0 and mode_id < MODE_NAMES.size():
 		return MODE_NAMES[mode_id]
 	return ""
-
-
-
-# -----------------------------------------------------------------------------
-# ASSEMBLER METHODS
-# -----------------------------------------------------------------------------
-# Private
-# -----------------------------------------------------------------------------
-func _StripComments(line : String) -> String:
-	line = line.strip_edges()
-	var ls = line.split(";", true, 1)
-	if ls[0].length() > 0:
-		return ls[0].strip_edges()
-	return ""
-
-func _IsCharToken(sym : String) -> int:
-	match sym:
-		"#":
-			return TOKEN.IMMEDIATE
-		"(":
-			return TOKEN.PAREN_L
-		")":
-			return TOKEN.PAREN_R
-		",":
-			return TOKEN.COMMA
-		"=":
-			return TOKEN.EQ
-		"@":
-			return TOKEN.HERE
-	return -1
-
-func _IsMathToken(sym : String) -> bool:
-	return ["+","-","*","/"].find(sym) >= 0
-
-func _IsNumberToken(sym : String) -> bool:
-	return sym == "$" or sym == "%"
-
-func _BuildToken(type : int, label : String = "", sym : String = "") -> Dictionary:
-	var token = {"type": type}
-	if type >= 0:
-		token.type = type
-		if label != "":
-			token["label"] = label
-		if sym != "":
-			token["sym"] = sym
-	elif label != "":
-		if (sym == "$" and label.is_valid_hex_number()) or label.is_valid_integer():
-			token.type = TOKEN.NUMBER
-			token["number"] = label
-			token["sym"] = sym
-		else:
-			if label.to_lower() in DATA.OP:
-				token.type = TOKEN.INST
-				token["label"] = label
-			else:
-				token.type = TOKEN.LABEL
-				token["label"] = label
-	return token
-
-
-func _Tokenize(line : String) -> Array:
-	var tokens = []
-	line = line.replace("\t", " ")
-	
-	var label = ""
-	var numsym = ""
-	while line != "":
-		var sym = line.left(1)
-		line = line.substr(1)
-		
-		if (sym == " " or sym == "\t") and label != "":
-			var token = _BuildToken(-1, label, "")
-			if token.type >= 0:
-				tokens.append(token)
-			label = ""
-			numsym = ""
-		else:
-			var type = _IsCharToken(sym)
-			if type >= 0:
-				if label != "":
-					tokens.append(_BuildToken(-1, label, numsym))
-					label = ""
-					numsym = ""
-				tokens.append(_BuildToken(type, "", ""))
-			elif _IsMathToken(sym):
-				if label != "":
-					tokens.append(_BuildToken(-1, label, numsym))
-					label = ""
-					numsym = ""
-				tokens.append(_BuildToken(TOKEN.MATH, "", sym))
-			elif _IsNumberToken(sym):
-				numsym = sym
-				if label != "":
-					tokens.append(_BuildToken(-1, label, numsym))
-					label = ""
-					numsym = ""
-			else:
-				label = label + sym
-				if line == "":
-					tokens.append(_BuildToken(-1, label, numsym))
-	
-	return tokens
-
-
-# Public
-# -----------------------------------------------------------------------------
-func parse_to_object(asm_text : String) -> Dictionary:
-	var asmobj = {
-		"valid": false,
-		"complete": false,
-		"labels": {},
-		"code": []
-	}
-	var lines = asm_text.split("\n")
-	if lines.size() > 0:
-		for line in lines:
-			line = _StripComments(line)
-	return asmobj

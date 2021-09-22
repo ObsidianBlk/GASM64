@@ -9,6 +9,7 @@ enum TOKEN {
 	LABEL,
 	NUMBER,
 	HERE,
+	HASH,
 	PAREN_L,
 	PAREN_R,
 	BLOCK_L,
@@ -49,17 +50,20 @@ func _init(src : String, firstLine : int = 0) -> void:
 # ---------------------------------------------------------------------------
 # Private Methods
 # ---------------------------------------------------------------------------
-func _StoreToken(token : Dictionary) -> void:
-	var lidx = token.line - _first_line
+func _StoreToken(lidx : int, token : Dictionary) -> void:
 	var tidx = _token.size()
 	_token.append(token)
 	if lidx >= 0 and lidx < _token_lines.size():
 		_token_lines[lidx].append(tidx)
 	elif lidx == _token_lines.size():
 		_token_lines.append([tidx])
-	else:
-		print("WARNING: Token line, ", token.line, ", is out of bounds.")
 
+func _GetTokenLineNumber(tidx : int) -> int:
+	for tline_idx in range(_token_lines.size()):
+		for tok_idx in _token_lines[tline_idx]:
+			if tok_idx == tidx:
+				return tline_idx
+	return -1
 
 func _StripLine(line : String) -> String:
 	var ls = line.split(";", true, 1)
@@ -75,86 +79,94 @@ func _ErrorToken(msg : String, idx : int, col : int, symbol: String = "") -> Dic
 	}
 
 func _SymbolToToken():
-	var token = {"type":TOKEN.LABEL, "line": _pos.l, "col":_pos.c, "symbol":_sym}
+	var token = {"type":TOKEN.LABEL, "col":_pos.c, "symbol":_sym}
 	var l = _sym.left(1)
 	if l == "$" or l == "%":
 		var r = _sym.substr(1)
-		if r.is_valid_hex_number() or r.is_valid_integer():
+		if r.is_valid_hex_number() or Utils.is_valid_binary(r):
 			token.type = TOKEN.NUMBER
 		else:
-			token = _ErrorToken("Symbol expected to be hex, binary number.", _pos.l, _pos.c, _sym)
+			token = _ErrorToken("Symbol expected to be hex or binary number.", _pos.l, _pos.c, _sym)
 	elif "0123456789".find(l) >= 0:
 		if _sym.is_valid_integer():
 			token.type = TOKEN.NUMBER
 		else:
-			token = _ErrorToken("Symbol expected to be integer number.", _pos.l, _pos.c, _sym)
+			token = _ErrorToken("Symbol '" + _sym + "' invalid.", _pos.l, _pos.c, _sym)
 	_sym = ""
 	return token
 
-func _IsSingleToken(c : String, idx : int, col : int):
+func _IsSingleToken(c : String, col : int):
 	match c:
 		"@":
-			return {"type":TOKEN.HERE, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.HERE, "col":col, "symbol":""}
+		"#":
+			return {"type":TOKEN.HASH, "col":col, "symbol":""}
 		"(":
-			return {"type":TOKEN.PAREN_L, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.PAREN_L, "col":col, "symbol":""}
 		")":
-			return {"type":TOKEN.PAREN_R, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.PAREN_R, "col":col, "symbol":""}
 		"{":
-			return {"type":TOKEN.BLOCK_L, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.BLOCK_L, "col":col, "symbol":""}
 		"}":
-			return {"type":TOKEN.BLOCK_R, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.BLOCK_R, "col":col, "symbol":""}
 		",":
-			return {"type":TOKEN.COMMA, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.COMMA, "col":col, "symbol":""}
 		".":
-			return {"type":TOKEN.PERIOD, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.PERIOD, "col":col, "symbol":""}
 		"\"":
-			return {"type":TOKEN.QUOTE, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.QUOTE, "col":col, "symbol":""}
 		":":
-			return {"type":TOKEN.COLON, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.COLON, "col":col, "symbol":""}
 		"=":
-			return {"type":TOKEN.EQ, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.EQ, "col":col, "symbol":""}
 		"+":
-			return {"type":TOKEN.PLUS, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.PLUS, "col":col, "symbol":""}
 		"-":
-			return {"type":TOKEN.MINUS, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.MINUS, "col":col, "symbol":""}
 		"/":
-			return {"type":TOKEN.DIV, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.DIV, "col":col, "symbol":""}
 		"*":
-			return {"type":TOKEN.MULT, "line":idx, "col":col, "symbol":""}
+			return {"type":TOKEN.MULT, "col":col, "symbol":""}
 	return null
+
+func _LexLine(idx : int, line : String) -> bool:
+	for col in range(line.length()):
+		var c : String = line.substr(col, 1)
+		if c == " ":
+			if _sym != "":
+				var tok = _SymbolToToken()
+				_StoreToken(_pos.l, tok)
+				if tok.type == TOKEN.ERROR:
+					return false
+		else:
+			var tok = _IsSingleToken(c, col)
+			if tok != null:
+				if _sym != "":
+					var toksym = _SymbolToToken()
+					_StoreToken(_pos.l, toksym)
+					if toksym.type == TOKEN.ERROR:
+						return false
+				_StoreToken(idx, tok)
+			else:
+				if _sym == "":
+					_pos.l = idx
+					_pos.c = col
+				_sym += c
+	if _sym != "":
+		var toksym = _SymbolToToken()
+		_StoreToken(_pos.l, toksym)
+		if toksym.type == TOKEN.ERROR:
+			return false
+	_StoreToken(idx, {"type": TOKEN.EOL, "col": line.length() - 1, "symbol":""})
+	return true
+
 
 func _LexSource() -> void:
 	for idx in range(_lines.size()):
 		var line : String = _StripLine(_lines[idx])
-		for col in range(line.length()):
-			var c : String = line.substr(col, 1)
-			if c == " ":
-				if _sym != "":
-					var tok = _SymbolToToken()
-					_StoreToken(tok)
-					if tok.type == TOKEN.ERROR:
-						return
-			else:
-				var tok = _IsSingleToken(c, _first_line + idx, col)
-				if tok != null:
-					if _sym != "":
-						var toksym = _SymbolToToken()
-						_StoreToken(toksym)
-						if toksym.type == TOKEN.ERROR:
-							return
-					_StoreToken(tok)
-				else:
-					if _sym == "":
-						_pos.l = _first_line + idx
-						_pos.c = col
-					_sym += c
-		if _sym != "":
-			var toksym = _SymbolToToken()
-			_StoreToken(toksym)
-			if toksym.type == TOKEN.ERROR:
-				return
-		_StoreToken({"type": TOKEN.EOL, "line":_first_line + idx, "col": line.length() - 1, "symbol":""})
-	_StoreToken({"type": TOKEN.EOF, "line":_first_line + (_lines.size() - 1), "col": 0, "symbol":""})
+		if not _LexLine(idx, line):
+			return
+	_StoreToken((_lines.size() - 1), {"type": TOKEN.EOF, "col": 0, "symbol":""})
 
 # ---------------------------------------------------------------------------
 # Public Methods
@@ -173,12 +185,17 @@ func token_count() -> int:
 func get_token(idx : int) -> Dictionary:
 	if idx >= 0 and idx < _token.size():
 		var tok = _token[idx]
-		return {
-			"type": tok.type,
-			"line": tok.line,
-			"col": tok.col,
-			"symbol": tok.symbol
-		}
+		var tidx = _GetTokenLineNumber(idx)
+		if tidx >= 0:
+			var res = {
+				"type": tok.type,
+				"line": tidx + _first_line,
+				"col": tok.col,
+				"symbol": tok.symbol
+			}
+			if tok.type == TOKEN.ERROR:
+				res["msg"] = tok.msg
+			return res
 	return {"type": TOKEN.EOF, "line":_first_line + (_lines.size() - 1), "col": 0, "symbol":""}
 
 func first_line_index() -> int:
@@ -190,6 +207,7 @@ func get_line(idx : int) -> String:
 		return _lines[idx]
 	return ""
 
+
 func get_line_tokens(idx : int) -> Array:
 	var res = []
 	idx -= _first_line
@@ -200,43 +218,9 @@ func get_line_tokens(idx : int) -> Array:
 
 func get_error_token():
 	if _token.size() > 0:
-		var tok = _token[_token.size() - 1]
+		var tok = get_token(_token.size() - 1)
 		if tok.type == TOKEN.ERROR:
 			return tok
 	return null
-
-#func get_next_token() -> Dictionary:
-#	if _tok != null:
-#		var t = _tok
-#		_tok = null
-#		return t
-#
-#	if _idx < _lines.size():
-#		if _line == "":
-#			_line = _StripLine(_lines[_idx])
-#			_col = 0
-#		while _col < _line.length():
-#			var c : String = _line.substr(_col, 1)
-#			if c == " ":
-#				var tok = _SymbolToToken()
-#				if tok != null:
-#					return tok
-#			else:
-#				_tok = _IsSingleToken(c)
-#				if _tok != null:
-#					var tok = _SymbolToToken()
-#					if tok == null:
-#						tok = _tok
-#						_tok = null
-#					return tok
-#				if _sym == "":
-#					_pos.l = _idx
-#					_pos.c = _col
-#				_sym += c
-#			_col += 1
-#		_idx += 1
-#		_line = ""
-#		return {"type": TOKEN.EOL, "line":_idx - 1, "col": _col - 1, "sym":""}
-#	return {"type": TOKEN.EOF, "line":_idx, "col": 0, "sym":""}
 
 
