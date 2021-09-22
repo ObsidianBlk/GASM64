@@ -78,4 +78,11 @@ func _on_CodeEditor_resized():
 		dataview_node.set_available_lines_to_height(cerect.size.y)
 
 func _on_CodeEditor_line_change(line_num, line_text):
-	print("Line Number ", line_num, " text is now \"", line_text, "\"")
+	var lex = Lexer.new(line_text, line_num)
+	if lex.is_valid():
+		for i in range(lex.token_count()):
+			print(lex.get_token(i))
+	else:
+		var err = lex.get_error_token()
+		if err != null:
+			print("ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
