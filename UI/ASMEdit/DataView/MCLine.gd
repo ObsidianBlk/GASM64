@@ -67,17 +67,17 @@ func clear_line() -> void:
 func set_line_bytes(cmd: int = -1, byte1: int = -1, byte2: int = -1) -> void:
 	if cmd_node:
 		if cmd >= 0:
-			cmd_node.text = GASM.int_to_hex(cmd & 0xFF, 2)
+			cmd_node.text = Utils.int_to_hex(cmd & 0xFF, 2)
 		else:
 			cmd_node.text = "  "
 	if byte1_node:
 		if byte1 >= 0:
-			byte1_node.text = GASM.int_to_hex(byte1 & 0xFF, 2)
+			byte1_node.text = Utils.int_to_hex(byte1 & 0xFF, 2)
 		else:
 			byte1_node.text = "  "
 	if byte2_node:
 		if byte2 >= 0:
-			byte2_node.text = GASM.int_to_hex(byte2 & 0xFF, 2)
+			byte2_node.text = Utils.int_to_hex(byte2 & 0xFF, 2)
 		else:
 			byte2_node.text = "  "
 
@@ -96,9 +96,9 @@ func set_line(dat : PoolIntArray) -> void:
 func get_line() -> PoolIntArray:
 	if cmd_node and byte1_node and byte2_node:
 		return PoolIntArray([
-			GASM.hex_to_int(cmd_node.text) if cmd_node.text != "  " else -1,
-			GASM.hex_to_int(byte1_node.text) if byte1_node.text != "  " else -1,
-			GASM.hex_to_int(byte2_node.text) if byte2_node.text != "  " else -1
+			Utils.hex_to_int(cmd_node.text) if cmd_node.text != "  " else -1,
+			Utils.hex_to_int(byte1_node.text) if byte1_node.text != "  " else -1,
+			Utils.hex_to_int(byte2_node.text) if byte2_node.text != "  " else -1
 		])
 	else:
 		return PoolIntArray([-1, -1, -1])

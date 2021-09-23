@@ -25,6 +25,38 @@ func call_deferred_once(method : String, obj = null, args : Array = []) -> void:
 		}
 		call_deferred("_call_and_release", key)
 
+func hex_to_int(hex : String) -> int:
+	if hex.is_valid_hex_number() and not hex.is_valid_hex_number(true):
+		hex = "0x" + hex
+		return hex.hex_to_int()
+	return -1
+
+func int_to_hex(v : int, minlen : int = 0) -> String:
+	var s = sign(v)
+	v = abs(v)
+	var hex = ""
+	while v > 0:
+		var code = v & 0xF
+		match code:
+			10:
+				hex = "A" + hex
+			11:
+				hex = "B" + hex
+			12:
+				hex = "C" + hex
+			13:
+				hex = "D" + hex
+			14:
+				hex = "E" + hex
+			15:
+				hex = "F" + hex
+			_:
+				hex = String(code) + hex
+		v = v >> 4
+	while hex.length() < minlen:
+		hex = "0" + hex
+	return hex
+
 func is_valid_binary(v : String) -> bool:
 	if v.length() > 0:
 		for c in v:

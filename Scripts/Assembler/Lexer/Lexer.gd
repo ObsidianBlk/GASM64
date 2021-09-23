@@ -8,17 +8,23 @@ enum TOKEN {
 	ERROR=-1,
 	LABEL,
 	NUMBER,
+	STRING,
 	HERE,
 	HASH,
 	PAREN_L,
 	PAREN_R,
 	BLOCK_L,
 	BLOCK_R,
+	LT,
+	LTE,
+	GT,
+	GTE,
 	COMMA,
 	PERIOD,
-	QUOTE,
 	COLON,
+	ASSIGN,
 	EQ,
+	NEQ,
 	PLUS,
 	MINUS,
 	DIV,
@@ -113,12 +119,8 @@ func _IsSingleToken(c : String, col : int):
 			return {"type":TOKEN.COMMA, "col":col, "symbol":""}
 		".":
 			return {"type":TOKEN.PERIOD, "col":col, "symbol":""}
-		"\"":
-			return {"type":TOKEN.QUOTE, "col":col, "symbol":""}
 		":":
 			return {"type":TOKEN.COLON, "col":col, "symbol":""}
-		"=":
-			return {"type":TOKEN.EQ, "col":col, "symbol":""}
 		"+":
 			return {"type":TOKEN.PLUS, "col":col, "symbol":""}
 		"-":
@@ -129,34 +131,73 @@ func _IsSingleToken(c : String, col : int):
 			return {"type":TOKEN.MULT, "col":col, "symbol":""}
 	return null
 
-func _LexLine(idx : int, line : String) -> bool:
-	for col in range(line.length()):
-		var c : String = line.substr(col, 1)
-		if c == " ":
-			if _sym != "":
-				var tok = _SymbolToToken()
-				_StoreToken(_pos.l, tok)
-				if tok.type == TOKEN.ERROR:
-					return false
-		else:
-			var tok = _IsSingleToken(c, col)
-			if tok != null:
-				if _sym != "":
-					var toksym = _SymbolToToken()
-					_StoreToken(_pos.l, toksym)
-					if toksym.type == TOKEN.ERROR:
-						return false
-				_StoreToken(idx, tok)
-			else:
-				if _sym == "":
-					_pos.l = idx
-					_pos.c = col
-				_sym += c
+func _IsOperatorToken(c1 : String, c2 : String, col : int):
+	match c1:
+		"=":
+			if c2 == "=":
+				return {"type":TOKEN.EQ, "col":col, "symbol":""}
+			return {"type":TOKEN.ASSIGN, "col":col, "symbol":""}
+		"<":
+			if c2 == "=":
+				return {"type":TOKEN.LTE, "col":col, "symbol":""}
+			return {"type":TOKEN.LT, "col":col, "symbol":""}
+		">":
+			if c2 == "=":
+				return {"type":TOKEN.GTE, "col":col, "symbol":""}
+			return {"type":TOKEN.GT, "col":col, "symbol":""}
+		"!":
+			if c2 == "=":
+				return {"type":TOKEN.NEQ, "col":col, "symbol":""}
+			#return {"type":TOKEN.NOT, "col":col, "symbol":""}
+	return null
+
+func _StoreSymIfExists() -> bool:
 	if _sym != "":
 		var toksym = _SymbolToToken()
 		_StoreToken(_pos.l, toksym)
 		if toksym.type == TOKEN.ERROR:
 			return false
+	return true
+
+func _LexLine(idx : int, line : String) -> bool:
+	var skip_c = false
+	for col in range(line.length()):
+		if skip_c:
+			skip_c = false
+			continue
+			
+		var c : String = line.substr(col, 1)
+		var sym_is_string = _sym != "" and _sym.left(1) == "\""
+		if c == "\"" or sym_is_string:
+			if _sym == "":
+				_pos.l = idx
+				_pos.c = col
+			_sym += c
+			if sym_is_string:
+				_StoreToken(idx, {"type":TOKEN.STRING, "col": _pos.c, "symbol":_sym})
+				_sym = ""
+		elif c == " ":
+			if not _StoreSymIfExists():
+				return false
+		else:
+			var tok = _IsSingleToken(c, col)
+			if tok == null and col + 1 < line.length():
+				var c2 : String = line.substr(col + 1, 1) # Sniffing ahead a character
+				tok = _IsOperatorToken(c, c2, col)
+			if tok != null:
+				if not _StoreSymIfExists():
+					return false
+				_StoreToken(idx, tok)
+				if [TOKEN.LTE, TOKEN.GTE, TOKEN.EQ, TOKEN.NEQ].find(tok.type) >= 0:
+					skip_c = true # If the above is true, we technically used a character
+							# we sniffed ahead on, so we don't want to process that character again.
+			else:
+				if _sym == "":
+					_pos.l = idx
+					_pos.c = col
+				_sym += c
+	if not _StoreSymIfExists():
+		return false
 	_StoreToken(idx, {"type": TOKEN.EOL, "col": line.length() - 1, "symbol":""})
 	return true
 
@@ -215,6 +256,12 @@ func get_line_tokens(idx : int) -> Array:
 		for tidx in _token_lines[idx]:
 			res.append(get_token(tidx))
 	return res
+
+func get_token_name(type : int) -> String:
+	for key in TOKEN.keys():
+		if TOKEN[key] == type:
+			return key
+	return ""
 
 func get_error_token():
 	if _token.size() > 0:

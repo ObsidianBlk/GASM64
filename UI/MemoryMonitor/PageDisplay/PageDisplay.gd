@@ -8,7 +8,7 @@ onready var page_label_node = get_node("Label")
 func set_page(page : int) -> void:
 	if not page_label_node:
 		return
-	page_label_node.text = "0x" + GASM.int_to_hex(page & 0xFF, 2)
+	page_label_node.text = "0x" + Utils.int_to_hex(page & 0xFF, 2)
 
 
 func set_data(data : PoolByteArray, offset : int = 0) -> void:
@@ -24,7 +24,7 @@ func set_data(data : PoolByteArray, offset : int = 0) -> void:
 				if inred:
 					inred = false
 					line += "[/color]"
-				line += GASM.int_to_hex(data[idx + offset], 2) + " "
+				line += Utils.int_to_hex(data[idx + offset], 2) + " "
 			else:
 				if not inred:
 					inred = true

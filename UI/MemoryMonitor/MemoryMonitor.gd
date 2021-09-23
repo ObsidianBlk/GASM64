@@ -106,11 +106,11 @@ func _UpdatePageDisplays() -> void:
 
 func _UpdateCPUDisplays() -> void:
 	var info = _cpu.get_state_info()
-	A_node.text = GASM.int_to_hex(info.A, 2)
-	X_node.text = GASM.int_to_hex(info.X, 2)
-	Y_node.text = GASM.int_to_hex(info.Y, 2)
-	STK_node.text = GASM.int_to_hex(info.SP, 2)
-	PC_node.text = GASM.int_to_hex(info.PC, 4)
+	A_node.text = Utils.int_to_hex(info.A, 2)
+	X_node.text = Utils.int_to_hex(info.X, 2)
+	Y_node.text = Utils.int_to_hex(info.Y, 2)
+	STK_node.text = Utils.int_to_hex(info.SP, 2)
+	PC_node.text = Utils.int_to_hex(info.PC, 4)
 	
 	Carry_node.pressed = (info.Status & 0x01) == 0x01
 	Zero_node.pressed = (info.Status & 0x02) == 0x02

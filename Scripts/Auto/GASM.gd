@@ -1,6 +1,9 @@
 tool
 extends Node
 
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
 const OPCODE_PREFIX = "opcodes_"
 const OPCODE_EXT = ".json"
 const OP_KEYS = ["name", "category", "description", "modes", "flags", "tags"]
@@ -15,11 +18,16 @@ const MODE_NAMES = [
 	"absolute", "absolute_x", "absolute_y",
 	"indirect_x", "indirect_y"
 ]
+
+# -----------------------------------------------------------------------------
+# ENUMs
+# -----------------------------------------------------------------------------
 enum MODES {IMP=0, IMM=1, IND=2, REL=3, ACC=4, ZP=5, ZPX=6, ZPY=7, ABS=8, ABSX=9, ABSY=10, INDX=11, INDY=12}
 
-enum TOKEN {INST=0, LABEL=1, NUMBER=2, HERE=3, PAREN_L=4, PAREN_R=5, COMMA=6, IMMEDIATE=7, A=8, X=9, Y=10, EQ=11, MATH=12}
-# TOKEN.HERE represents the '*' operator which is the memory address at the start of the line.
 
+# -----------------------------------------------------------------------------
+# Variables
+# -----------------------------------------------------------------------------
 var DATA = {
 	"OP": {},
 	"CATEGORIES": {},
@@ -28,12 +36,17 @@ var DATA = {
 }
 var CODE_LIST = []
 
+# -----------------------------------------------------------------------------
+# Override Methods
+# -----------------------------------------------------------------------------
 func _ready():
 	for _i in range(256):
 		CODE_LIST.append(null)
 	_load_opcode_data("res://Data")
 
-
+# -----------------------------------------------------------------------------
+# Private Methods
+# -----------------------------------------------------------------------------
 func _load_opcode_data(oppath : String) -> void:
 	var files = []
 	var dir = Directory.new()
@@ -81,7 +94,7 @@ func _store_opdata(data : Dictionary) -> void:
 							"op": key,
 							"mode_id": get_mode_id_from_name(mode),
 							"opcode": data[key].modes[mode].opcode,
-							"opval": hex_to_int(data[key].modes[mode].opcode),
+							"opval": Utils.hex_to_int(data[key].modes[mode].opcode),
 							"bytes": data[key].modes[mode].bytes,
 							"cycles": data[key].modes[mode].cycles,
 							"pagecross": data[key].modes[mode].pagecross,
@@ -115,38 +128,9 @@ func _store_opdata(data : Dictionary) -> void:
 			print("[WARNING] Key '", key, "' already stored in data.")
 
 
-func hex_to_int(hex : String) -> int:
-	if hex.is_valid_hex_number() and not hex.is_valid_hex_number(true):
-		hex = "0x" + hex
-		return hex.hex_to_int()
-	return -1
-
-func int_to_hex(v : int, minlen : int = 0) -> String:
-	var s = sign(v)
-	v = abs(v)
-	var hex = ""
-	while v > 0:
-		var code = v & 0xF
-		match code:
-			10:
-				hex = "A" + hex
-			11:
-				hex = "B" + hex
-			12:
-				hex = "C" + hex
-			13:
-				hex = "D" + hex
-			14:
-				hex = "E" + hex
-			15:
-				hex = "F" + hex
-			_:
-				hex = String(code) + hex
-		v = v >> 4
-	while hex.length() < minlen:
-		hex = "0" + hex
-	return hex
-
+# -----------------------------------------------------------------------------
+# Public Methods
+# -----------------------------------------------------------------------------
 
 func is_valid_opcode(code : int) -> bool:
 	if code >= 0 and code < CODE_LIST.size():
@@ -255,6 +239,14 @@ func get_opcodes_by_tags(tags : Array) -> Array:
 					break;
 	
 	return opcodes
+
+func get_opcode_from_name_and_mode(op : String, mode : int) -> int:
+	op = op.to_lower()
+	if op in DATA.OP:
+		var mode_name = get_mode_name_from_ID(mode)
+		if mode_name in DATA.OP[op].modes:
+			return DATA.OP[op].modes[mode_name].opval
+	return -1
 
 func get_mode_id_from_name(mode_name : String) -> int:
 	for i in range(MODE_NAMES.size()):

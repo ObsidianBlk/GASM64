@@ -14,7 +14,7 @@ func _ready() -> void:
 	for i in range(16):
 		var aix = AXISINFO.instance()
 		aix.axis_mode = 1
-		aix.text = GASM.int_to_hex(i)
+		aix.text = Utils.int_to_hex(i)
 		chart_node.add_child(aix)
 	
 	
@@ -22,7 +22,7 @@ func _ready() -> void:
 		if i & 0x0F == 0:
 			var aiy = AXISINFO.instance()
 			aiy.axis_mode = 2
-			aiy.text = GASM.int_to_hex((i & 0xF0) >> 4)
+			aiy.text = Utils.int_to_hex((i & 0xF0) >> 4)
 			chart_node.add_child(aiy)
 		var oib = OPINFOBOX.instance()
 		oib.op_code = i
