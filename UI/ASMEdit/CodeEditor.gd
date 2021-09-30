@@ -4,6 +4,7 @@ extends TextEdit
 # Signals
 # ---------------------------------------------------------------------------
 signal line_change(line_num, line_text)
+signal source_change()
 
 
 # ---------------------------------------------------------------------------
@@ -52,13 +53,14 @@ func _UpdateData() -> void:
 	var cc = cursor_get_column()
 	var line_count = get_line_count()
 	if get_line_count() != _last_line_count:
-		# TODO: Check if full reassembly is required!
+		emit_signal("source_change")
 		_last_line_count = line_count
 	else:
 		if cl != _last_cursor_line:
 			var line = get_line(_last_cursor_line)
 			if line != _active_line:
-				emit_signal("line_change", _last_cursor_line, line)
+				emit_signal("source_change")
+				#emit_signal("line_change", _last_cursor_line, line)
 			_last_cursor_line = cl
 			_active_line = get_line(_last_cursor_line)
 

@@ -29,9 +29,10 @@ onready var codeeditor_node = get_node("Editor/CodeEditor")
 # Override Methods
 # ---------------------------------------------------------------------------
 func _ready() -> void:
-	print("Yo bro!")
 	dataview_node.available_lines = 10
 	dataview_node.set_line(0, 255, 110, 96)
+	
+	codeeditor_node.connect("source_change", self, "_on_source_change")
 
 
 # ---------------------------------------------------------------------------
@@ -72,6 +73,21 @@ func get_color(name : String, node_type : String = "") -> Color:
 # Handler Methods
 # ---------------------------------------------------------------------------
 
+func _on_source_change() -> void:
+	var src = codeeditor_node.text
+	var lex = Lexer.new(src)
+	if lex.is_valid():
+		var parser = Parser.new(lex)
+		if parser.is_valid():
+			print(parser.get_ast())
+		else:
+			for i in range(parser.error_count()):
+				print(parser.get_error(i))
+	else:
+		var err = lex.get_error_token()
+		if err != null:
+			print("ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
+
 func _on_CodeEditor_resized():
 	var cerect = codeeditor_node.get_rect()
 	if cerect.size.y < 5000:
@@ -81,11 +97,11 @@ func _on_CodeEditor_line_change(line_num, line_text):
 	var lex = Lexer.new(line_text, line_num)
 	if lex.is_valid():
 		var parser = Parser.new(lex)
-#		if parser.is_valid():
-#			print(parser.get_ast())
-#		else:
-#			for i in range(parser.error_count()):
-#				print(parser.get_error(i))
+		if parser.is_valid():
+			print(parser.get_ast())
+		else:
+			for i in range(parser.error_count()):
+				print(parser.get_error(i))
 	else:
 		var err = lex.get_error_token()
 		if err != null:

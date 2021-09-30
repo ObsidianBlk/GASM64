@@ -100,12 +100,17 @@ func _RecallToken() -> bool:
 		return true
 	return false
 
-func _IsToken(type : int, sym : String = "") -> bool:
+func _IsToken(type : int, sym : String = "", consume_on_true : bool = false) -> bool:
 	var t = _PeekToken()
 	if t.type == type:
 		if sym == "" or sym == t.symbol:
+			if consume_on_true:
+				_ConsumeToken()
 			return true
 	return false
+
+func _IsTokenConsume(type : int, sym : String = "") -> bool:
+	return _IsToken(type, sym, true)
 
 func _IsInstruction() -> bool:
 	var t = _PeekToken()
@@ -133,14 +138,16 @@ func _IsBinaryOperator() -> bool:
 func _ParseBlock(terminator : int = Lexer.TOKEN.EOF, ignoreEOL : bool = false):
 	var explist = []
 	while not (_IsToken(terminator) or _IsToken(Lexer.TOKEN.EOF)) :
+		if _IsTokenConsume(Lexer.TOKEN.EOL): # Just skip empty lines
+			continue
 		var ex = _ParseExpression()
 		if _errors.size() > 0:
 			return null
 		if ex != null:
 			explist.append(ex)
 		if not ignoreEOL:
-			var token = _PeekToken()
-			if token.type != Lexer.TOKEN.EOL:
+			if not _IsTokenConsume(Lexer.TOKEN.EOL):
+				var token = _PeekToken()
 				_StoreError("Expected end of line.", token.line, token.col)
 				return null
 	var tok = _ConsumeToken()
@@ -259,7 +266,9 @@ func _ParseInstruction():
 	if addr != null:
 		return {
 			"type": ASTNODE.INST,
-			"addr": addr,
+			"inst": token.symbol.to_upper(),
+			"addr": addr.addr,
+			"value": null if not ("value" in addr) else addr.value,
 			"line": token.line,
 			"col": token.col
 		}

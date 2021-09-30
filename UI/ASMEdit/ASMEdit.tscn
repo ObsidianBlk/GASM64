@@ -34,5 +34,4 @@ syntax_highlighting = true
 minimap_draw = true
 script = ExtResource( 3 )
 
-[connection signal="line_change" from="Editor/CodeEditor" to="." method="_on_CodeEditor_line_change"]
 [connection signal="resized" from="Editor/CodeEditor" to="." method="_on_CodeEditor_resized"]
