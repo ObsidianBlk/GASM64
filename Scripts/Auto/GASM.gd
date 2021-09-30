@@ -170,7 +170,7 @@ func get_op_info(op_name : String) -> Dictionary:
 	return opi
 
 func is_op(op_name : String) -> bool:
-	return op_name.to_lower() in DATA.OP
+	return op_name.to_upper() in DATA.OP
 
 func get_ops() -> Array:
 	return DATA.OP.keys()
