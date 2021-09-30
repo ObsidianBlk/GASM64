@@ -9,7 +9,6 @@ enum TOKEN {
 	LABEL,
 	NUMBER,
 	STRING,
-	HERE,
 	HASH,
 	PAREN_L,
 	PAREN_R,
@@ -103,8 +102,6 @@ func _SymbolToToken():
 
 func _IsSingleToken(c : String, col : int):
 	match c:
-		"@":
-			return {"type":TOKEN.HERE, "col":col, "symbol":""}
 		"#":
 			return {"type":TOKEN.HASH, "col":col, "symbol":""}
 		"(":

@@ -9,8 +9,10 @@ enum ASTNODE {
 	NUMBER,
 	STRING,
 	LABEL,
+	HERE,
 	BLOCK,
 	INST,
+	HILO,
 	BINARY,
 	ASSIGNMENT,
 	CALL
@@ -39,6 +41,7 @@ const BINOP_INFO = {
 var _lexer : Lexer = null
 var _tidx : int = 0
 var _tidx_mem : int = -1
+var _skip_EOL : bool = false
 
 var _ast = null
 var _errors = []
@@ -135,7 +138,7 @@ func _IsBinaryOperator() -> bool:
 	].find(t.type) >= 0
 
 
-func _ParseBlock(terminator : int = Lexer.TOKEN.EOF, ignoreEOL : bool = false):
+func _ParseBlock(terminator : int = Lexer.TOKEN.EOF):
 	var explist = []
 	while not (_IsToken(terminator) or _IsToken(Lexer.TOKEN.EOF)) :
 		if _IsTokenConsume(Lexer.TOKEN.EOL): # Just skip empty lines
@@ -145,11 +148,13 @@ func _ParseBlock(terminator : int = Lexer.TOKEN.EOF, ignoreEOL : bool = false):
 			return null
 		if ex != null:
 			explist.append(ex)
-		if not ignoreEOL:
+		if not _skip_EOL:
 			if not _IsTokenConsume(Lexer.TOKEN.EOL):
 				var token = _PeekToken()
 				_StoreError("Expected end of line.", token.line, token.col)
 				return null
+		else:
+			_skip_EOL = false
 	var tok = _ConsumeToken()
 	if tok.type != terminator:
 		_StoreError(
@@ -204,7 +209,11 @@ func _ParseAtom():
 		return _ParseDirectives()
 	
 	var t = _ConsumeToken()
-	if t.type == Lexer.TOKEN.NUMBER:
+	if t.type == Lexer.TOKEN.MULT:
+		return _ParseHere(t)
+	elif t.type == Lexer.TOKEN.LT or t.type == Lexer.TOKEN.GT:
+		return _ParseHILO(t)
+	elif t.type == Lexer.TOKEN.NUMBER:
 		return _ParseNumber(t)
 	elif t.type == Lexer.TOKEN.STRING:
 		return _ParseString(t)
@@ -226,12 +235,25 @@ func _ParseString(t):
 	}
 
 func _ParseLabel(t):
-	return {
+	var label_node = {
 		"type": ASTNODE.LABEL,
 		"value": t.symbol,
 		"line": t.line,
 		"col": t.col
 	}
+	
+	if _IsInstruction() or _IsTokenConsume(Lexer.TOKEN.COLON):
+		_skip_EOL = true
+		return {
+			"type": ASTNODE.ASSIGNMENT,
+			"op": "=",
+			"left": label_node,
+			"right": _ParseHere(t),
+			"line": t.line,
+			"col": t.col
+		}
+	return label_node
+
 
 func _ParseNumber(t):
 	var l = t.symbol.left(1)
@@ -251,6 +273,25 @@ func _ParseNumber(t):
 	return {
 		"type":ASTNODE.NUMBER,
 		"value": val,
+		"line": t.line,
+		"col": t.col
+	}
+
+func _ParseHILO(t):
+	var val = _ParseAtom()
+	if val != null:
+		return {
+			"type": ASTNODE.HILO,
+			"operator": "<" if t.type == Lexer.TOKEN.LT else ">",
+			"value": val,
+			"line": t.line,
+			"col": t.col
+		}
+	return null
+
+func _ParseHere(t):
+	return {
+		"type": ASTNODE.HERE,
 		"line": t.line,
 		"col": t.col
 	}
@@ -415,6 +456,10 @@ func _Addressing():
 			if node != null or _errors.size() > 0:
 				return node
 			
+			return _AddrAbs()
+		Lexer.TOKEN.GT:
+			return _AddrAbs()
+		Lexer.TOKEN.LT:
 			return _AddrAbs()
 		_:
 			_StoreError("Syntax Error! Unexpected token.", token.line, token.col)
