@@ -1,6 +1,14 @@
 extends Reference
 class_name Parser
 
+#
+# GASM Parser
+#
+# Loosely based on assembly style as described at...
+# https://www.masswerk.at/6502/assembler.html
+#
+# Will formalize this soon!
+#
 
 # ---------------------------------------------------------------------------
 # ENUMs
@@ -9,6 +17,7 @@ enum ASTNODE {
 	NUMBER,
 	STRING,
 	LABEL,
+	DIRECTIVE,
 	HERE,
 	BLOCK,
 	INST,
@@ -121,6 +130,12 @@ func _IsInstruction() -> bool:
 		return GASM.is_op(t.symbol)
 	return false
 
+func _IsDirective() -> bool:
+	var t = _PeekToken()
+	if t.type == Lexer.TOKEN.DIRECTIVE:
+		return true
+	return false
+
 func _IsBinaryOperator() -> bool:
 	var t = _PeekToken()
 	return [
@@ -137,6 +152,9 @@ func _IsBinaryOperator() -> bool:
 		Lexer.TOKEN.MULT
 	].find(t.type) >= 0
 
+func _SkipEOL() -> void:
+	while _IsTokenConsume(Lexer.TOKEN.EOL):
+		pass
 
 func _ParseBlock(terminator : int = Lexer.TOKEN.EOF):
 	var explist = []
@@ -168,28 +186,42 @@ func _ParseDelimited(stype : int, etype : int, dtype : int, parse_func : String)
 	var toEOL = (stype < 0 or etype < 0)
 	var el = []
 	var first = true
-	var token = _ConsumeToken()
+	var token = null
 	if not toEOL:
-		if token.type != stype:
-			_StoreError("Unexpected token type " + _lexer.get_token_name(token.type) + ".", token.line, token.col)
-			return null
 		token = _ConsumeToken()
-	while ((not token.type == Lexer.TOKEN.EOF) and (not toEOL and token.type != etype)) or (toEOL and token.type == Lexer.TOKEN.EOL):
+		if token.type != stype:
+			_StoreError(
+				"Unexpected token type " + _lexer.get_token_name(token.type) + ". Expected " + _lexer.get_token_name(stype),
+				token.line, token.col
+			)
+			return null
+		_SkipEOL()
+	while ((not _IsToken(Lexer.TOKEN.EOF)) and (not toEOL and not _IsToken(etype))) or (toEOL and not _IsToken(Lexer.TOKEN.EOL)):
 		if not first:
-			if token.type != dtype:
-				_StoreError("Unexpected token type " + _lexer.get_token_name(token.type) + ".", token.line, token.col)
-				return null
 			token = _ConsumeToken()
+			if token.type != dtype:
+				_StoreError(
+					"Unexpected token type " + _lexer.get_token_name(token.type) + ". Expected " + _lexer.get_token_name(dtype),
+					token.line, token.col
+				)
+				return null
+			if not toEOL:
+				_SkipEOL()
 		first = false
 		var e = call(parse_func)
 		if e != null:
-			el.push(e)
+			el.append(e)
 		elif _errors.size() > 0:
 			return null
-		token = _ConsumeToken()
+		if not toEOL:
+			_SkipEOL()
 	if not toEOL:
+		token = _ConsumeToken()
 		if token.type != etype:
-			_StoreError("Unexpected token type " + _lexer.get_token_name(token.type) + ".", token.line, token.col)
+			_StoreError(
+				"Unexpected token type " + _lexer.get_token_name(token.type) + ". Expected " + _lexer.get_token_name(etype),
+				token.line, token.col
+			)
 			return null
 	return el
 
@@ -205,7 +237,7 @@ func _ParseAtom():
 		return _ParseBlock(Lexer.TOKEN.BLOCK_R)
 	elif _IsInstruction():
 		return _ParseInstruction()
-	elif _IsToken(Lexer.TOKEN.PERIOD):
+	elif _IsDirective():
 		return _ParseDirectives()
 	
 	var t = _ConsumeToken()
@@ -229,7 +261,7 @@ func _ParseAtom():
 func _ParseString(t):
 	return {
 		"type": ASTNODE.STRING,
-		"value": t.symbol.substr(1, t.symbol.size() - 2),
+		"value": t.symbol.substr(1, t.symbol.length() - 2),
 		"line": t.line,
 		"col": t.col
 	}
@@ -465,7 +497,56 @@ func _Addressing():
 			_StoreError("Syntax Error! Unexpected token.", token.line, token.col)
 	return null
 
+func _ParseByteDirective(directive : String):
+	var token = _PeekToken()
+	var vals = null
+	if _IsToken(Lexer.TOKEN.BRACE_L):
+		vals = _ParseDelimited(Lexer.TOKEN.BRACE_L, Lexer.TOKEN.BRACE_R, Lexer.TOKEN.COMMA, "_ParseAtom")
+	else:
+		vals = _ParseDelimited(-1, -1, Lexer.TOKEN.COMMA, "_ParseAtom")
+	if vals != null:
+		return {"type": ASTNODE.DIRECTIVE, "directive": directive, "values": vals}
+	return null
+
+func _ParseTextDirective(directive : String):
+	var token = _PeekToken()
+	var vals = null
+	if _IsToken(Lexer.TOKEN.BRACE_L):
+		vals = _ParseDelimited(Lexer.TOKEN.BRACE_L, Lexer.TOKEN.BRACE_R, Lexer.TOKEN.COMMA, "_ParseAtom")
+	else:
+		vals = _ParseDelimited(-1, -1, Lexer.TOKEN.COMMA, "_ParseAtom")
+	if vals != null:
+		for v in vals:
+			if v.type != ASTNODE.STRING:
+				_StoreError("Expected a string literal.", v.line, v.col)
+				return null
+		return {"type": ASTNODE.DIRECTIVE, "directive": directive, "values": vals}
+	return null
+
+func _ParseFillDirective():
+	var token = _PeekToken()
+	var amount = _ParseAtom()
+	if amount == null:
+		_StoreError("Directive '.fill' expects at least one EXPRESSION argument.", token.line, token.col)
+		return null
+	var val = null
+	if not _IsToken(Lexer.TOKEN.EOL):
+		val = _ParseAtom()
+		if val == null:
+			return null
+	return {"type": ASTNODE.DIRECTIVE, "directive":".fill", "value": val, "bytes": amount}
+
 func _ParseDirectives():
+	var token = _ConsumeToken()
+	match token.symbol:
+		".bytes", ".words", ".dbytes":
+			return _ParseByteDirective(token.symbol)
+		".text", ".ascii", ".petsci", ".include":
+			return _ParseTextDirective(token.symbol)
+		".fill":
+			return _ParseFillDirective()
+		_:
+			_StoreError("Unrecognized directive '" + token.symbol + "'.", token.line, token.col)
 	return null
 
 func _ParseCall(f):

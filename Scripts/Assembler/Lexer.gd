@@ -9,17 +9,19 @@ enum TOKEN {
 	LABEL,
 	NUMBER,
 	STRING,
+	DIRECTIVE,
 	HASH,
 	PAREN_L,
 	PAREN_R,
 	BLOCK_L,
 	BLOCK_R,
+	BRACE_L,
+	BRACE_R,
 	LT,
 	LTE,
 	GT,
 	GTE,
 	COMMA,
-	PERIOD,
 	COLON,
 	ASSIGN,
 	EQ,
@@ -86,7 +88,9 @@ func _ErrorToken(msg : String, idx : int, col : int, symbol: String = "") -> Dic
 func _SymbolToToken():
 	var token = {"type":TOKEN.LABEL, "col":_pos.c, "symbol":_sym}
 	var l = _sym.left(1)
-	if l == "$" or l == "%":
+	if l == ".":
+		token.type = TOKEN.DIRECTIVE
+	elif l == "$" or l == "%":
 		var r = _sym.substr(1)
 		if r.is_valid_hex_number() or Utils.is_valid_binary(r):
 			token.type = TOKEN.NUMBER
@@ -112,10 +116,12 @@ func _IsSingleToken(c : String, col : int):
 			return {"type":TOKEN.BLOCK_L, "col":col, "symbol":""}
 		"}":
 			return {"type":TOKEN.BLOCK_R, "col":col, "symbol":""}
+		"[":
+			return {"type":TOKEN.BRACE_L, "col":col, "symbol":""}
+		"]":
+			return {"type":TOKEN.BRACE_R, "col":col, "symbol":""}
 		",":
 			return {"type":TOKEN.COMMA, "col":col, "symbol":""}
-		".":
-			return {"type":TOKEN.PERIOD, "col":col, "symbol":""}
 		":":
 			return {"type":TOKEN.COLON, "col":col, "symbol":""}
 		"+":
@@ -156,6 +162,13 @@ func _StoreSymIfExists() -> bool:
 			return false
 	return true
 
+func _IsSymbolFullString() -> bool:
+	if _sym.left(1) == "\"" and _sym.length() >= 2:
+		var r = _sym.substr(_sym.length() -1)
+		var r2 = _sym.substr(_sym.length() -2)
+		return r == "\"" and r2 != "\\\"" 
+	return false
+
 func _LexLine(idx : int, line : String) -> bool:
 	var skip_c = false
 	for col in range(line.length()):
@@ -170,7 +183,7 @@ func _LexLine(idx : int, line : String) -> bool:
 				_pos.l = idx
 				_pos.c = col
 			_sym += c
-			if sym_is_string:
+			if _IsSymbolFullString():
 				_StoreToken(idx, {"type":TOKEN.STRING, "col": _pos.c, "symbol":_sym})
 				_sym = ""
 		elif c == " ":
