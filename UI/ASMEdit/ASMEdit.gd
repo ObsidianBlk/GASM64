@@ -75,18 +75,21 @@ func get_color(name : String, node_type : String = "") -> Color:
 
 func _on_source_change() -> void:
 	var src = codeeditor_node.text
-	var lex = Lexer.new(src)
-	if lex.is_valid():
-		var parser = Parser.new(lex)
-		if parser.is_valid():
-			print(parser.get_ast())
-		else:
-			for i in range(parser.error_count()):
-				print(parser.get_error(i))
-	else:
-		var err = lex.get_error_token()
-		if err != null:
-			print("ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
+	var assem = Assembler.new()
+	assem.process(src)
+	print(assem.get_binary)
+#	var lex = Lexer.new(src)
+#	if lex.is_valid():
+#		var parser = Parser.new(lex)
+#		if parser.is_valid():
+#			print(parser.get_ast())
+#		else:
+#			for i in range(parser.error_count()):
+#				print(parser.get_error(i))
+#	else:
+#		var err = lex.get_error_token()
+#		if err != null:
+#			print("ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
 
 func _on_CodeEditor_resized():
 	var cerect = codeeditor_node.get_rect()

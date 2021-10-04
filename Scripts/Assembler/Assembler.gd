@@ -35,13 +35,13 @@ func _StoreError(msg : String, line : int, col : int) -> void:
 	})
 
 func _Compile(ast : Dictionary) -> bool:
-	_ProcessNode(ast)
+	_compiled = _ProcessNode(ast)
 	return _errors.size() <= 0 and _compiled != null
 
 func _ProcessNode(node : Dictionary):
 	match node.type:
 		Parser.ASTNODE.BLOCK:
-			pass
+			return _ProcessBlock(node)
 		Parser.ASTNODE.ASSIGNMENT:
 			_ProcessAssignment(node)
 		Parser.ASTNODE.BINARY:
@@ -56,12 +56,40 @@ func _ProcessNode(node : Dictionary):
 		Parser.ASTNODE.NUMBER:
 			return node.value
 		Parser.ASTNODE.HILO:
-			pass
+			return _ProcessHILO(node)
 		Parser.ASTNODE.INST:
-			pass
+			return _ProcessInstruction(node)
 		Parser.ASTNODE.DIRECTIVE:
 			pass
 	return null
+
+func _ProcessBlock(node : Dictionary):
+	var block = {
+		"elements": [],
+		"line": node.line,
+		"col": node.col
+	}
+	for ex in node.expressions:
+		var e = _ProcessNode(ex)
+		if _errors.size() <= 0:
+			if typeof(e) == TYPE_DICTIONARY:
+				block.elements.append(e)
+		else:
+			return null
+	return block
+
+
+func _ProcessHILO(node : Dictionary):
+	var val = _ProcessNode(node.value)
+	if typeof(val) != TYPE_INT:
+		_StoreError("Operand expected to evaluate to a NUMBER.", node.value.line, node.value.col)
+		return null
+	if val < 0 or val > 0xFFFF:
+		_StoreError("HILO word out of bounds.", node.value.line, node.value.col)
+		return null
+	if node.operator == "<":
+		return (val & 0xFF)
+	return (val & 0xFF00) >> 8
 
 func _ProcessBinary(node : Dictionary):
 	var left = node.left
@@ -125,11 +153,198 @@ func _ProcessAssignment(node : Dictionary) -> void:
 			return
 		_env.PC(val)			
 	else:
-		if typeof(val) != TYPE_INT and typeof(val) != TYPE_STRING:
-			_StoreError("ASSIGNMENT only supports NUMBERS and STRINGS.", right.line, right.col)
+		if typeof(val) != TYPE_INT and typeof(val) != TYPE_STRING and typeof(val) != TYPE_BOOL:
+			_StoreError("ASSIGNMENT only supports NUMBERS, STRINGS, BOOLEANS.", right.line, right.col)
 			return
 		_env.set_label(left.value, val)
 	return
+
+func _ProcessInstruction(node : Dictionary):
+	var inst = null
+	match node.addr:
+		GASM.MODES.IMP, GASM.MODES.ACC:
+			inst = _ProcessAddrIMP(node)
+		GASM.MODES.IMM:
+			inst = _ProcessAddrIMM(node)
+		GASM.MODES.IND:
+			inst = _ProcessAddrIND(node)
+		GASM.MODES.INDX, GASM.MODES.INDY:
+			inst = _ProcessAddrINDXY(node)
+		GASM.MODES.ABS:
+			if GASM.op_has_mode(node.inst, GASM.MODES.REL):
+				inst = _ProcessAddrIMM(node) # Immediate mode also handles Relative mode. BECAUSE I SAID SO!
+			else:
+				# This handles Zero Page if value is or under 0xFF
+				inst = _ProcessAddrABS(node)
+		GASM.MODES.ABSX, GASM.MODES.ABSY:
+			inst = _ProcessABSXY(node)
+
+	if inst != null:
+		_env.PC_next(inst.data.size())
+	return inst
+
+func _ProcessAddrIMP(node : Dictionary):
+	var inst = {"data":[], "line":node.line, "col":node.col}
+	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	if op < 0:
+		_StoreError(
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			node.line, node.col
+		)
+		return null
+	inst.data.append(op)
+	return inst
+
+func _ProcessAddrIMM(node : Dictionary):
+	var relmode = false
+	var inst = {"data":[], "line":node.line, "col":node.col}
+	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	if op < 0:
+		op = GASM.get_opcode_from_name_and_mode(node.inst, GASM.MODES.REL)
+		if op < 0:
+			_StoreError(
+				"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+				node.line, node.col
+			)
+			return null
+		relmode = true
+	
+	var val = _ProcessNode(node.value)
+	if typeof(val) != TYPE_INT:
+		_StoreError("Instruction requires a NUMBER value.", node.value.line, node.value.col)
+		return null
+	if val < 0 or val > 0xFF:
+		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
+		return null
+	
+	if relmode:
+		var here = _env.PC()
+		var off = val - here
+		if off < -128 or off > 127:
+			_StoreError("Relative address target is out of range.", node.value.line, node.value.col)
+			return null
+		val = abs(off)
+		if off < 0:
+			val = val ^ 0xFF
+	inst.data.append(op)
+	inst.data.append(val & 0xFF)
+	return inst
+
+
+func _ProcessAddrABS(node : Dictionary):
+	var inst = {"data":[], "line":node.line, "col":node.col}
+	
+	var val = _ProcessNode(node.value)
+	if typeof(val) != TYPE_INT:
+		_StoreError("Instruction requires a NUMBER value.", node.value.line, node.value.col)
+		return null
+	if val < 0:
+		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
+		return null
+	
+	var op = -1
+	if val <= 0xFF and GASM.op_has_mode(node.inst, GASM.MODES.ZP):
+		op = GASM.get_opcode_from_name_and_mode(node.inst, GASM.MODES.ZP)
+		inst.data.append(op)
+		inst.data.append(val & 0xFF)
+		return inst
+	
+	if val > 0xFFFF:
+		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
+		return null
+		
+	op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	if op < 0:
+		_StoreError(
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			node.line, node.col
+		)
+		return null
+	inst.data.append(op)
+	inst.data.append(val & 0xFF)
+	inst.data.append((val & 0xFF00) >> 8)
+	return inst
+
+func _ProcessABSXY(node : Dictionary):
+	var ZPT = GASM.MODES.ZPX if node.addr == GASM.MODES.ABSX else GASM.MODES.ZPY 
+	var inst = {"data":[], "line":node.line, "col":node.col}
+	
+	var val = _ProcessNode(node.value)
+	if typeof(val) != TYPE_INT:
+		_StoreError("Instruction requires a NUMBER value.", node.value.line, node.value.col)
+		return null
+	if val < 0:
+		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
+		return null
+	
+	var op = -1
+	if val <= 0xFF and GASM.op_has_mode(node.inst, ZPT):
+		op = GASM.get_opcode_from_name_and_mode(node.inst, ZPT)
+		inst.data.append(op)
+		inst.data.append(val & 0xFF)
+		return inst
+	
+	if val > 0xFFFF:
+		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
+		return null
+		
+	op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	if op < 0:
+		_StoreError(
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			node.line, node.col
+		)
+		return null
+	inst.data.append(op)
+	inst.data.append(val & 0xFF)
+	inst.data.append((val & 0xFF00) >> 8)
+	return inst
+
+func _ProcessAddrIND(node : Dictionary):
+	var inst = {"data":[], "line":node.line, "col":node.col}
+	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	if op < 0:
+		_StoreError(
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			node.line, node.col
+		)
+		return null
+	
+	var val = _ProcessNode(node.value)
+	if typeof(val) != TYPE_INT:
+		_StoreError("Instruction requires a NUMBER value.", node.value.line, node.value.col)
+		return null
+	if val < 0 or val > 0xFFFF:
+		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
+		return null
+	
+	inst.data.append(op)
+	inst.data.append(val & 0xFF)
+	inst.data.append((val & 0xFF00) >> 8)
+	return inst
+
+
+func _ProcessAddrINDXY(node : Dictionary):
+	var inst = {"data":[], "line":node.line, "col":node.col}
+	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	if op < 0:
+		_StoreError(
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			node.line, node.col
+		)
+		return null
+	
+	var val = _ProcessNode(node.value)
+	if typeof(val) != TYPE_INT:
+		_StoreError("Instruction requires a NUMBER value.", node.value.line, node.value.col)
+		return null
+	if val < 0 or val > 0xFF:
+		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
+		return null
+	
+	inst.data.append(op)
+	inst.data.append(val & 0xFF)
+	return inst
 
 # ----------------------------------------------------------------------------
 # Public Methods
@@ -154,4 +369,15 @@ func process(source : String) -> bool:
 		if _parser.is_valid():
 			return _Compile(_parser.get_ast())
 	return false
+
+func get_object():
+	return _compiled;
+
+func get_binary() -> PoolByteArray:
+	var data = []
+	if _compiled != null:
+		for item in _compiled.elements:
+			if "data" in item:
+				data.append_array(item.data)
+	return PoolByteArray(data)
 

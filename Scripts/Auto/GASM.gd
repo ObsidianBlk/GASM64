@@ -175,6 +175,9 @@ func is_op(op_name : String) -> bool:
 func get_ops() -> Array:
 	return DATA.OP.keys()
 
+func op_has_mode(op_name : String, mode_id : int) -> bool:
+	return get_opcode_from_name_and_mode(op_name, mode_id) >= 0
+
 func get_categories() -> Array:
 	return DATA.CATEGORIES.keys()
 

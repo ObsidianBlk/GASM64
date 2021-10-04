@@ -58,13 +58,11 @@ func PC(pcv = null) -> int:
 			_PC = pcv
 	return _PC
 
-func PC_next() -> int:
+func PC_next(amount : int  = 1) -> int:
 	if _parent != null:
 		return _parent.PC_next()
 	var cpc : int = _PC
-	_PC += 1
-	if _PC > 0xFFFF:
-		_PC -= 0xFFFF
+	_PC = (_PC + amount) % 0xFFFF
 	return cpc
 
 

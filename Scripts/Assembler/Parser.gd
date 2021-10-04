@@ -157,7 +157,8 @@ func _SkipEOL() -> void:
 		pass
 
 func _ParseBlock(terminator : int = Lexer.TOKEN.EOF):
-	var explist = []
+	var tok = _PeekToken()
+	var node = {"type":ASTNODE.BLOCK, "expressions":[], "line":tok.line, "col":tok.col}
 	while not (_IsToken(terminator) or _IsToken(Lexer.TOKEN.EOF)) :
 		if _IsTokenConsume(Lexer.TOKEN.EOL): # Just skip empty lines
 			continue
@@ -165,7 +166,7 @@ func _ParseBlock(terminator : int = Lexer.TOKEN.EOF):
 		if _errors.size() > 0:
 			return null
 		if ex != null:
-			explist.append(ex)
+			node.expressions.append(ex)
 		if not _skip_EOL:
 			if not _IsTokenConsume(Lexer.TOKEN.EOL):
 				var token = _PeekToken()
@@ -173,14 +174,14 @@ func _ParseBlock(terminator : int = Lexer.TOKEN.EOF):
 				return null
 		else:
 			_skip_EOL = false
-	var tok = _ConsumeToken()
+	tok = _ConsumeToken()
 	if tok.type != terminator:
 		_StoreError(
 			"Unexpected end of block. Expected token " + _lexer.get_token_name(terminator) + ". Found End of Line",
 			tok.line, tok.col
 		)
 		return null
-	return {"type":ASTNODE.BLOCK, "expressions":explist}
+	return node
 
 func _ParseDelimited(stype : int, etype : int, dtype : int, parse_func : String):
 	var toEOL = (stype < 0 or etype < 0)
