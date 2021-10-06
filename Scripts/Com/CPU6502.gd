@@ -32,15 +32,15 @@ var _Reg = PoolByteArray([0,0,0,0,0])
 
 # Address Mode Method Lookup Table
 var _AddrModeLUT : Dictionary = {
-	GASM.MODES.ABS: "_AddrAbsolute",
-	GASM.MODES.ABSX: "_AddrAbsoluteX",
-	GASM.MODES.ABSY: "_AddrAbsoluteY",
-	GASM.MODES.ZP: "_AddrZeroPage",
-	GASM.MODES.ZPX: "_AddrZeroPageX",
-	GASM.MODES.ZPY: "_AddrZeroPageY",
-	GASM.MODES.IND: "_AddrIndirect",
-	GASM.MODES.INDX: "_AddrXIndirect",
-	GASM.MODES.INDY: "_AddrIndirectY"
+	GASM.MODE.ABS: "_AddrAbsolute",
+	GASM.MODE.ABSX: "_AddrAbsoluteX",
+	GASM.MODE.ABSY: "_AddrAbsoluteY",
+	GASM.MODE.ZP: "_AddrZeroPage",
+	GASM.MODE.ZPX: "_AddrZeroPageX",
+	GASM.MODE.ZPY: "_AddrZeroPageY",
+	GASM.MODE.IND: "_AddrIndirect",
+	GASM.MODE.INDX: "_AddrXIndirect",
+	GASM.MODE.INDY: "_AddrIndirectY"
 }
 
 # Variables used for processing operations
@@ -802,13 +802,13 @@ func clock() -> void:
 			_HandleReset()
 		CYCLE_STATE.INST:
 			_opcode = _fetched
-			_opcycles = GASM.get_op_cycles(_opcode)
-			_opbytes = GASM.get_op_bytes(_opcode) - 1
+			_opcycles = GASM.get_inst_code_cycles(_opcode)[0]
+			_opbytes = GASM.get_inst_code_bytes(_opcode) - 1
 			_cycle = 1
 			_cycle_state = CYCLE_STATE.MODE
 			#_addr = -1
 		CYCLE_STATE.MODE:
-			var mode = GASM.get_op_mode_id(_opcode)
+			var mode = GASM.get_inst_code_mode(_opcode)
 			if mode >= 0 and mode in _AddrModeLUT:
 				if call(_AddrModeLUT[mode]):
 					_cycle_state = CYCLE_STATE.ADDR
@@ -820,7 +820,7 @@ func clock() -> void:
 			_cycle_state = CYCLE_STATE.OP
 	
 	if _cycle_state == CYCLE_STATE.OP:
-		var inst = "_" + GASM.get_op_asm_name(_opcode)
+		var inst = "_" + GASM.get_inst_code_name(_opcode)
 		print("Calling Op: ", inst, " | Cycles: ", _opcycles, " | Op Code: ", _opcode)
 		if has_method(inst):
 			call(inst)

@@ -87,7 +87,7 @@ func _BinarySymbol(TokType : int) -> String:
 func _TokenNumberToValue(token) -> int:
 	var l = token.symbol.left(1)
 	if l == "$":
-		return GASM.hex_to_int(token.symbol.substr(1))
+		return Utils.hex_to_int(token.symbol.substr(1))
 	elif l == "%":
 		return Utils.binary_to_int(token.symbol.substr(1))
 	return token.symbol.to_int()
@@ -127,7 +127,7 @@ func _IsTokenConsume(type : int, sym : String = "") -> bool:
 func _IsInstruction() -> bool:
 	var t = _PeekToken()
 	if t.type == Lexer.TOKEN.LABEL:
-		return GASM.is_op(t.symbol)
+		return GASM.is_instruction(t.symbol)
 	return false
 
 func _IsDirective() -> bool:
@@ -334,7 +334,7 @@ func _ParseInstruction():
 	var token = _ConsumeToken()
 	if token.type != Lexer.TOKEN.LABEL:
 		return null
-	if not GASM.is_op(token.symbol):
+	if not GASM.is_instruction(token.symbol):
 		return null
 	var addr = _Addressing()
 	if addr != null:
@@ -353,10 +353,10 @@ func _ParseInstruction():
 func _AddrImplied(ignore_errors : bool = false):
 	var token = _PeekToken()
 	if token.type == Lexer.TOKEN.EOL:
-		return {"addr":GASM.MODES.IMP}
+		return {"addr":GASM.MODE.IMP}
 	elif token.type == Lexer.TOKEN.LABEL and token.symbol.to_lower() == "a":
 		_ConsumeToken()
-		return {"addr":GASM.MODES.ACC}
+		return {"addr":GASM.MODE.ACC}
 	elif not ignore_errors:
 		_StoreError("Unexpected token " + _lexer.get_token_name(token.type) + ".", token.line, token.col)
 	return null
@@ -367,7 +367,7 @@ func _AddrImmediate():
 	if token.type == Lexer.TOKEN.HASH:
 		var val = _ParseAtom()
 		if val != null:
-			return {"addr":GASM.MODES.IMM, "value":val}
+			return {"addr":GASM.MODE.IMM, "value":val}
 	_RecallToken()
 	return null
 
@@ -379,7 +379,7 @@ func _AddrIndirect():
 		if val != null:
 			token = _ConsumeToken()
 			if token.type == Lexer.TOKEN.PAREN_R:
-				return {"addr": GASM.MODES.IND, "value":val}
+				return {"addr": GASM.MODE.IND, "value":val}
 			# NOTE: If the above IF is false, this is NOT neccessarily a syntax error.
 			# This could be an INDX or INDY situation.
 	_RecallToken()
@@ -400,7 +400,7 @@ func _AddrIndX():
 					# Syntactically correct!
 					token = _ConsumeToken()
 					if token.type == Lexer.TOKEN.PAREN_R:
-						return {"addr": GASM.MODES.INDX, "value":val}
+						return {"addr": GASM.MODE.INDX, "value":val}
 					else:
 						_StoreError("Syntax Error! Expected PAREN_R token.", token.line, token.col)
 	_RecallToken()
@@ -420,7 +420,7 @@ func _AddrIndY():
 					if token.type == Lexer.TOKEN.LABEL and token.symbol.to_lower() == "y":
 						# NOTE: The PAREN_R, COMMA, and LABEL tokens can fail without it being an error.
 						# However, if they pass, then EOL ~MUST~ also follow to be Syntactically correct!
-						return {"addr": GASM.MODES.INDY, "value":val}
+						return {"addr": GASM.MODE.INDY, "value":val}
 	_RecallToken()
 	return null
 
@@ -443,7 +443,7 @@ func _AddrAbs():
 				var sym = token.symbol.to_lower()
 				if sym == "x" or sym == "y":
 					return {
-						"addr" : GASM.MODES.ABSX if sym == "x" else GASM.MODES.ABSY,
+						"addr" : GASM.MODE.ABSX if sym == "x" else GASM.MODE.ABSY,
 						"value":val
 					}
 				else:
@@ -451,7 +451,7 @@ func _AddrAbs():
 			else:
 				_StoreError("Syntax Error! Expected LABEL token of 'X' or 'Y'.", token.line, token.col)
 		elif token.type == Lexer.TOKEN.EOL:
-			return {"addr":GASM.MODES.ABS, "value":val}
+			return {"addr":GASM.MODE.ABS, "value":val}
 	_RecallToken()
 	return null
 

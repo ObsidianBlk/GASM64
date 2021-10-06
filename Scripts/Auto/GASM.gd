@@ -1,4 +1,3 @@
-tool
 extends Node
 
 # -----------------------------------------------------------------------------
@@ -22,47 +21,46 @@ const MODE_NAMES = [
 # -----------------------------------------------------------------------------
 # ENUMs
 # -----------------------------------------------------------------------------
-enum MODES {IMP=0, IMM=1, IND=2, REL=3, ACC=4, ZP=5, ZPX=6, ZPY=7, ABS=8, ABSX=9, ABSY=10, INDX=11, INDY=12}
+enum MODE {IMP=0, IMM=1, IND=2, REL=3, ACC=4, ZP=5, ZPX=6, ZPY=7, ABS=8, ABSX=9, ABSY=10, INDX=11, INDY=12}
 
 
 # -----------------------------------------------------------------------------
 # Variables
 # -----------------------------------------------------------------------------
-var DATA = {
-	"OP": {},
-	"CATEGORIES": {},
-	"MODES": {},
-	"TAGS": {}
-}
-var CODE_LIST = []
+var _INST = {}
+var _INST_CODES = {}
+var _CATEGORIES = {}
+var _ADDR_MODES = {}
+var _TAGS = {}
+
 
 # -----------------------------------------------------------------------------
 # Override Methods
 # -----------------------------------------------------------------------------
-func _ready():
-	for _i in range(256):
-		CODE_LIST.append(null)
-	_load_opcode_data("res://Data")
+func _ready() -> void:
+#	for _i in range(256):
+#		CODE_LIST.append(null)
+	_load_instruction_data("res://Data")
 
 # -----------------------------------------------------------------------------
 # Private Methods
 # -----------------------------------------------------------------------------
-func _load_opcode_data(oppath : String) -> void:
+func _load_instruction_data(path : String) -> void:
 	var files = []
 	var dir = Directory.new()
-	dir.open(oppath)
+	dir.open(path)
 	dir.list_dir_begin()
 
 	var filename = dir.get_next()
 	while filename != "":
 		if filename.begins_with(OPCODE_PREFIX) and filename.ends_with(OPCODE_EXT):
 			var file = File.new()
-			file.open(oppath + "/" + filename, File.READ)
+			file.open(path + "/" + filename, File.READ)
 			var jsondat = parse_json(file.get_as_text())
 			if jsondat:
-				_store_opdata(jsondat)
+				_store_instruction_data(jsondat)
 			else:
-				print("[ERROR] Failed to parse json data, '", oppath + "/" + filename, "'.")
+				print("[ERROR] Failed to parse json data, '", path + "/" + filename, "'.")
 		filename = dir.get_next()
 	dir.list_dir_end()
 
@@ -74,190 +72,205 @@ func _obj_has_keys(ob : Dictionary, keys : Array) -> bool:
 	return true
 
 
-func _store_opdata(data : Dictionary) -> void:
-	for key in data:
-		if not (key in DATA.OP):
-			if _obj_has_keys(data[key], OP_KEYS):
-				var op = {
-					"name": data[key].name,
-					"category": data[key].category,
-					"description": data[key].description,
-					"modes":{},
-					"flags": data[key].flags,
+func _store_instruction_data(jdata : Dictionary) -> void:
+	for key in jdata:
+		var inst = key.to_lower()
+		if not inst in _INST:
+			if _obj_has_keys(jdata[key], OP_KEYS):
+				var inst_data = {
+					"name": jdata[key].name,
+					"category": jdata[key].category,
+					"description": jdata[key].description,
+					"addr_modes":{},
+					"flags": jdata[key].flags,
 					"tags":[]
 				}
 				
 				var process = true
-				for mode in data[key].modes.keys():
-					if mode in MODE_NAMES and _obj_has_keys(data[key].modes[mode], MODE_KEYS):
-						op.modes[mode] = {
-							"op": key,
-							"mode_id": get_mode_id_from_name(mode),
-							"opcode": data[key].modes[mode].opcode,
-							"opval": Utils.hex_to_int(data[key].modes[mode].opcode),
-							"bytes": data[key].modes[mode].bytes,
-							"cycles": data[key].modes[mode].cycles,
-							"pagecross": data[key].modes[mode].pagecross,
+				for addr_name in jdata[key].modes.keys():
+					if addr_name in MODE_NAMES and _obj_has_keys(jdata[key].modes[addr_name], MODE_KEYS):
+						var addr_id = get_addr_mode_id(addr_name) 
+						inst_data.addr_modes[addr_id] = {
+							"addr_name": addr_name,
+							"code": Utils.hex_to_int(jdata[key].modes[addr_name].opcode),
+							"bytes": jdata[key].modes[addr_name].bytes,
+							"cycles": jdata[key].modes[addr_name].cycles,
+							"pagecross": jdata[key].modes[addr_name].pagecross,
 							"success": 0
 						}
-						if "success" in data[key].modes[mode]:
-							op.modes[mode].success = data[key].modes[mode].success
+						if "success" in jdata[key].modes[addr_name]:
+							inst_data.addr_modes[addr_id].success = jdata[key].modes[addr_name].success
 					else:
-						print("[WARNING] Key'", key, "' mode '", mode, "' either unknown or missing required property.")
+						print("[WARNING] Key'{key}', Addressing Mode '{mode}' either unknown or missing required property.".format({"key":key, "mode":addr_name}))
 						process = false
 						break
 				
 				if process:
-					DATA.OP[key] = op
-					if not (op.category in DATA.CATEGORIES):
-						DATA.CATEGORIES[op.category] = []
-					DATA.CATEGORIES[op.category].append(key)
-					for mode in op.modes:
-						if not (mode in DATA.MODES):
-							DATA.MODES[mode] = []
-						DATA.MODES[mode].append(key)
-						CODE_LIST[op.modes[mode].opval] = op.modes[mode]
-					for tag in data[key].tags:
-						op.tags.append(tag)
-						if not (tag in DATA.TAGS):
-							DATA.TAGS[tag] = []
-						DATA.TAGS[tag].append(key)
+					_INST[inst] = inst_data
+					if not (inst_data.category in _CATEGORIES):
+						_CATEGORIES[inst_data.category] = []
+					_CATEGORIES[inst_data.category].append(inst)
+					for mode in inst_data.addr_modes:
+						_INST_CODES[inst_data.addr_modes[mode].code] = {
+							"inst": inst,
+							"addr": mode
+						}
+						if not (mode in _ADDR_MODES):
+							_ADDR_MODES[mode] = []
+						_ADDR_MODES[mode].append(inst)
+					for tag in jdata[key].tags:
+						inst_data.tags.append(tag)
+						if not (tag in _TAGS):
+							_TAGS[tag] = []
+						_TAGS[tag].append(inst)
 			else:
-				print("[WARNING] Key '", key, "' missing required property.")
+				print("[WARNING] Key '{key}' missing required property.".format({"key":key}))
 		else:
-			print("[WARNING] Key '", key, "' already stored in data.")
-
+			print("[WARNING] Key '{key}' already stored in data.".format({"key":key}))
 
 # -----------------------------------------------------------------------------
 # Public Methods
 # -----------------------------------------------------------------------------
 
-func is_valid_opcode(code : int) -> bool:
-	if code >= 0 and code < CODE_LIST.size():
-		return CODE_LIST[code] != null
-	return false
 
-func get_op_info(op_name : String) -> Dictionary:
-	var opi = {
-		"name": "",
-		"category": "",
-		"description": "",
-		"modes":null,
-		"flags": "",
-		"tags":null
-	}
-	
-	if op_name in DATA.OP:
-		var op = DATA.OP[op_name]
-		opi.name = op.name
-		opi.category = op.category
-		opi.description = op.description
-		opi.flags = op.flags
-		opi.tags = []
-		opi.modes = {}
-		for i in range(0, op.tags.size()):
-			opi.tags.append(op.tags[i])
-		for mode in op.modes:
-			opi.modes[mode] = {
-				"opcode": op.modes[mode].opcode,
-				"opval": op.modes[mode].opval,
-				"bytes": op.modes[mode].bytes,
-				"cycles": op.modes[mode].cycles,
-				"pagecross": op.modes[mode].pagecross,
-				"success": op.modes[mode].success
+func get_instructions() -> Array:
+	return _INST.keys()
+
+func is_instruction(inst : String) -> bool:
+	return inst.to_lower() in _INST
+
+func instruction_has_address_mode(inst : String, addr_id : int) -> bool:
+	return get_instruction_code(inst, addr_id) >= 0
+
+func get_instruction_info(inst : String, addr_id : int = -1):
+	inst = inst.to_lower()
+	if inst in _INST:
+		if addr_id in _INST[inst].addr_modes:
+			var addr = _INST[inst].addr_modes[addr_id]
+			return {
+				"addr_name": addr.addr_name,
+				"code": addr.code,
+				"bytes": addr.bytes,
+				"cycles": addr.cycles,
+				"pagecross": addr.pagecross,
+				"success": addr.success
 			}
-	
-	return opi
+		else:
+			var info = _INST[inst]
+			var res = {
+				"name": info.name,
+				"category": info.category,
+				"description": info.description,
+				"addr_modes":[],
+				"flags": [],
+				"tags":[]
+			}
+			res.addr_modes = info.addr_modes.keys()
+			for f in info.flags:
+				res.flags.append(f)
+			for t in info.tags:
+				res.tags.append(t)
+			return res
+	return null
 
-func is_op(op_name : String) -> bool:
-	return op_name.to_upper() in DATA.OP
-
-func get_ops() -> Array:
-	return DATA.OP.keys()
-
-func op_has_mode(op_name : String, mode_id : int) -> bool:
-	return get_opcode_from_name_and_mode(op_name, mode_id) >= 0
-
-func get_categories() -> Array:
-	return DATA.CATEGORIES.keys()
-
-func get_ops_from_category(cat_name : String) -> Array:
-	var oplist = []
-	if cat_name in DATA.CATEGORIES:
-		for i in range(0, DATA.CATEGORIES[cat_name].size()):
-			oplist.append(DATA.CATEGORIES[cat_name][i])
-	return oplist
-
-func get_modeinfo_from_code(code : int) -> Dictionary:
-	if code >= 0 and code < CODE_LIST.size():
-		if CODE_LIST[code] != null:
-			return CODE_LIST[code]
-	return {"op":""}
-
-func get_op_cycles(code : int) -> int:
-	if code >= 0 and code < CODE_LIST.size():
-		if CODE_LIST[code] != null:
-			return CODE_LIST[code].cycles
-	return 2
-
-func get_op_bytes(code : int) -> int:
-	if code >= 0 and code < CODE_LIST.size():
-		if CODE_LIST[code] != null:
-			return CODE_LIST[code].bytes
-	return 1
-
-func get_op_mode_id(code : int) -> int:
-	if code >= 0 and code < CODE_LIST.size():
-		if CODE_LIST[code] != null:
-			return CODE_LIST[code].mode_id
+func get_instruction_code(inst : String, addr_id : int) -> int:
+	inst = inst.to_lower()
+	if inst in _INST and addr_id in _INST[inst].addr_modes:
+		return _INST[inst].addr_modes[addr_id].code
 	return -1
 
-func get_op_asm_name(code : int) -> String:
-	if code >= 0 and code < CODE_LIST.size():
-		if CODE_LIST[code] != null:
-			return CODE_LIST[code].op
+func get_instruction_bytes(inst : String, addr_id : int) -> int:
+	inst = inst.to_lower()
+	if inst in _INST and addr_id in _INST[inst].addr_modes:
+		return _INST[inst].addr_modes[addr_id].bytes
+	return -1
+
+func get_inst_code_bytes(code : int) -> int:
+	if code in _INST_CODES:
+		var inst = _INST_CODES[code].inst
+		var addr = _INST_CODES[code].addr
+		return _INST[inst].addr_modes[addr].bytes
+	return -1
+
+func get_instruction_cycles(inst : String, addr_id : int) -> Array:
+	inst = inst.to_lower()
+	if inst in _INST and addr_id in _INST[inst].addr_modes:
+		return [
+			_INST[inst].addr_modes[addr_id].cycles,
+			_INST[inst].addr_modes[addr_id].pagecross,
+			_INST[inst].addr_modes[addr_id].success
+		]
+	return [-1,0,0]
+
+func get_inst_code_cycles(code : int) -> Array:
+	if code in _INST_CODES:
+		var inst = _INST_CODES[code].inst
+		var addr = _INST_CODES[code].addr
+		return [
+			_INST[inst].addr_modes[addr].cycles,
+			_INST[inst].addr_modes[addr].pagecross,
+			_INST[inst].addr_modes[addr].success
+		]
+	return [-1,0,0]
+
+func is_inst_code_valid(code : int) -> bool:
+	return code in _INST_CODES
+
+func get_inst_code_name(code : int) -> String:
+	if code in _INST_CODES:
+		return _INST_CODES[code].inst
 	return ""
 
-func get_opcodes_by_tag(tag : String) -> Array:
-	var opcodes = []
-	if tag in DATA.TAGS:
-		for i in range(0, DATA.TAGS[tag].size()):
-			opcodes.append(DATA.TAGS[tag][i])
-	return opcodes
-
-func get_opcodes_by_tags(tags : Array) -> Array:
-	var opcodes = []
-	if tags.size() > 0:
-		opcodes = get_opcodes_by_tag(tags[0])
-		if tags.size() > 1:
-			for i in range(1, tags.size()):
-				var ctags = opcodes
-				var ntags = get_opcodes_by_tag(tags[i])
-				opcodes = []
-				if ntags.size() > 0:
-					for c in range(0, ctags.size()):
-						if ntags.find(ctags[c]) >= 0:
-							opcodes.append(ctags[c])
-				if opcodes.size() <= 0:
-					break;
-	
-	return opcodes
-
-func get_opcode_from_name_and_mode(op : String, mode : int) -> int:
-	op = op.to_upper()
-	if op in DATA.OP:
-		var mode_name = get_mode_name_from_ID(mode)
-		if mode_name in DATA.OP[op].modes:
-			return DATA.OP[op].modes[mode_name].opval
+func get_inst_code_mode(code : int) -> int:
+	if code in _INST_CODES:
+		return _INST_CODES[code].addr
 	return -1
 
-func get_mode_id_from_name(mode_name : String) -> int:
+func get_inst_code_info(code : int):
+	if code in _INST_CODES:
+		return get_instruction_info(_INST_CODES[code].inst, _INST_CODES[code].addr)
+	return null
+
+func get_addr_mode_name(addr_id : int) -> String:
+	if addr_id >= 0 and addr_id < MODE_NAMES.size():
+		return MODE_NAMES[addr_id]
+	return ""
+
+func get_addr_mode_id(addr_name : String) -> int:
 	for i in range(MODE_NAMES.size()):
-		if MODE_NAMES[i] == mode_name:
+		if MODE_NAMES[i] == addr_name:
 			return i
 	return -1
 
-func get_mode_name_from_ID(mode_id : int) -> String:
-	if mode_id >= 0 and mode_id < MODE_NAMES.size():
-		return MODE_NAMES[mode_id]
-	return ""
+func get_instructions_by_address_mode(addr_id : int) -> Array:
+	return _ADDR_MODES.keys()
+
+func get_instruction_categories() -> Array:
+	return _CATEGORIES.keys()
+
+func get_category_instructions(category : String) -> Array:
+	var instlist = []
+	if category in _CATEGORIES:
+		for inst in _CATEGORIES[category]:
+			instlist.append(inst)
+	return instlist
+
+func get_instruction_tags() -> Array:
+	return _TAGS.keys()
+
+func get_instructions_by_tag(tag : String) -> Array:
+	var instlist = []
+	if tag in _TAGS:
+		for inst in _TAGS[tag]:
+			instlist.append(inst)
+	return instlist
+
+func get_instructions_by_tags(taglist : Array) -> Array:
+	var instlist = []
+	for tag in taglist:
+		var nlist = get_instructions_by_tag(tag)
+		for ins in nlist:
+			if instlist.find(ins) < 0:
+				instlist.append(ins)
+	return instlist
+

@@ -164,21 +164,21 @@ func _ProcessAssignment(node : Dictionary) -> void:
 func _ProcessInstruction(node : Dictionary):
 	var inst = null
 	match node.addr:
-		GASM.MODES.IMP, GASM.MODES.ACC:
+		GASM.MODE.IMP, GASM.MODE.ACC:
 			inst = _ProcessAddrIMP(node)
-		GASM.MODES.IMM:
+		GASM.MODE.IMM:
 			inst = _ProcessAddrIMM(node)
-		GASM.MODES.IND:
+		GASM.MODE.IND:
 			inst = _ProcessAddrIND(node)
-		GASM.MODES.INDX, GASM.MODES.INDY:
+		GASM.MODE.INDX, GASM.MODE.INDY:
 			inst = _ProcessAddrINDXY(node)
-		GASM.MODES.ABS:
-			if GASM.op_has_mode(node.inst, GASM.MODES.REL):
+		GASM.MODE.ABS:
+			if GASM.instruction_has_address_mode(node.inst, GASM.MODE.REL):
 				inst = _ProcessAddrIMM(node) # Immediate mode also handles Relative mode. BECAUSE I SAID SO!
 			else:
 				# This handles Zero Page if value is or under 0xFF
 				inst = _ProcessAddrABS(node)
-		GASM.MODES.ABSX, GASM.MODES.ABSY:
+		GASM.MODE.ABSX, GASM.MODE.ABSY:
 			inst = _ProcessABSXY(node)
 
 	if inst != null:
@@ -187,10 +187,10 @@ func _ProcessInstruction(node : Dictionary):
 
 func _ProcessAddrIMP(node : Dictionary):
 	var inst = {"data":[], "line":node.line, "col":node.col}
-	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
-			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_addr_mode_name(node.addr),
 			node.line, node.col
 		)
 		return null
@@ -200,12 +200,12 @@ func _ProcessAddrIMP(node : Dictionary):
 func _ProcessAddrIMM(node : Dictionary):
 	var relmode = false
 	var inst = {"data":[], "line":node.line, "col":node.col}
-	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
-		op = GASM.get_opcode_from_name_and_mode(node.inst, GASM.MODES.REL)
+		op = GASM.get_instruction_code(node.inst, GASM.MODE.REL)
 		if op < 0:
 			_StoreError(
-				"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+				"Instruction '" + node.inst + "' does not support mode " + GASM.get_addr_mode_name(node.addr),
 				node.line, node.col
 			)
 			return null
@@ -245,8 +245,8 @@ func _ProcessAddrABS(node : Dictionary):
 		return null
 	
 	var op = -1
-	if val <= 0xFF and GASM.op_has_mode(node.inst, GASM.MODES.ZP):
-		op = GASM.get_opcode_from_name_and_mode(node.inst, GASM.MODES.ZP)
+	if val <= 0xFF and GASM.instruction_has_address_mode(node.inst, GASM.MODE.ZP):
+		op = GASM.get_instruction_code(node.inst, GASM.MODE.ZP)
 		inst.data.append(op)
 		inst.data.append(val & 0xFF)
 		return inst
@@ -255,10 +255,10 @@ func _ProcessAddrABS(node : Dictionary):
 		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
 		return null
 		
-	op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
-			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_addr_mode_name(node.addr),
 			node.line, node.col
 		)
 		return null
@@ -268,7 +268,7 @@ func _ProcessAddrABS(node : Dictionary):
 	return inst
 
 func _ProcessABSXY(node : Dictionary):
-	var ZPT = GASM.MODES.ZPX if node.addr == GASM.MODES.ABSX else GASM.MODES.ZPY 
+	var ZPT = GASM.MODE.ZPX if node.addr == GASM.MODE.ABSX else GASM.MODE.ZPY 
 	var inst = {"data":[], "line":node.line, "col":node.col}
 	
 	var val = _ProcessNode(node.value)
@@ -280,8 +280,8 @@ func _ProcessABSXY(node : Dictionary):
 		return null
 	
 	var op = -1
-	if val <= 0xFF and GASM.op_has_mode(node.inst, ZPT):
-		op = GASM.get_opcode_from_name_and_mode(node.inst, ZPT)
+	if val <= 0xFF and GASM.instruction_has_address_mode(node.inst, ZPT):
+		op = GASM.get_instruction_code(node.inst, ZPT)
 		inst.data.append(op)
 		inst.data.append(val & 0xFF)
 		return inst
@@ -290,10 +290,10 @@ func _ProcessABSXY(node : Dictionary):
 		_StoreError("Instruction value out of bounds.", node.value.line, node.value.col)
 		return null
 		
-	op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
-			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_addr_mode_name(node.addr),
 			node.line, node.col
 		)
 		return null
@@ -304,10 +304,10 @@ func _ProcessABSXY(node : Dictionary):
 
 func _ProcessAddrIND(node : Dictionary):
 	var inst = {"data":[], "line":node.line, "col":node.col}
-	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
-			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_addr_mode_name(node.addr),
 			node.line, node.col
 		)
 		return null
@@ -328,10 +328,10 @@ func _ProcessAddrIND(node : Dictionary):
 
 func _ProcessAddrINDXY(node : Dictionary):
 	var inst = {"data":[], "line":node.line, "col":node.col}
-	var op = GASM.get_opcode_from_name_and_mode(node.inst, node.addr)
+	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
-			"Instruction '" + node.inst + "' does not support mode " + GASM.get_mode_name_from_ID(node.addr),
+			"Instruction '" + node.inst + "' does not support mode " + GASM.get_addr_mode_name(node.addr),
 			node.line, node.col
 		)
 		return null
