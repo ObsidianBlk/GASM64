@@ -506,7 +506,13 @@ func _ParseByteDirective(directive : String):
 	else:
 		vals = _ParseDelimited(-1, -1, Lexer.TOKEN.COMMA, "_ParseAtom")
 	if vals != null:
-		return {"type": ASTNODE.DIRECTIVE, "directive": directive, "values": vals}
+		return {
+			"type": ASTNODE.DIRECTIVE,
+			"directive": directive,
+			"values": vals,
+			"line": token.line,
+			"col": token.col
+			}
 	return null
 
 func _ParseTextDirective(directive : String):
@@ -521,7 +527,13 @@ func _ParseTextDirective(directive : String):
 			if v.type != ASTNODE.STRING:
 				_StoreError("Expected a string literal.", v.line, v.col)
 				return null
-		return {"type": ASTNODE.DIRECTIVE, "directive": directive, "values": vals}
+		return {
+			"type": ASTNODE.DIRECTIVE,
+			"directive": directive,
+			"values": vals,
+			"line": token.line,
+			"col": token.col
+		}
 	return null
 
 func _ParseFillDirective():
@@ -535,7 +547,13 @@ func _ParseFillDirective():
 		val = _ParseAtom()
 		if val == null:
 			return null
-	return {"type": ASTNODE.DIRECTIVE, "directive":".fill", "value": val, "bytes": amount}
+	return {
+		"type": ASTNODE.DIRECTIVE,
+		"directive":".fill",
+		"value": val,
+		"bytes": amount,
+		"line": token.line,
+		"col": token.col}
 
 func _ParseDirectives():
 	var token = _ConsumeToken()

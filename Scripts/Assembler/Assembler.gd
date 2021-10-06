@@ -62,7 +62,7 @@ func _ProcessNode(node : Dictionary):
 		Parser.ASTNODE.INST:
 			return _ProcessInstruction(node)
 		Parser.ASTNODE.DIRECTIVE:
-			pass
+			return _ProcessDirective(node)
 	return null
 
 func _ProcessBlock(node : Dictionary):
@@ -348,6 +348,99 @@ func _ProcessAddrINDXY(node : Dictionary):
 	inst.data.append(val & 0xFF)
 	return inst
 
+func _ProcessDirective(node : Dictionary):
+	match node.directive:
+		".bytes":
+			return _ProcessDirBytes(node)
+		".dbytes", ".words":
+			return _ProcessDirWords(node)
+		".text", ".ascii":
+			return _ProcessDirText(node)
+		".import":
+			return _ProcessDirImport(node)
+		".fill":
+			return _ProcessDirFill(node)
+	return null
+
+func _ProcessDirBytes(node : Dictionary):
+	var res = {"data":[], "line":node.line, "col":node.col}
+	for v in node.values:
+		var val = _ProcessNode(v)
+		if typeof(val) != TYPE_INT:
+			_StoreError("Directive '.bytes' expects all values to evaluate to NUMBERS.", v.line, v.col)
+			return null
+		res.data.append(val)
+	return res
+
+func _ProcessDirWords(node : Dictionary):
+	var dbytes = node.directive == ".dbytes"
+	var res = {"data":[], "line":node.line, "col":node.col}
+	for v in node.values:
+		var val = _ProcessNode(v)
+		if typeof(val) != TYPE_INT:
+			_StoreError("Directive '{dir}' expects all values to evaluate to NUMBERS.".format({"dir": node.directive}), v.line, v.col)
+			return null
+		if dbytes:
+			res.data.append((val & 0xFF00) >> 8)
+			res.data.append(val & 0xFF)
+		else:
+			res.data.append(val & 0xFF)
+			res.data.append((val & 0xFF00) >> 8)
+	return res
+
+func _ProcessDirText(node : Dictionary):
+	var res = {"data":[], "line":node.line, "col":node.col}
+	for v in node.values:
+		var val = _ProcessNode(v)
+		if typeof(val) != TYPE_STRING:
+			_StoreError("Directive '{dir}' expects all values to evaluate to STRINGS.".format({"dir": node.directive}), v.line, v.col)
+			return null
+		for i in range(val.length()):
+			var cord = val.ord_at(i)
+			if cord >= 0 and cord <= 0xFF:
+				res.data.append(cord)
+			else:
+				res.data.append(32) # TODO: Do I really want to put a default "space" character here??!?!
+	return res
+
+func _ProcessDirFill(node : Dictionary):
+	var res = {"data":[], "line":node.line, "col":node.col}
+	var bytes = _ProcessNode(node.bytes)
+	if typeof(bytes) != TYPE_INT:
+		_StoreError("Directive '{dir}' expected byte count argument as NUMBER.".format({"dir": node.directive}), node.bytes.line, node.bytes.col)
+		return null
+	var val = 0
+	if node.value != null:
+		val = _ProcessNode(node.value)
+		if typeof(bytes) != TYPE_INT:
+			_StoreError("Directive '{dir}' expected value argument as NUMBER.".format({"dir": node.directive}), node.value.line, node.value.col)
+			return null
+		if val > 0xFF:
+			_StoreError("Directive '{dir}' value argument out of bounds.".format({"dir": node.directive}), node.value.line, node.value.col)
+			return null
+	for _i in range(bytes):
+		res.data.append(val)
+	return res
+
+func _ProcessDirImport(node : Dictionary):
+	var res = {"asm":null, "line":node.line, "col":node.col}
+	var paths = []
+	for v in node.values:
+		var path = _ProcessNode(v)
+		if typeof(path) != TYPE_STRING:
+			_StoreError("Directive '{dir}' expects all values to evaluate to STRINGS.".format({"dir": node.directive}), v.line, v.col)
+			return null
+		paths.append(path)
+	if paths.size() > 0:
+		var asms = []
+		for path in paths:
+			# TODO: Handle GASM project methodology then come back to me!
+			pass
+		if _errors.size() <= 0 and asms.size() > 0:
+			res.asm = asms
+			return res
+	return null
+
 # ----------------------------------------------------------------------------
 # Public Methods
 # ----------------------------------------------------------------------------
@@ -391,9 +484,9 @@ func print_binary(across : int = 8) -> void:
 			print(line)
 			line = ""
 		if line == "":
-			line += Utils.int_to_hex(bin[i])
+			line += Utils.int_to_hex(bin[i], 2)
 		else:
-			line += " " + Utils.int_to_hex(bin[i])
+			line += " " + Utils.int_to_hex(bin[i], 2)
 	if line != "":
 		print(line)
 

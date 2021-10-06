@@ -35,7 +35,7 @@ func int_to_hex(v : int, minlen : int = 0) -> String:
 	var s = sign(v)
 	v = abs(v)
 	var hex = ""
-	while v > 0:
+	while hex == "" or v > 0:
 		var code = v & 0xF
 		match code:
 			10:
@@ -72,6 +72,6 @@ func binary_to_int(v : String) -> int:
 		if c == "1":
 			val += pow(2, ex)
 		ex -= 1
-	return val
+	return int(val)
 
 

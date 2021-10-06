@@ -19,16 +19,16 @@ func set_op_code(c : int) -> void:
 	if c >= 0 and c < 256:
 		op_code = c
 		if ready:
-			var cinfo = GASM.get_modeinfo_from_code(c)
-			if cinfo.op != "":
+			var cinfo = GASM.get_inst_code_info(c)
+			if cinfo != null:
 				info_node.visible = true
 				opmode_node.visible = true
 				sep_node.visible = true
 				code_node.visible = true
 				
-				opname_node.text = cinfo.op
-				opmode_node.text = GASM.get_mode_name_from_ID(cinfo.mode_id)
-				code_node.text = cinfo.opcode
+				opname_node.text = GASM.get_inst_code_name(c)
+				opmode_node.text = cinfo.addr_name
+				code_node.text = Utils.int_to_hex(c)
 				bytes_node.text = String(cinfo.bytes)
 				cycles_node.text = String(cinfo.cycles)
 			else:

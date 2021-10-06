@@ -41,7 +41,7 @@ func _UpdateSyntaxColors() -> void:
 	var commentColor = get_color("selection_color")
 	#if not funcColor:
 	#	funcColor = color_instruction
-	var ops = GASM.get_ops()
+	var ops = GASM.get_instructions()
 	for op in ops:
 		add_keyword_color(op.to_lower(), funcColor)
 		add_keyword_color(op.to_upper(), funcColor)
