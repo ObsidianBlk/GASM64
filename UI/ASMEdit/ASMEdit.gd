@@ -76,8 +76,11 @@ func get_color(name : String, node_type : String = "") -> Color:
 func _on_source_change() -> void:
 	var src = codeeditor_node.text
 	var assem = Assembler.new()
-	assem.process(src)
-	print(assem.get_binary)
+	if assem.process(src):
+		assem.print_binary()
+	else:
+		assem.print_errors()
+	#print(assem.get_binary())
 #	var lex = Lexer.new(src)
 #	if lex.is_valid():
 #		var parser = Parser.new(lex)

@@ -22,6 +22,8 @@ func _init(parent : Assembler = null, ast : Dictionary = {}) -> void:
 		_env = _parent.get_child_environment()
 		if ast != {}:
 			_Compile(ast)
+	else:
+		_env = Environ.new()
 
 
 # ----------------------------------------------------------------------------
@@ -380,4 +382,51 @@ func get_binary() -> PoolByteArray:
 			if "data" in item:
 				data.append_array(item.data)
 	return PoolByteArray(data)
+
+func print_binary(across : int = 8) -> void:
+	var bin : PoolByteArray = get_binary()
+	var line : String = ""
+	for i in range(bin.size()):
+		if i % across == 0 and line != "":
+			print(line)
+			line = ""
+		if line == "":
+			line += Utils.int_to_hex(bin[i])
+		else:
+			line += " " + Utils.int_to_hex(bin[i])
+	if line != "":
+		print(line)
+
+func error_count() -> int:
+	if _lexer and not _lexer.is_valid():
+		return 1
+	elif _parser and not _parser.is_valid():
+		return _parser.error_count()
+	return _errors.size()
+
+func get_error(idx : int):
+	if _lexer and not _lexer.is_valid():
+		var err = _lexer.get_error_token()
+		return {"type":"LEXER", "msg": err.msg, "line": err.line, "col": err.col}
+	elif _parser and not _parser.is_valid():
+		var err = _parser.get_error(idx)
+		return {"type":"PARSER", "msg": err.msg, "line": err.line, "col": err.col}
+	elif _errors.size() > 0:
+		var err = null
+		if idx >= 0 and idx < _errors.size():
+			err = _errors[idx]
+		if err == null:
+			err = _errors[0]
+		return {"type":"ASSEMBLER", "msg": err.msg, "line": err.line, "col": err.col}
+	return null
+
+func print_error(idx : int) -> void:
+	if error_count() > 0:
+		var err = get_error(idx)
+		print(err.type, " ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
+
+func print_errors() -> void:
+	for i in range(error_count()):
+		print_error(i)
+
 

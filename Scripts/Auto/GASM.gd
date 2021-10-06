@@ -244,7 +244,7 @@ func get_opcodes_by_tags(tags : Array) -> Array:
 	return opcodes
 
 func get_opcode_from_name_and_mode(op : String, mode : int) -> int:
-	op = op.to_lower()
+	op = op.to_upper()
 	if op in DATA.OP:
 		var mode_name = get_mode_name_from_ID(mode)
 		if mode_name in DATA.OP[op].modes:

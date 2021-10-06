@@ -350,14 +350,14 @@ func _ParseInstruction():
 	return null
 
 
-func _AddrImplied():
+func _AddrImplied(ignore_errors : bool = false):
 	var token = _PeekToken()
 	if token.type == Lexer.TOKEN.EOL:
 		return {"addr":GASM.MODES.IMP}
 	elif token.type == Lexer.TOKEN.LABEL and token.symbol.to_lower() == "a":
 		_ConsumeToken()
 		return {"addr":GASM.MODES.ACC}
-	else:
+	elif not ignore_errors:
 		_StoreError("Unexpected token " + _lexer.get_token_name(token.type) + ".", token.line, token.col)
 	return null
 
@@ -485,7 +485,7 @@ func _Addressing():
 		Lexer.TOKEN.NUMBER:
 			return _AddrAbs()
 		Lexer.TOKEN.LABEL:
-			var node = _AddrImplied() # This will check for "Accumulator" addressing
+			var node = _AddrImplied(true) # This will check for "Accumulator" addressing
 			if node != null or _errors.size() > 0:
 				return node
 			
@@ -578,7 +578,7 @@ func _MaybeBinary(ltok, pres : int):
 				return null
 			var operator = _BinarySymbol(tok.type)
 			return _MaybeBinary({
-				"Type": ASTNODE.ASSIGNMENT if tok.type == Lexer.TOKEN.ASSIGN else ASTNODE.BINARY,
+				"type": ASTNODE.ASSIGNMENT if tok.type == Lexer.TOKEN.ASSIGN else ASTNODE.BINARY,
 				"op": operator,
 				"left": ltok,
 				"right": rtok,
