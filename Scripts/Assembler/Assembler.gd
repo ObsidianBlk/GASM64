@@ -8,7 +8,6 @@ var _parent : Assembler = null
 var _env : Environ = null
 var _lexer : Lexer = null
 var _parser : Parser = null
-var _initpc : int = 0
 
 var _compiled = null
 var _errors = []
@@ -75,7 +74,11 @@ func _ProcessBlock(node : Dictionary):
 		var e = _ProcessNode(ex)
 		if _errors.size() <= 0:
 			if typeof(e) == TYPE_DICTIONARY:
-				block.elements.append(e)
+				if "elements" in e:
+					for item in e.elements:
+						block.elements.append(item)
+				else:
+					block.elements.append(e)
 		else:
 			return null
 	return block
@@ -186,7 +189,7 @@ func _ProcessInstruction(node : Dictionary):
 	return inst
 
 func _ProcessAddrIMP(node : Dictionary):
-	var inst = {"data":[], "line":node.line, "col":node.col}
+	var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
@@ -199,7 +202,7 @@ func _ProcessAddrIMP(node : Dictionary):
 
 func _ProcessAddrIMM(node : Dictionary):
 	var relmode = false
-	var inst = {"data":[], "line":node.line, "col":node.col}
+	var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		op = GASM.get_instruction_code(node.inst, GASM.MODE.REL)
@@ -234,7 +237,7 @@ func _ProcessAddrIMM(node : Dictionary):
 
 
 func _ProcessAddrABS(node : Dictionary):
-	var inst = {"data":[], "line":node.line, "col":node.col}
+	var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	
 	var val = _ProcessNode(node.value)
 	if typeof(val) != TYPE_INT:
@@ -269,7 +272,7 @@ func _ProcessAddrABS(node : Dictionary):
 
 func _ProcessABSXY(node : Dictionary):
 	var ZPT = GASM.MODE.ZPX if node.addr == GASM.MODE.ABSX else GASM.MODE.ZPY 
-	var inst = {"data":[], "line":node.line, "col":node.col}
+	var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	
 	var val = _ProcessNode(node.value)
 	if typeof(val) != TYPE_INT:
@@ -303,7 +306,7 @@ func _ProcessABSXY(node : Dictionary):
 	return inst
 
 func _ProcessAddrIND(node : Dictionary):
-	var inst = {"data":[], "line":node.line, "col":node.col}
+	var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
@@ -327,7 +330,7 @@ func _ProcessAddrIND(node : Dictionary):
 
 
 func _ProcessAddrINDXY(node : Dictionary):
-	var inst = {"data":[], "line":node.line, "col":node.col}
+	var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(
@@ -363,18 +366,20 @@ func _ProcessDirective(node : Dictionary):
 	return null
 
 func _ProcessDirBytes(node : Dictionary):
-	var res = {"data":[], "line":node.line, "col":node.col}
+	var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	for v in node.values:
 		var val = _ProcessNode(v)
 		if typeof(val) != TYPE_INT:
 			_StoreError("Directive '.bytes' expects all values to evaluate to NUMBERS.", v.line, v.col)
 			return null
 		res.data.append(val)
+	if res.data.size() > 0:
+		_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirWords(node : Dictionary):
 	var dbytes = node.directive == ".dbytes"
-	var res = {"data":[], "line":node.line, "col":node.col}
+	var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	for v in node.values:
 		var val = _ProcessNode(v)
 		if typeof(val) != TYPE_INT:
@@ -386,10 +391,12 @@ func _ProcessDirWords(node : Dictionary):
 		else:
 			res.data.append(val & 0xFF)
 			res.data.append((val & 0xFF00) >> 8)
+	if res.data.size() > 0:
+		_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirText(node : Dictionary):
-	var res = {"data":[], "line":node.line, "col":node.col}
+	var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	for v in node.values:
 		var val = _ProcessNode(v)
 		if typeof(val) != TYPE_STRING:
@@ -401,10 +408,12 @@ func _ProcessDirText(node : Dictionary):
 				res.data.append(cord)
 			else:
 				res.data.append(32) # TODO: Do I really want to put a default "space" character here??!?!
+	if res.data.size() > 0:
+		_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirFill(node : Dictionary):
-	var res = {"data":[], "line":node.line, "col":node.col}
+	var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var bytes = _ProcessNode(node.bytes)
 	if typeof(bytes) != TYPE_INT:
 		_StoreError("Directive '{dir}' expected byte count argument as NUMBER.".format({"dir": node.directive}), node.bytes.line, node.bytes.col)
@@ -420,10 +429,12 @@ func _ProcessDirFill(node : Dictionary):
 			return null
 	for _i in range(bytes):
 		res.data.append(val)
+	if res.data.size() > 0:
+		_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirImport(node : Dictionary):
-	var res = {"asm":null, "line":node.line, "col":node.col}
+	var res = {"asm":null, "line":node.line, "col":node.col, "PC":_env.PC()}
 	var paths = []
 	for v in node.values:
 		var path = _ProcessNode(v)
@@ -467,6 +478,31 @@ func process(source : String) -> bool:
 
 func get_object():
 	return _compiled;
+
+func get_binary_line(idx : int) -> Dictionary:
+	if _compiled:
+		for item in _compiled.elements:
+			if item.line == idx:
+				return {
+					"addr": item.PC,
+					"line": idx,
+					"data": PoolByteArray(item.data)
+				}
+	return {"addr": -1, "line": 0, "data": null}
+
+func get_binary_lines(start : int, end :int) -> Array:
+	var lines = []
+	if _compiled and start >= 0 and end >= start:
+		if start == end:
+			return [get_binary_line(start)]
+		for item in _compiled.elements:
+			if item.line >= start and item.line <= end:
+				lines.append({
+					"addr": item.PC,
+					"line": item.line,
+					"data": PoolByteArray(item.data)
+				})
+	return lines
 
 func get_binary() -> PoolByteArray:
 	var data = []

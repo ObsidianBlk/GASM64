@@ -30,7 +30,7 @@ onready var codeeditor_node = get_node("Editor/CodeEditor")
 # ---------------------------------------------------------------------------
 func _ready() -> void:
 	dataview_node.available_lines = 10
-	dataview_node.set_line(0, 0x8000, PoolByteArray([255, 110, 96]))
+	#dataview_node.set_line(0, 0x8000, PoolByteArray([255, 110, 96]))
 	
 	codeeditor_node.connect("source_change", self, "_on_source_change")
 
@@ -69,6 +69,31 @@ func get_color(name : String, node_type : String = "") -> Color:
 		return codeeditor_node.get_color(name)
 	return .get_color(name)
 
+func get_visible_top_line_index() -> int:
+	if codeeditor_node:
+		var font = codeeditor_node.get_font("font")
+		if font:
+			if font is DynamicFont:
+				return int(floor(codeeditor_node.scroll_vertical / font.size))
+			if font is BitmapFont:
+				return int(floor(codeeditor_node.scroll_vertical / font.height))
+	return 0
+
+func get_visible_line_count() -> int:
+	var cerect = codeeditor_node.get_rect()
+	var font = codeeditor_node.get_font("font")
+	if font:
+		if font is DynamicFont:
+			return int(floor(cerect.size.y / font.size))
+		if font is BitmapFont:
+			return int(floor(cerect.size.y / font.height))
+	return 0
+
+func get_line_count() -> int:
+	if codeeditor_node:
+		return codeeditor_node.get_line_count()
+	return 0
+
 # ---------------------------------------------------------------------------
 # Handler Methods
 # ---------------------------------------------------------------------------
@@ -77,7 +102,14 @@ func _on_source_change() -> void:
 	var src = codeeditor_node.text
 	var assem = Assembler.new()
 	if assem.process(src):
-		assem.print_binary()
+		var s = get_visible_top_line_index()
+		var e = s + get_visible_line_count()
+		if dataview_node:
+			dataview_node.clear()
+			var lines = assem.get_binary_lines(s, e)
+			for line in lines:
+				dataview_node.set_line(line.line, line.addr, line.data)
+		#assem.print_binary()
 	else:
 		assem.print_errors()
 	#print(assem.get_binary())
