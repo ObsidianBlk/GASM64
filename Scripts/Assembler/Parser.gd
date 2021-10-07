@@ -524,7 +524,7 @@ func _ParseTextDirective(directive : String):
 		vals = _ParseDelimited(-1, -1, Lexer.TOKEN.COMMA, "_ParseAtom")
 	if vals != null:
 		for v in vals:
-			if v.type != ASTNODE.STRING:
+			if v.type != ASTNODE.STRING and v.type != ASTNODE.LABEL:
 				_StoreError("Expected a string literal.", v.line, v.col)
 				return null
 		return {

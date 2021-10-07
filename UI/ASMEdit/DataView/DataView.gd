@@ -85,10 +85,11 @@ func _UpdateCmdLines() -> void:
 # -----------------------------------------------------------------------------
 func clear() -> void:
 	for i in range(_mclines.size()):
-		set_line(i)
+		_mclines[i].clear_line()
 
 func clear_line(idx : int) -> void:
-	set_line(idx)
+	if idx >= 0 and idx < _mclines.size():
+		_mclines[idx].clear_line()
 
 func set_available_lines_to_height(height : int) -> void:
 	var mclheight = 0
@@ -110,18 +111,18 @@ func set_available_lines_to_height(height : int) -> void:
 		set_available_lines(0)
 
 
-func set_line(idx : int, cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
+func set_line(idx : int, addr : int, data : PoolByteArray) -> void:
 	if idx >= 0 and idx < _mclines.size():
-		_mclines[idx].set_line_bytes(cmd, byte1, byte2)
+		_mclines[idx].set_line(addr, data)
 
-func push_line_top(cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
-	for i in range(_mclines.size()-1, 0, -1):
-		_mclines[i].set_from_cmdline(_mclines[i-1])
-	_mclines[0].set_line_bytes(cmd, byte1, byte2) 
-
-func push_line_bottom(cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
-	for i in range(1, _mclines.size()):
-		_mclines[i-1].set_from_cmdline(_mclines[i])
-	_mclines[_mclines.size() - 1].set_line_bytes(cmd, byte1, byte2)
+#func push_line_top(cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
+#	for i in range(_mclines.size()-1, 0, -1):
+#		_mclines[i].set_from_cmdline(_mclines[i-1])
+#	_mclines[0].set_line_bytes(cmd, byte1, byte2) 
+#
+#func push_line_bottom(cmd : int = -1, byte1 : int = -1, byte2 : int = -1) -> void:
+#	for i in range(1, _mclines.size()):
+#		_mclines[i-1].set_from_cmdline(_mclines[i])
+#	_mclines[_mclines.size() - 1].set_line_bytes(cmd, byte1, byte2)
 
 

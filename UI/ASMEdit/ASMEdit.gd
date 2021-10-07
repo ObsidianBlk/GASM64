@@ -30,7 +30,7 @@ onready var codeeditor_node = get_node("Editor/CodeEditor")
 # ---------------------------------------------------------------------------
 func _ready() -> void:
 	dataview_node.available_lines = 10
-	dataview_node.set_line(0, 255, 110, 96)
+	dataview_node.set_line(0, 0x8000, PoolByteArray([255, 110, 96]))
 	
 	codeeditor_node.connect("source_change", self, "_on_source_change")
 
