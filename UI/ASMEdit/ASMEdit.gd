@@ -10,7 +10,7 @@ class_name ASMEdit
 # ---------------------------------------------------------------------------
 # Variables
 # ---------------------------------------------------------------------------
-
+var _assem : Assembler = null
 
 # ---------------------------------------------------------------------------
 # Onready Variables
@@ -29,16 +29,23 @@ onready var codeeditor_node = get_node("Editor/CodeEditor")
 # Override Methods
 # ---------------------------------------------------------------------------
 func _ready() -> void:
+	_assem = Assembler.new()
 	dataview_node.available_lines = 10
 	#dataview_node.set_line(0, 0x8000, PoolByteArray([255, 110, 96]))
 	
 	codeeditor_node.connect("source_change", self, "_on_source_change")
+	codeeditor_node.connect("visible_lines_change", self, "_on_visible_lines_change")
 
 
 # ---------------------------------------------------------------------------
 # Private Methods
 # ---------------------------------------------------------------------------
-
+func _UpdateDataView(start : int, end : int) -> void:
+	if dataview_node:
+		dataview_node.clear()
+		var lines = _assem.get_binary_lines(start, end)
+		for line in lines:
+			dataview_node.set_line(line.line - start, line.addr, line.data)
 
 # ---------------------------------------------------------------------------
 # Public Methods
@@ -71,12 +78,13 @@ func get_color(name : String, node_type : String = "") -> Color:
 
 func get_visible_top_line_index() -> int:
 	if codeeditor_node:
-		var font = codeeditor_node.get_font("font")
-		if font:
-			if font is DynamicFont:
-				return int(floor(codeeditor_node.scroll_vertical / font.size))
-			if font is BitmapFont:
-				return int(floor(codeeditor_node.scroll_vertical / font.height))
+		return codeeditor_node.scroll_vertical
+#		var font = codeeditor_node.get_font("font")
+#		if font:
+#			if font is DynamicFont:
+#				return int(floor(codeeditor_node.scroll_vertical / font.size))
+#			if font is BitmapFont:
+#				return int(floor(codeeditor_node.scroll_vertical / font.height))
 	return 0
 
 func get_visible_line_count() -> int:
@@ -100,31 +108,17 @@ func get_line_count() -> int:
 
 func _on_source_change() -> void:
 	var src = codeeditor_node.text
-	var assem = Assembler.new()
-	if assem.process(src):
-		var s = get_visible_top_line_index()
-		var e = s + get_visible_line_count()
-		if dataview_node:
-			dataview_node.clear()
-			var lines = assem.get_binary_lines(s, e)
-			for line in lines:
-				dataview_node.set_line(line.line, line.addr, line.data)
+	if _assem.process(src):
+		_UpdateDataView(
+			codeeditor_node.get_current_start_line(),
+			codeeditor_node.get_current_end_line()
+		)
 		#assem.print_binary()
 	else:
-		assem.print_errors()
-	#print(assem.get_binary())
-#	var lex = Lexer.new(src)
-#	if lex.is_valid():
-#		var parser = Parser.new(lex)
-#		if parser.is_valid():
-#			print(parser.get_ast())
-#		else:
-#			for i in range(parser.error_count()):
-#				print(parser.get_error(i))
-#	else:
-#		var err = lex.get_error_token()
-#		if err != null:
-#			print("ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
+		_assem.print_errors()
+
+func _on_visible_lines_change(start : int, end : int) -> void:
+	_UpdateDataView(start, end)
 
 func _on_CodeEditor_resized():
 	var cerect = codeeditor_node.get_rect()

@@ -468,7 +468,16 @@ func get_lexer() -> Lexer:
 		return _parent.get_lexer()
 	return _lexer
 
-func process(source : String) -> bool:
+func process(source : String, initial_PC : int = 0) -> bool:
+	if initial_PC < 0 or initial_PC > 0xFFFF:
+		_StoreError("Initial PC value is out of bounds.", 0, 0)
+		return false
+		
+	if _compiled != null:
+		_compiled = null
+		_env = Environ.new()
+	_env.PC(initial_PC)
+	
 	_lexer = Lexer.new(source)
 	if _lexer.is_valid():
 		_parser = Parser.new(_lexer)
