@@ -108,7 +108,7 @@ func get_line_count() -> int:
 
 func _on_source_change() -> void:
 	var src = codeeditor_node.text
-	if _assem.process(src):
+	if _assem.process_from_source(src):
 		_UpdateDataView(
 			codeeditor_node.get_current_start_line(),
 			codeeditor_node.get_current_end_line()

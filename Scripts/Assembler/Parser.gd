@@ -555,9 +555,26 @@ func _ParseFillDirective():
 		"line": token.line,
 		"col": token.col}
 
+func _ParseSegmentDirective():
+	var token = _PeekToken()
+	var val = _ParseAtom()
+	if val == null:
+		_StoreError("Directive '.segment' expects at least one EXPRESSION argument.", token.line, token.col)
+		return null
+	return {
+		"type": ASTNODE.DIRECTIVE,
+		"directive":".segment",
+		"value": val,
+		"line": token.line,
+		"col": token.col}
+
 func _ParseDirectives():
+	# TODO: Should I pass this token to all of the _Parse*Directive() methods?
+	# This token holds the true line/col position for the directive after all.
 	var token = _ConsumeToken()
 	match token.symbol:
+		".segment":
+			return _ParseSegmentDirective()
 		".bytes", ".words", ".dbytes":
 			return _ParseByteDirective(token.symbol)
 		".text", ".ascii", ".petsci", ".include":

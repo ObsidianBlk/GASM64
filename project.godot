@@ -89,6 +89,7 @@ config/icon="res://icon.png"
 
 GASM="*res://Scripts/Auto/GASM.gd"
 Utils="*res://Scripts/Auto/Utils.gd"
+GASM_Segment="*res://Scripts/Auto/GASM_Segment.gd"
 
 [display]
 
