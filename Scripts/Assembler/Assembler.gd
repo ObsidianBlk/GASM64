@@ -6,8 +6,6 @@ class_name Assembler
 # ----------------------------------------------------------------------------
 var _parent : Assembler = null
 var _env : Environ = null
-var _lexer : Lexer = null
-var _parser : Parser = null
 var _ast : Dictionary = {}
 
 var _errors = []
@@ -26,14 +24,15 @@ func _init(parent : Assembler = null, ast : Dictionary = {}) -> void:
 			_ast = ast
 			process()
 	else:
-		_env = Environ.new()
+		_env = Environ.new(Environ.new())
 
 
 # ----------------------------------------------------------------------------
-# Private Methods
+# Private Utility Methods
 # ----------------------------------------------------------------------------
-func _StoreError(msg : String, line : int, col : int) -> void:
+func _StoreError(msg : String, line : int, col : int, type : String = "ASSEMBLER") -> void:
 	_errors.append({
+		"type": type,
 		"msg": msg,
 		"line": line,
 		"col": col
@@ -50,9 +49,9 @@ func _init_default_segments() -> void:
 		else:
 			print("WARNING: 'Default' segment '", seg_name, "' has invalid starting address.")
 
-func _add_segment(seg_name : String, start_addr : int, bytes : int, auto_activate : bool = false) -> void:
+func _add_segment(seg_name : String, start : int, bytes : int, auto_activate : bool = false) -> void:
 	if not seg_name in _segments:
-		_segments[seg_name] = {"start": start_addr, "bytes": bytes, "data": [], "PC": start_addr}
+		_segments[seg_name] = {"start": start, "bytes": bytes, "data": [], "PC": 0}
 		if _active_segment == "" or auto_activate:
 			_active_segment = seg_name
 
@@ -60,6 +59,17 @@ func _add_segment(seg_name : String, start_addr : int, bytes : int, auto_activat
 func _activate_segment(seg_name : String) -> void:
 	if seg_name in _segments:
 		_active_segment = seg_name
+
+func _get_line_in_segment(seg_name : String, idx : int) -> Dictionary:
+	if seg_name in _segments:
+		for e in _segments[seg_name].data:
+			if e is Dictionary and e.line == idx:
+				return {
+					"addr": _segments[seg_name].start + e.PC,
+					"line": idx,
+					"data": PoolByteArray(e.data)
+				}
+	return {"addr": -1, "line": 0, "data": null}
 
 func _PC() -> int:
 	if _active_segment == "":
@@ -73,6 +83,10 @@ func _movePC(amount : int) -> void:
 		return
 	_segments[_active_segment].PC += amount
 
+
+# ----------------------------------------------------------------------------
+# Private Process Methods
+# ----------------------------------------------------------------------------
 
 func _ProcessNode(node : Dictionary):
 	match node.type:
@@ -558,29 +572,33 @@ func is_assembled() -> bool:
 func get_child_environment() -> Environ:
 	return Environ.new(_env)
 
-func get_parser() -> Parser:
-	if _parent != null:
-		return _parent.get_parser()
-	return _parser
-
-func get_lexer() -> Lexer:
-	if _parent != null:
-		return _parent.get_lexer()
-	return _lexer
 
 func process_from_source(source : String) -> bool:
-	_lexer = Lexer.new(source)
-	if _lexer.is_valid():
-		_parser = Parser.new(_lexer)
-		if _parser.is_valid():
-			_ast = _parser.get_ast()
+	_errors.clear()
+	
+	var lexer : Lexer = Lexer.new(source)
+	if lexer.is_valid():
+		var parser : Parser = Parser.new(lexer)
+		if parser.is_valid():
+			_ast = parser.get_ast()
 			return process()
+		else:
+			for idx in range(parser.error_count()):
+				var err = parser.get_error(idx)
+				_StoreError(err.msg, err.line, err.col, "PARSER")
+	else:
+		var err = lexer.get_error_token()
+		_StoreError(err.msg, err.line, err.col, "LEXER")
 	return false
 
 func process() -> bool:
+	_errors.clear()
+	
 	if not _ast.empty():
 		_init_default_segments()
 		_ProcessNode(_ast)
+		if _errors.size() <= 0:
+			return true
 	return false
 
 func get_object():
@@ -588,28 +606,19 @@ func get_object():
 	#return _compiled;
 
 func get_binary_line(idx : int) -> Dictionary:
-#	if _compiled:
-#		for item in _compiled.elements:
-#			if item.line == idx:
-#				return {
-#					"addr": item.PC,
-#					"line": idx,
-#					"data": PoolByteArray(item.data)
-#				}
+	for seg_name in _segments:
+		var line = _get_line_in_segment(seg_name, idx)
+		if line.data != null:
+			return line
 	return {"addr": -1, "line": 0, "data": null}
 
 func get_binary_lines(start : int, end :int) -> Array:
 	var lines = []
-#	if _compiled and start >= 0 and end >= start:
-#		if start == end:
-#			return [get_binary_line(start)]
-#		for item in _compiled.elements:
-#			if item.line >= start and item.line <= end:
-#				lines.append({
-#					"addr": item.PC,
-#					"line": item.line,
-#					"data": PoolByteArray(item.data)
-#				})
+	if start >= 0 and end >= start:
+		for i in range(start, end + 1):
+			var line = get_binary_line(i)
+			if line.data != null:
+				lines.append(line)
 	return lines
 
 func get_binary() -> PoolByteArray:
@@ -635,26 +644,16 @@ func print_binary(across : int = 8) -> void:
 		print(line)
 
 func error_count() -> int:
-	if _lexer and not _lexer.is_valid():
-		return 1
-	elif _parser and not _parser.is_valid():
-		return _parser.error_count()
 	return _errors.size()
 
 func get_error(idx : int):
-	if _lexer and not _lexer.is_valid():
-		var err = _lexer.get_error_token()
-		return {"type":"LEXER", "msg": err.msg, "line": err.line, "col": err.col}
-	elif _parser and not _parser.is_valid():
-		var err = _parser.get_error(idx)
-		return {"type":"PARSER", "msg": err.msg, "line": err.line, "col": err.col}
-	elif _errors.size() > 0:
-		var err = null
-		if idx >= 0 and idx < _errors.size():
-			err = _errors[idx]
-		if err == null:
-			err = _errors[0]
-		return {"type":"ASSEMBLER", "msg": err.msg, "line": err.line, "col": err.col}
+	if idx >= 0 and idx < _errors.size():
+		return {
+			"type": _errors[idx].type,
+			"msg": _errors[idx].msg,
+			"line": _errors[idx].line,
+			"col": _errors[idx].col
+		}
 	return null
 
 func print_error(idx : int) -> void:

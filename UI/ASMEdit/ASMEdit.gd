@@ -125,16 +125,16 @@ func _on_CodeEditor_resized():
 	if cerect.size.y < 5000:
 		dataview_node.set_available_lines_to_height(cerect.size.y)
 
-func _on_CodeEditor_line_change(line_num, line_text):
-	var lex = Lexer.new(line_text, line_num)
-	if lex.is_valid():
-		var parser = Parser.new(lex)
-		if parser.is_valid():
-			print(parser.get_ast())
-		else:
-			for i in range(parser.error_count()):
-				print(parser.get_error(i))
-	else:
-		var err = lex.get_error_token()
-		if err != null:
-			print("ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
+#func _on_CodeEditor_line_change(line_num, line_text):
+#	var lex = Lexer.new(line_text, line_num)
+#	if lex.is_valid():
+#		var parser = Parser.new(lex)
+#		if parser.is_valid():
+#			print(parser.get_ast())
+#		else:
+#			for i in range(parser.error_count()):
+#				print(parser.get_error(i))
+#	else:
+#		var err = lex.get_error_token()
+#		if err != null:
+#			print("ERROR [Line: ", err.line, ", Col: ", err.col, "]: ", err.msg)
