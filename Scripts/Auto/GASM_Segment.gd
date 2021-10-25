@@ -7,6 +7,7 @@ extends Node
 signal segment_created(seg_name, addr, size)
 signal segment_dropped(seg_name)
 signal segment_changed(seg_name, addr, size)
+signal segment_overlap(sega_name, segb_name, from_addr, size)
 
 
 # -------------------------------------------------------------------------
@@ -37,6 +38,11 @@ func _ready() -> void:
 func _SegmentNameValid(seg_name : String) -> bool:
 	return rx_varname.search(seg_name) != null
 
+func _EmitOverlaps(seg_name : String) -> void:
+	var overlaps = get_segment_overlaps(seg_name)
+	if overlaps.size() > 0:
+		for overlap in overlaps:
+			emit_signal("segment_overlap", overlap.segA, overlap.segB, overlap.start, overlap.size)
 
 # -------------------------------------------------------------------------
 # Public Methods
@@ -83,6 +89,7 @@ func set_segment(seg_name : String, start_page : int, size : int) -> void:
 			emit_signal("segment_created", seg_name, _SEG[seg_name].start, _SEG[seg_name].size)
 		else:
 			emit_signal("segment_changed", seg_name, _SEG[seg_name].start, _SEG[seg_name].size)
+		_EmitOverlaps(seg_name)
 
 
 func drop_segment(seg_name : String) -> void:
@@ -91,6 +98,36 @@ func drop_segment(seg_name : String) -> void:
 			_SEG.erase(seg_name)
 			emit_signal("segment_dropped", seg_name)
 
+func segments_overlap(segA : String, segB : String):
+	if segA != segB:
+		var bytes = _SEG[segA].bytes
+		var startA = _SEG[segA].start
+		var endA = (startA + bytes) - 1
+		
+		bytes = _SEG[segB].bytes
+		var startB = _SEG[segB].start
+		var endB = (startB + bytes) - 1
+		
+		if startA <= endB and endA >= startB:
+			var start = startA if startA >= startB else startB
+			var end = endA if endA <= endB else endB
+			return {"start": start, "size": (end - start)}
+	return null
+
+func get_segment_overlaps(seg_name : String) -> Array:
+	var overlaps = []
+	
+	for seg in _SEG:
+		if seg != seg_name:
+			var overlap = segments_overlap(seg_name, seg)
+			if overlap != null:
+				overlaps.append({
+					"segA": seg_name,
+					"segB": seg,
+					"start": overlap.start,
+					"size": overlap.size
+				})
+	return overlaps
 
 # -------------------------------------------------------------------------
 # Handler Methods

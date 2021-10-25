@@ -68,7 +68,7 @@ func _UpdateData() -> void:
 	var cc = cursor_get_column()
 	var line_count = get_line_count()
 	_UpdateVisibleLines(true)
-	if get_line_count() != _last_line_count:
+	if line_count != _last_line_count:
 		emit_signal("source_change")
 		_last_line_count = line_count
 	else:
