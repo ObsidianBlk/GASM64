@@ -63,6 +63,11 @@ _global_script_classes=[ {
 "class": "Parser",
 "language": "GDScript",
 "path": "res://Scripts/Assembler/Parser.gd"
+}, {
+"base": "Reference",
+"class": "Segments",
+"language": "GDScript",
+"path": "res://Scripts/Assembler/Segments.gd"
 } ]
 _global_script_class_icons={
 "ASMEdit": "",
@@ -75,7 +80,8 @@ _global_script_class_icons={
 "MCLine": "",
 "MemDevice": "",
 "Memory": "",
-"Parser": ""
+"Parser": "",
+"Segments": ""
 }
 
 [application]
