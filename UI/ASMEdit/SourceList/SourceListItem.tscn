@@ -1,0 +1,55 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://UI/ASMEdit/SourceList/SourceListItem.gd" type="Script" id=1]
+[ext_resource path="res://icons/godot/icon_file.png" type="Texture" id=2]
+
+[sub_resource type="StyleBoxLine" id=1]
+color = Color( 1, 1, 1, 0.12549 )
+
+[node name="SourceListItem" type="VBoxContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+size_flags_horizontal = 3
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Control" type="MarginContainer" parent="."]
+margin_right = 1920.0
+margin_bottom = 16.0
+mouse_filter = 1
+
+[node name="LBL" type="HBoxContainer" parent="Control"]
+margin_right = 1920.0
+margin_bottom = 16.0
+
+[node name="TextureRect" type="TextureRect" parent="Control/LBL"]
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 2 )
+
+[node name="Label" type="Label" parent="Control/LBL"]
+margin_left = 20.0
+margin_top = 1.0
+margin_right = 111.0
+margin_bottom = 15.0
+mouse_filter = 1
+text = "I'm a monkey!"
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+margin_right = 1920.0
+margin_bottom = 16.0
+mouse_filter = 1
+color = Color( 1, 1, 1, 0 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HSeparator" type="HSeparator" parent="."]
+margin_top = 20.0
+margin_right = 1920.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+custom_styles/separator = SubResource( 1 )

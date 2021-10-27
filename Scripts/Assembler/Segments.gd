@@ -72,9 +72,7 @@ func push_data_line(data : Array, owner_id : int, line : int, col : int) -> void
 			"line": line,
 			"col": col
 		})
-		var last = _segments[_active_segment].PC
 		_segments[_active_segment].PC += data.size()
-		print("Last PC: ", last, " | Current PC: ", _segments[_active_segment].PC)
 
 
 func find_line_in_segment(seg_name : String, owner_id : int, idx : int) -> Dictionary:

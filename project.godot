@@ -65,6 +65,11 @@ _global_script_classes=[ {
 "path": "res://Scripts/Assembler/Parser.gd"
 }, {
 "base": "Reference",
+"class": "Project",
+"language": "GDScript",
+"path": "res://Scripts/project.gd"
+}, {
+"base": "Reference",
 "class": "Segments",
 "language": "GDScript",
 "path": "res://Scripts/Assembler/Segments.gd"
@@ -81,6 +86,7 @@ _global_script_class_icons={
 "MemDevice": "",
 "Memory": "",
 "Parser": "",
+"Project": "",
 "Segments": ""
 }
 

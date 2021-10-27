@@ -10,6 +10,10 @@ Releases/*
 # Raw work folder and misc
 Work/*
 
+# Using Godot engine icons. Not sure of license, so not including them in
+# repository yet...
+icons/godot/*.png
+
 # Imported translations (automatically generated from CSV files)
 *.translation
 

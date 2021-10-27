@@ -15,6 +15,7 @@ var _assem : Assembler = null
 # ---------------------------------------------------------------------------
 # Onready Variables
 # ---------------------------------------------------------------------------
+onready var sourcelist_node = get_node("Editor/SourceList")
 onready var dataview_node = get_node("Editor/DataView")
 onready var codeeditor_node = get_node("Editor/CodeEditor")
 
