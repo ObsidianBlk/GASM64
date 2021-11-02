@@ -74,4 +74,20 @@ func binary_to_int(v : String) -> int:
 		ex -= 1
 	return int(val)
 
+func uuidv4(no_seperate : bool = false) -> String:
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	
+	var uuid = ""
+	for i in range(0, 16):
+		var byte = rng.randi_range(0, 256)
+		if i == 6:
+			byte = 0x40 | (0x0F & byte)
+		elif i == 9:
+			byte = 0x80 | (0x3F & byte)
+		uuid += int_to_hex(byte, 2)
+		if not no_seperate and (i == 3 or i == 5 or i == 7 or i == 9):
+			uuid += "-"
+	return uuid
+
 
