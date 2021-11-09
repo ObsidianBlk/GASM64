@@ -7,6 +7,7 @@ class_name Assembler
 var _parent : Assembler = null
 var _env : Environ = null
 var _segments : Segments = null
+var _parser : Parser = null
 var _ast : Dictionary = {}
 
 var _errors = []
@@ -15,6 +16,7 @@ var _errors = []
 # Override Methods
 # ----------------------------------------------------------------------------
 func _init(parent : Assembler = null) -> void:
+	_parser = Parser.new()
 	if parent != null:
 		_parent = parent
 		_env = _parent.get_child_environment()
@@ -451,6 +453,10 @@ func is_assembled() -> bool:
 			return _errors.size() <= 0
 	return _errors.size() <= 0
 
+func get_root() -> Assembler:
+	if _parent != null:
+		return _parent.get_root()
+	return self
 
 func get_child_environment() -> Environ:
 	return Environ.new(_env)
@@ -460,30 +466,42 @@ func get_segments() -> Segments:
 	return _segments
 
 
-func process_from_source(source : String) -> bool:
+func prime_source(source : String) -> bool:
 	_errors.clear()
-	
 	var lexer : Lexer = Lexer.new(source)
 	if lexer.is_valid():
-		var parser : Parser = Parser.new(lexer)
-		if parser.is_valid():
-			_ast = parser.get_ast()
-			return process()
+		if _parser.parse(lexer):
+			_ast = _parser.get_ast()
+			return true
 		else:
-			for idx in range(parser.error_count()):
-				var err = parser.get_error(idx)
+			for idx in range(_parser.error_count()):
+				var err = _parser.get_error(idx)
 				_StoreError(err.msg, err.line, err.col, "PARSER")
 	else:
 		var err = lexer.get_error_token()
 		_StoreError(err.msg, err.line, err.col, "LEXER")
 	return false
 
-func process(parser : Parser = null) -> bool:
-	_errors.clear()
-	
-	if parser != null and parser.is_valid():
-		_ast = parser.get_ast()
 
+func prime_ast_buffer(buffer : PoolByteArray) -> bool:
+	_errors.clear()
+	if _parser.parse_ast_buffer(buffer):
+		_ast = _parser.get_ast()
+		return true
+	else:
+		for idx in range(_parser.error_count()):
+			var err = _parser.get_error(idx)
+			_StoreError(err.msg, err.line, err.col, "PARSER")
+	return false
+
+
+func process_from_source(source : String) -> bool:
+	if prime_source(source):
+		return process()
+	return false
+
+
+func process() -> bool:
 	if not _ast.empty():
 		if _parent == null:
 			_segments.reset()

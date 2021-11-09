@@ -58,10 +58,9 @@ var _errors = []
 # ---------------------------------------------------------------------------
 # Constructor
 # ---------------------------------------------------------------------------
-func _init(lex : Lexer) -> void:
-	if lex.is_valid():
-		_lexer = lex
-		_ast = _ParseBlock()
+func _init(lex : Lexer = null) -> void:
+	if lex != null:
+		parse(lex)
 
 
 # ---------------------------------------------------------------------------
@@ -622,6 +621,164 @@ func _MaybeBinary(ltok, pres : int):
 			}, pres)
 	return ltok
 
+func _ASTNodeToBuffer(ast : Dictionary, store_line_col : bool = false) -> PoolByteArray:
+	var data : PoolByteArray = PoolByteArray([])
+	data.append(ast.type)
+	if store_line_col:
+		data.append_array(Utils.int_to_buffer(ast.line, 4))
+		data.append_array(Utils.int_to_buffer(ast.col, 2))
+	# NOTE: ASTNODE.HERE is automatically handled by the code above and needs no entry
+	# in the match list.
+	match ast.type:
+		ASTNODE.BLOCK:
+			data.append_array(Utils.int_to_buffer(ast.expressions.size(), 8))
+			for e in ast.expressions:
+				data.append_array(_ASTNodeToBuffer(e, store_line_col))
+		ASTNODE.ASSIGNMENT, ASTNODE.BINARY:
+			data.append(ast.op.ord_at(0))
+			data.append_array(_ASTNodeToBuffer(ast.left, store_line_col))
+			data.append_array(_ASTNodeToBuffer(ast.right, store_line_col))
+		ASTNODE.HILO:
+			data.append(ast.operator.ord_at(0))
+			data.append_array(_ASTNodeToBuffer(ast.value, store_line_col))
+		ASTNODE.INST:
+			var ibuf = ast.inst.to_utf8()
+			data.append(ibuf.size())
+			data.append_array(ibuf)
+			data.append(ast.addr)
+			if ast.value != null:
+				data.append_array(_ASTNodeToBuffer(ast.value, store_line_col))
+		ASTNODE.LABEL, ASTNODE.STRING:
+			data.append_array(Utils.int_to_buffer(ast.value.size(), 4))
+			data.append_array(ast.value.to_utf8())
+		ASTNODE.NUMBER:
+			data.append_array(Utils.int_to_buffer(ast.value, 2))
+		ASTNODE.DIRECTIVE:
+			data.append(ast.directive.size())
+			data.append_array(ast.directive.to_utf8())
+			
+			match ast.directive:
+				".segment":
+					data.append(ast.value.size())
+					data.append_array(ast.value.to_utf8())
+				".bytes", ".words", ".dbytes", ".text", ".ascii", ".petsci", ".include":
+					data.append_array(Utils.int_to_buffer(ast.values.size(), 4))
+					for v in ast.values:
+						data.append_array(_ASTNodeToBuffer(v, store_line_col))
+				".fill":
+					data.append_array(_ASTNodeToBuffer(ast.value, store_line_col))
+					data.append_array(_ASTNodeToBuffer(ast.bytes, store_line_col))
+	return data
+
+
+func _BufferToASTNode(buffer : PoolByteArray, offset : int, has_line_col : bool = false):
+	var ast = {"type": buffer[offset], "line": 0, "col": 0}
+	offset += 1
+	if ASTNODE.values().find(ast.type) < 0:
+		_StoreError("Unknown AST Node Type (" + ast.type + ") in buffer.", -1, 0)
+		return null
+	if has_line_col:
+		ast.line = Utils.buffer_to_int(buffer, offset, 4)
+		ast.col = Utils.buffer_to_int(buffer, offset + 4, 2)
+		offset += 6
+	if ast.type != ASTNODE.HERE:
+		match ast.type:
+			ASTNODE.BLOCK:
+				var ecount = Utils.buffer_to_int(buffer, offset, 8)
+				ast["expressions"] = []
+				offset += 8
+				for _i in range(ecount):
+					var res = _BufferToASTNode(buffer, offset, has_line_col)
+					if res == null:
+						return null
+					offset = res.offset
+					ast.expressions.append(res.ast)
+			ASTNODE.ASSIGNMENT, ASTNODE.BINARY:
+				ast["op"] = "%c" % buffer[offset]
+				var res = _BufferToASTNode(buffer, offset + 1, has_line_col)
+				if res == null:
+					return null
+				ast["left"] = res.ast
+				
+				res = _BufferToASTNode(buffer, res.offset, has_line_col)
+				if res == null:
+					return null
+				offset = res.offset
+				ast["right"] = res.ast
+			ASTNODE.HILO:
+				ast["operator"] = "%c" % buffer[offset]
+				var res = _BufferToASTNode(buffer, offset + 1, has_line_col)
+				if res == null:
+					return null
+				offset = res.offset
+				ast["value"] = res.ast
+			ASTNODE.INST:
+				var isize = buffer[offset]
+				var inst = Utils.buffer_to_string(buffer, offset + 1, isize)
+				if not GASM.is_instruction(inst):
+					_StoreError("Unrecognized instruction name '" + inst + "' in AST buffer.", -1, 0)
+					return null
+				ast["inst"] = inst
+				ast["value"] = null
+				offset += isize + 1
+				var addr = buffer[offset]
+				if GASM.MODE.values().find(addr) < 0:
+					_StoreError("Unrecognized instruction addressing more '" + addr + "' in AST buffer", -1, 0)
+					return null
+				if addr != GASM.MODE.IMP and addr != GASM.MODE.IMM:
+					var res = _BufferToASTNode(buffer, offset + 1, has_line_col)
+					if res == null:
+						return null
+					offset = res.offset
+					ast.value = res.ast
+			ASTNODE.LABEL, ASTNODE.STRING:
+				var ssize = Utils.buffer_to_int(buffer, offset, 4)
+				offset += 4
+				var val = Utils.buffer_to_string(buffer, offset, ssize)
+				ast["value"] = val
+				offset += ssize
+			ASTNODE.NUMBER:
+				ast["value"] = Utils.buffer_to_int(buffer, offset, 2)
+				offset += 2
+			ASTNODE.DIRECTIVE:
+				var size = buffer[offset]
+				var directive = Utils.buffer_to_string(buffer, offset + 1, size)
+				offset += size + 1
+				
+				match directive:
+					".segment":
+						size = buffer[offset]
+						ast["value"] = Utils.buffer_to_string(buffer, offset + 1, size)
+						offset += size + 1
+					".bytes", ".words", ".dbytes", ".text", ".ascii", ".petsci", ".include":
+						size = Utils.buffer_to_int(buffer, offset, 4)
+						offset += 4
+						var values = []
+						for _i in range(size):
+							var res = _BufferToASTNode(buffer, offset, has_line_col)
+							if res == null:
+								return null
+							offset = res.offset
+							values.append(res.ast)
+						ast["values"] = values
+					".fill":
+						var res = _BufferToASTNode(buffer, offset, has_line_col)
+						if res == null:
+							return null
+						ast["value"] = res.ast
+						
+						res = _BufferToASTNode(buffer, res.offset, has_line_col)
+						if res == null:
+							return null
+						ast["bytes"] = res.ast
+						offset = res.offset
+					_:
+						_StoreError("Unknown directive '" + directive + "' in AST buffer.", -1, 0)
+						return null
+				ast["directive"] = directive
+
+	return {"offset": offset, "ast":ast}
+
 
 # ---------------------------------------------------------------------------
 # Public Methods
@@ -629,8 +786,33 @@ func _MaybeBinary(ltok, pres : int):
 func is_valid() -> bool:
 	return _ast != null and _errors.size() <= 0
 
+func parse(lex : Lexer) -> bool:
+	if lex.is_valid():
+		_errors.clear()
+		_lexer = lex
+		_ast = _ParseBlock()
+		if _errors.size() <= 0:
+			return true
+	return false
+
+func parse_ast_buffer(buffer : PoolByteArray) -> bool:
+	_errors.clear()
+	var has_line_col = (buffer[0] == 1)
+	var res = _BufferToASTNode(buffer, 1, has_line_col)
+	if res != null:
+		_ast = res.ast
+		return true
+	return false
+
 func get_ast():
 	return _ast
+
+func get_ast_buffer(inc_line_col : bool = false) -> PoolByteArray:
+	var buffer : PoolByteArray = PoolByteArray([])
+	if _ast != null and _errors.size() <= 0:
+		buffer.append(0 if not inc_line_col else 1)
+		buffer.append_array(_ASTNodeToBuffer(_ast, inc_line_col))
+	return buffer
 
 func error_count() -> int:
 	return _errors.size()

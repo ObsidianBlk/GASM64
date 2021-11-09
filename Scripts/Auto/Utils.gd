@@ -108,7 +108,7 @@ func sub_buffer(buffer : PoolByteArray, sidx : int, eidx : int) -> PoolByteArray
 		return PoolByteArray([])
 	return buffer.subarray(sidx, eidx)
 
-func buffer_to_tnt(buffer : PoolByteArray, offset : int, bytes : int) -> int:
+func buffer_to_int(buffer : PoolByteArray, offset : int, bytes : int) -> int:
 	if offset >= 0 and offset < buffer.size() and offset + bytes <= buffer.size():
 		var sub : PoolByteArray = sub_buffer(buffer, offset, offset + (bytes - 1))
 		if sub.size() == bytes:
