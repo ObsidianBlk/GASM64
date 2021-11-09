@@ -35,51 +35,6 @@ func _StoreError(msg : String, line : int, col : int, type : String = "ASSEMBLER
 		"col": col
 	})
 
-#func _init_default_segments() -> void:
-#	if not _segments.empty():
-#		_segments.clear()
-#
-#	for seg_name in GASM_Segment.get_default_segment_names():
-#		var seg = GASM_Segment.get_segment(seg_name)
-#		if seg.start >= 0 and seg.start <= 0xFF00:
-#			_add_segment(seg_name, seg.start, seg.bytes)
-#		else:
-#			print("WARNING: 'Default' segment '", seg_name, "' has invalid starting address.")
-#
-#func _add_segment(seg_name : String, start : int, bytes : int, auto_activate : bool = false) -> void:
-#	if not seg_name in _segments:
-#		_segments[seg_name] = {"start": start, "bytes": bytes, "data": [], "PC": 0}
-#		if _active_segment == "" or auto_activate:
-#			_active_segment = seg_name
-#
-#
-#func _activate_segment(seg_name : String) -> void:
-#	if seg_name in _segments:
-#		_active_segment = seg_name
-#
-#func _get_line_in_segment(seg_name : String, idx : int) -> Dictionary:
-#	if seg_name in _segments:
-#		for e in _segments[seg_name].data:
-#			if e is Dictionary and e.line == idx:
-#				return {
-#					"addr": _segments[seg_name].start + e.PC,
-#					"line": idx,
-#					"data": PoolByteArray(e.data)
-#				}
-#	return {"addr": -1, "line": 0, "data": null}
-#
-#func _PC() -> int:
-#	if _active_segment == "":
-#		print("WARNING: Attempting to perform a PC adjustment without an active segment.")
-#		return -1
-#	return _segments[_active_segment].start + _segments[_active_segment].PC
-#
-#func _movePC(amount : int) -> void:
-#	if _active_segment == "":
-#		print("WARNING: Attempting to perform a PC adjustment without an active segment.")
-#		return
-#	_segments[_active_segment].PC += amount
-
 
 # ----------------------------------------------------------------------------
 # Private Process Methods
@@ -110,24 +65,6 @@ func _ProcessNode(node : Dictionary):
 			return _ProcessDirective(node)
 	return null
 
-#func _ProcessBlock(node : Dictionary):
-#	var block = {
-#		"elements": [],
-#		"line": node.line,
-#		"col": node.col
-#	}
-#	for ex in node.expressions:
-#		var e = _ProcessNode(ex)
-#		if _errors.size() <= 0:
-#			if typeof(e) == TYPE_DICTIONARY:
-#				if "elements" in e:
-#					for item in e.elements:
-#						block.elements.append(item)
-#				else:
-#					block.elements.append(e)
-#		else:
-#			return null
-#	return block
 
 func _ProcessBlock(node : Dictionary):
 	for ex in node.expressions:
@@ -195,31 +132,6 @@ func _ProcessBinary(node : Dictionary):
 	_StoreError("Unexpected error in BINARY operation.", node.line, node.col)
 	return null
 
-# This version of the method allows HERE to be assigned to, which we do not want to allow anymore.
-#func _ProcessAssignment(node : Dictionary) -> void:
-#	var left = node.left
-#	var right = node.right
-#
-#	if left.type != Parser.ASTNODE.LABEL and left.type != Parser.ASTNODE.HERE:
-#		_StoreError("ASSIGNMENT expects LABEL or HERE as left-hand operand.", left.line, left.col)
-#		return
-#
-#	var val = _ProcessNode(right)
-#
-#	if left.type == Parser.ASTNODE.HERE:
-#		if typeof(val) != TYPE_INT:
-#			_StoreError("Program Address cannot be assigned STRING.", right.line, right.col)
-#			return
-#		if val < 0 or val > 0xFFFF:
-#			_StoreError("Program Address assignment is out of bounds.", right.line, right.col)
-#			return
-#		_env.PC(val)			
-#	else:
-#		if typeof(val) != TYPE_INT and typeof(val) != TYPE_STRING and typeof(val) != TYPE_BOOL:
-#			_StoreError("ASSIGNMENT only supports NUMBERS, STRINGS, BOOLEANS.", right.line, right.col)
-#			return
-#		_env.set_label(left.value, val)
-#	return
 
 func _ProcessAssignment(node : Dictionary) -> void:
 	var left = node.left
@@ -256,9 +168,6 @@ func _ProcessInstruction(node : Dictionary):
 		GASM.MODE.ABSX, GASM.MODE.ABSY:
 			inst = _ProcessABSXY(node)
 
-	#if inst != null:
-	#	_movePC(inst.data.size())
-		#_env.PC_next(inst.data.size())
 	return inst
 
 func _ProcessAddrIMP(node : Dictionary):
@@ -275,7 +184,6 @@ func _ProcessAddrIMP(node : Dictionary):
 
 func _ProcessAddrIMM(node : Dictionary):
 	var relmode = false
-	#var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var inst = {"data":[], "line":node.line, "col":node.col}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
@@ -311,7 +219,6 @@ func _ProcessAddrIMM(node : Dictionary):
 
 
 func _ProcessAddrABS(node : Dictionary):
-	#var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var inst = {"data":[], "line":node.line, "col":node.col}
 	
 	var val = _ProcessNode(node.value)
@@ -347,7 +254,6 @@ func _ProcessAddrABS(node : Dictionary):
 
 func _ProcessABSXY(node : Dictionary):
 	var ZPT = GASM.MODE.ZPX if node.addr == GASM.MODE.ABSX else GASM.MODE.ZPY 
-	#var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var inst = {"data":[], "line":node.line, "col":node.col}
 	
 	var val = _ProcessNode(node.value)
@@ -382,7 +288,6 @@ func _ProcessABSXY(node : Dictionary):
 	return inst
 
 func _ProcessAddrIND(node : Dictionary):
-	#var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var inst = {"data":[], "line":node.line, "col":node.col}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
@@ -407,7 +312,6 @@ func _ProcessAddrIND(node : Dictionary):
 
 
 func _ProcessAddrINDXY(node : Dictionary):
-	#var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var inst = {"data":[], "line":node.line, "col":node.col}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
@@ -446,7 +350,6 @@ func _ProcessDirective(node : Dictionary):
 	return null
 
 func _ProcessDirBytes(node : Dictionary):
-	#var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var res = {"data":[], "line":node.line, "col":node.col}
 	for v in node.values:
 		var val = _ProcessNode(v)
@@ -454,14 +357,10 @@ func _ProcessDirBytes(node : Dictionary):
 			_StoreError("Directive '.bytes' expects all values to evaluate to NUMBERS.", v.line, v.col)
 			return null
 		res.data.append(val)
-	#if res.data.size() > 0:
-	#	_movePC(res.data.size())
-		#_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirWords(node : Dictionary):
 	var dbytes = node.directive == ".dbytes"
-	#var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var res = {"data":[], "line":node.line, "col":node.col}
 	for v in node.values:
 		var val = _ProcessNode(v)
@@ -474,13 +373,9 @@ func _ProcessDirWords(node : Dictionary):
 		else:
 			res.data.append(val & 0xFF)
 			res.data.append((val & 0xFF00) >> 8)
-	#if res.data.size() > 0:
-	#	_movePC(res.data.size())
-		#_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirText(node : Dictionary):
-	#var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var res = {"data":[], "line":node.line, "col":node.col}
 	for v in node.values:
 		var val = _ProcessNode(v)
@@ -493,13 +388,9 @@ func _ProcessDirText(node : Dictionary):
 				res.data.append(cord)
 			else:
 				res.data.append(32) # TODO: Do I really want to put a default "space" character here??!?!
-	#if res.data.size() > 0:
-	#	_movePC(res.data.size())
-		#_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirFill(node : Dictionary):
-	#var res = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
 	var res = {"data":[], "line":node.line, "col":node.col}
 	var bytes = _ProcessNode(node.bytes)
 	if typeof(bytes) != TYPE_INT:
@@ -516,13 +407,9 @@ func _ProcessDirFill(node : Dictionary):
 			return null
 	for _i in range(bytes):
 		res.data.append(val)
-	#if res.data.size() > 0:
-	#	_movePC(res.data.size())
-		#_env.PC_next(res.data.size())
 	return res
 
 func _ProcessDirImport(node : Dictionary):
-	#var res = {"asm":null, "line":node.line, "col":node.col, "PC":_env.PC()}
 	var res = {"asm":null, "line":node.line, "col":node.col}
 	var paths = []
 	for v in node.values:
@@ -550,10 +437,8 @@ func _ProcessDirSegment(node : Dictionary):
 	if segment.start >= 0:
 		if val in _segments:
 			_segments.set_activate_segment(val)
-			#_activate_segment(val)
 		else:
 			_segments.add_segment(val, segment.start, segment.bytes, true)
-			#_add_segment(val, segment.start, segment.bytes, true)
 	return null
 
 
@@ -610,21 +495,9 @@ func process(parser : Parser = null) -> bool:
 
 func get_binary_line(idx : int) -> Dictionary:
 	return _segments.find_line_in_segments(get_instance_id(), idx)
-#	for seg_name in _segments:
-#		var line = _get_line_in_segment(seg_name, idx)
-#		if line.data != null:
-#			return line
-#	return {"addr": -1, "line": 0, "data": null}
 
 func get_binary_lines(start : int, end :int) -> Array:
 	return _segments.get_lines(get_instance_id(), start, end)
-#	var lines = []
-#	if start >= 0 and end >= start:
-#		for i in range(start, end + 1):
-#			var line = get_binary_line(i)
-#			if line.data != null:
-#				lines.append(line)
-#	return lines
 
 func get_binary() -> PoolByteArray:
 	var data = []
