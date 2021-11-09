@@ -91,3 +91,40 @@ func uuidv4(no_seperate : bool = false) -> String:
 	return uuid
 
 
+# --------------------------------------------------------------------------
+# Buffer Tools
+# --------------------------------------------------------------------------
+
+func int_to_buffer(val : int, bytes : int) -> PoolByteArray:
+	var buffer = []
+	for i in range(0, bytes):
+		var chunk = val >> (((bytes - 1) - i) * 8)
+		buffer.append(chunk & 0xFF)
+	return PoolByteArray(buffer)
+
+
+func sub_buffer(buffer : PoolByteArray, sidx : int, eidx : int) -> PoolByteArray:
+	if not (sidx >= 0 and sidx < buffer.size() and eidx >= 0 and eidx < buffer.size() and sidx >= eidx):
+		return PoolByteArray([])
+	return buffer.subarray(sidx, eidx)
+
+func buffer_to_tnt(buffer : PoolByteArray, offset : int, bytes : int) -> int:
+	if offset >= 0 and offset < buffer.size() and offset + bytes <= buffer.size():
+		var sub : PoolByteArray = sub_buffer(buffer, offset, offset + (bytes - 1))
+		if sub.size() == bytes:
+			var val = 0
+			for i in range(0, bytes):
+				val = val | (sub[i] << (((bytes - 1) - i) * 8))
+			return val
+	return -1
+
+func buffer_to_string(buffer : PoolByteArray, offset : int, bytes : int, decompressed_size : int = 0) -> String:
+	if offset >= 0 and offset < buffer.size() and offset + bytes <= buffer.size():
+		var sub = buffer.subarray(offset, offset+(bytes - 1))
+		if decompressed_size > 0:
+			sub = sub.decompress(decompressed_size, File.COMPRESSION_GZIP)
+		return sub.get_string_from_utf8()
+	return "";
+
+
+
