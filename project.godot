@@ -67,7 +67,7 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "Project",
 "language": "GDScript",
-"path": "res://Scripts/project.gd"
+"path": "res://Scripts/Project.gd"
 }, {
 "base": "Reference",
 "class": "Segments",

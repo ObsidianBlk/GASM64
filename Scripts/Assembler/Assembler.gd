@@ -465,6 +465,11 @@ func get_child_environment() -> Environ:
 func get_segments() -> Segments:
 	return _segments
 
+func get_ast_buffer(include_debug_info : bool = false) -> PoolByteArray:
+	if _parser and _parser.is_valid():
+		return _parser.get_ast_buffer(include_debug_info)
+	return PoolByteArray([])
+
 
 func prime_source(source : String) -> bool:
 	_errors.clear()
