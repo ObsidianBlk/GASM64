@@ -81,34 +81,45 @@ func _GenerateAssemblyBuffer(block : PoolByteArray, res_name : String) -> void:
 	var resbuf = PoolByteArray([])
 	
 	if _data[RESOURCE_TYPE.ASSEMBLY][res_name].ref != "":
-		resbuf.append(1) # This identifies this block as a "reference" resource.
+		resbuf.append(0x80) # This identifies this block as a "reference" resource.
 		buffer = _data[RESOURCE_TYPE.ASSEMBLY][res_name].ref.to_utf8()
 		size = buffer.size()
 		resbuf.append_array(Utils.int_to_buffer(size, 2))
 		resbuf.append_array(buffer)
 	else:
-		resbuf.append(0) # This identifies this block as a "local" resource.
+		var key = 0
+		var asm = _data[RESOURCE_TYPE.ASSEMBLY][res_name].assembler
+		if asm and asm.is_valid():
+			key = key | 0x01
+			
+		resbuf.append(key) # This identifies this block as a "local" resource.
+		
+		# Getting the byte array of the source text file.
 		buffer = _data[RESOURCE_TYPE.ASSEMBLY][res_name].source.to_utf8()
 		size = buffer.size()
+		# And storing the uncompressed size.
 		resbuf.append_array(Utils.int_to_buffer(size, 2))
 		
+		# Compressing the source text file
 		buffer = buffer.compress(File.COMPRESSION_GZIP)
 		size = buffer.size()
+		# Storing compressed size and buffer.
 		resbuf.append_array(Utils.int_to_buffer(size, 2))
 		resbuf.append_array(buffer)
 		
-		if _data[RESOURCE_TYPE.ASSEMBLY][res_name].assembler:
-			var astbuf = _data[RESOURCE_TYPE.ASSEMBLY][res_name].assembler.get_ast_buffer()
+		if key & 0x01 != 0:
+			var astbuf : PoolByteArray = asm.get_ast_buffer()
+			size = astbuf.size()
+			astbuf = astbuf.compress(File.COMPRESSION_GZIP)
+			resbuf.append_array(Utils.int_to_buffer(size, 4))
 			resbuf.append_array(Utils.int_to_buffer(astbuf.size(), 4))
 			resbuf.append_array(astbuf)
-		else:
-			resbuf.append_array(Utils.int_to_buffer(0, 4))
 		
 		resbuf.append(
 			1 if _data[RESOURCE_TYPE.ASSEMBLY][res_name].main else 0
 		)
 	
-	block.append_array(Utils.int_to_buffer(resbuf.size(), 8))
+	block.append_array(Utils.int_to_buffer(resbuf.size(), 4))
 	block.append_array(resbuf)
 
 
@@ -188,39 +199,52 @@ func _ProcessAssemblyBuffer(buffer : PoolByteArray, offset : int, count : int) -
 			return false
 		offset += 4
 		
-		var index = 0
 		for _i in range(0, count):
-			var size = Utils.buffer_to_int(buffer, offset + index, 2)
-			var res_name = Utils.buffer_to_string(buffer, offset + index + 2, size)
-			index += 2 + size
+			var size = Utils.buffer_to_int(buffer, offset, 2)
+			var res_name = Utils.buffer_to_string(buffer, offset + 2, size)
+			offset += 2 + size
 			
-			var resource_size = Utils.buffer_to_int(buffer, offset + index, 4)
-			index += 8
+			var resource_size = Utils.buffer_to_int(buffer, offset, 4)
+			offset += 4
 			
-			var isRef = buffer[offset + index]
-			index += 1
-			if isRef:
-				size = Utils.buffer_to_int(buffer, offset + index, 2)
-				index += 2
-				var ref = Utils.buffer_to_string(buffer, offset + index, size)
+			var key = buffer[offset]
+			offset += 1
+			if key & 0x80 != 0:
+				size = Utils.buffer_to_int(buffer, offset, 2)
+				offset += 2
+				var ref = Utils.buffer_to_string(buffer, offset, size)
+				offset += size
 				add_assembly_resource(res_name, {"reference_project_id": ref})
 			else:
-				var src_size = Utils.buffer_to_int(buffer, offset + index, 2)
-				index += 2
-				
-				size = Utils.buffer_to_int(buffer, offset + index, 2)
-				var source = Utils.buffer_to_string(buffer, offset + index + 2, size, src_size)
-				index += 2 + size
-				
-				# TODO: Load AST Buffer!!!!
-				
-				var main = buffer[offset + index] == 1
-				index += 1
-				
 				if _data_stubbed:
+					offset += resource_size
 					add_assembly_resource(res_name)
 				else:
-					add_assembly_resource(res_name, {"source":source, "is_main":main})
+					var options = {"source":"", "is_main":false}
+					var src_size = Utils.buffer_to_int(buffer, offset, 2)
+					offset += 2
+					
+					size = Utils.buffer_to_int(buffer, offset, 2)
+					options.source = Utils.buffer_to_string(buffer, offset + 2, size, src_size)
+					offset += 2 + size
+					
+					var asm : Assembler = null
+					if key & 0x01 != 0:
+						var ast_size = Utils.buffer_to_int(buffer, offset, 4)
+						size = Utils.buffer_to_int(buffer, offset+4, 4)
+						offset += 8
+						
+						var astbuf = buffer.subarray(offset, size-1).decompress(File.COMPRESSION_GZIP)
+						asm = Assembler.new()
+						if not asm.prime_ast_buffer(astbuf):
+							_StoreError("_ProcessAssemblyBuffer", "Failed to import AST tree data.")
+							return false
+						options["assembler"] = asm
+					
+					options.is_main = buffer[offset] == 1
+					offset += 1
+					
+					add_assembly_resource(res_name, options)
 		return true
 	else:
 		_StoreError("_ProcessAssemblyBuffer", "Offset outside of buffer boundry.")
@@ -279,21 +303,21 @@ func _LoadProjectHeader(file : File, func_name : String):
 	return {"project_id":project_id, "project_name": project_name, "version": version}
 
 
-func _LoadStub(path : String, headers_only : bool = false) -> bool:
-	var file = File.new()
-	if file.open(path, File.READ) == OK:
-		var header = _LoadProjectHeader(file, "load")
-		if header != null:
-			_project_id = header.project_id
-			_project_name = header.project_name
-			if headers_only:
-				_data_stubbed = true
-				file.close()
-				return true
-		
-		
-		
-	return false
+#func _LoadStub(path : String, headers_only : bool = false) -> bool:
+#	var file = File.new()
+#	if file.open(path, File.READ) == OK:
+#		var header = _LoadProjectHeader(file, "load")
+#		if header != null:
+#			_project_id = header.project_id
+#			_project_name = header.project_name
+#			if headers_only:
+#				_data_stubbed = true
+#				file.close()
+#				return true
+#
+#
+#
+#	return false
 
 
 func _LoadProject(path : String, options : Dictionary = {}) -> bool:
@@ -346,6 +370,9 @@ func get_error(idx : int):
 
 func is_dirty() -> bool:
 	return _is_dirty
+
+func is_stubbed() -> bool:
+	return _data_stubbed
 
 func get_project_id() -> String:
 	return _project_id
@@ -462,16 +489,10 @@ func load(options : Dictionary = {}) -> bool:
 	if "path" in options:
 		path = options.path
 	
-	if "headers_only" in options and options.headers_only == true:
-		if _LoadProject(path, {"headers_only":options.headers_only}):
-			_is_dirty = false
-			_filepath = path
-			return true
-	else:
-		if _LoadProject(path):
-			_filepath = path
-			_is_dirty = false
-			return true
+	if _LoadProject(path, options):
+		_filepath = path
+		_is_dirty = false
+		return true
 	return false
 
 

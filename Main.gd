@@ -2,6 +2,7 @@ extends Node2D
 
 const HZ = 1000000
 
+onready var editormodeui_node = get_node("UI/UIContainer/EditorModeUI")
 
 #onready var dv_node = get_node("UI/EditorModeUI/Main/DataView")
 
@@ -38,3 +39,11 @@ func _on_Timer_timeout():
 	pass
 
 
+
+
+func _on_mode_change(mode):
+	match mode:
+		"game":
+			editormodeui_node.visible = false
+		"editor":
+			editormodeui_node.visible = true

@@ -13,6 +13,7 @@ Work/*
 # Using Godot engine icons. Not sure of license, so not including them in
 # repository yet...
 icons/godot/*.png
+icons/godot/*.svg
 
 # Imported translations (automatically generated from CSV files)
 *.translation

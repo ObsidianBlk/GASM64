@@ -1,0 +1,112 @@
+[gd_scene format=2]
+
+[node name="ProjectScreen" type="PanelContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBC" type="HBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 1913.0
+margin_bottom = 1073.0
+
+[node name="LeftControls" type="VBoxContainer" parent="HBC"]
+margin_right = 1813.0
+margin_bottom = 1066.0
+size_flags_horizontal = 3
+
+[node name="ProjectName" type="HBoxContainer" parent="HBC/LeftControls"]
+margin_right = 1813.0
+margin_bottom = 24.0
+
+[node name="Label" type="Label" parent="HBC/LeftControls/ProjectName"]
+margin_top = 5.0
+margin_right = 123.0
+margin_bottom = 19.0
+text = "New Project Name:"
+
+[node name="LineEdit" type="LineEdit" parent="HBC/LeftControls/ProjectName"]
+margin_left = 127.0
+margin_right = 1813.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+placeholder_text = "Enter Project Name"
+
+[node name="HSeparator" type="HSeparator" parent="HBC/LeftControls"]
+margin_top = 28.0
+margin_right = 1813.0
+margin_bottom = 32.0
+
+[node name="ProjectList" type="ItemList" parent="HBC/LeftControls"]
+margin_top = 36.0
+margin_right = 1813.0
+margin_bottom = 1066.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VSeparator" type="VSeparator" parent="HBC"]
+margin_left = 1817.0
+margin_right = 1821.0
+margin_bottom = 1066.0
+
+[node name="MarginContainer" type="MarginContainer" parent="HBC"]
+margin_left = 1825.0
+margin_right = 1906.0
+margin_bottom = 1066.0
+size_flags_vertical = 3
+custom_constants/margin_right = 8
+custom_constants/margin_left = 8
+custom_constants/margin_bottom = 4
+
+[node name="Buttons" type="VBoxContainer" parent="HBC/MarginContainer"]
+margin_left = 8.0
+margin_right = 73.0
+margin_bottom = 1062.0
+size_flags_vertical = 3
+custom_constants/separation = 8
+
+[node name="Create" type="Button" parent="HBC/MarginContainer/Buttons"]
+margin_right = 65.0
+margin_bottom = 20.0
+disabled = true
+text = "CREATE"
+
+[node name="HSeparator" type="HSeparator" parent="HBC/MarginContainer/Buttons"]
+margin_top = 28.0
+margin_right = 65.0
+margin_bottom = 32.0
+
+[node name="Edit" type="Button" parent="HBC/MarginContainer/Buttons"]
+margin_top = 40.0
+margin_right = 65.0
+margin_bottom = 60.0
+disabled = true
+text = "EDIT"
+
+[node name="Remove" type="Button" parent="HBC/MarginContainer/Buttons"]
+margin_top = 68.0
+margin_right = 65.0
+margin_bottom = 88.0
+disabled = true
+text = "REMOVE"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBC/MarginContainer/Buttons"]
+margin_top = 96.0
+margin_right = 65.0
+margin_bottom = 1034.0
+size_flags_vertical = 3
+
+[node name="Quit" type="Button" parent="HBC/MarginContainer/Buttons"]
+margin_top = 1042.0
+margin_right = 65.0
+margin_bottom = 1062.0
+text = "QUIT"
+
+[node name="PopupDialog" type="PopupDialog" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 1913.0
+margin_bottom = 1073.0

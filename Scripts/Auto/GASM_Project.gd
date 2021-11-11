@@ -5,6 +5,7 @@ extends Node
 # Signals
 # -------------------------------------------------------------------------
 signal unsaved_project
+signal verify_project_removal
 
 # -------------------------------------------------------------------------
 # Constants
@@ -47,11 +48,17 @@ func _LoadProjectList() -> void:
 		_available_projects.clear()
 		dir.list_dir_begin()
 		var file_name = dir.get_next()
+		var proj : Project = Project.new()
 		while file_name != "":
 			if not dir.current_is_dir():
-				var header = load_info(Project.FOLDER + file_name, true)
-				if header != null:
-					_available_projects.append(header)
+				if proj.load({"path": Project.FOLDER + file_name, "stubbed":true}):
+					_available_projects.append({
+						"project_name": proj.get_project_name(),
+						"project_id": proj.get_project_id(),
+						"resources": {
+							Project.RESOURCE_TYPE.ASSEMBLY: proj.get_resource_names(Project.RESOURCE_TYPE.ASSEMBLY)
+						}
+					})
 				else:
 					print("WARNING: Failed to load possible project file '" + file_name + "'.");
 			file_name = dir.get_next()
@@ -60,8 +67,20 @@ func _LoadProjectList() -> void:
 # -------------------------------------------------------------------------
 # Public Methods
 # -------------------------------------------------------------------------
-func get_project_list() -> Array:
-	return _available_projects.duplicate(true)
+func get_available_projects() -> Array:
+	var arr : Array = []
+	for item in _available_projects:
+		arr.append({"project_name": item.project_name, "project_id":item.project_id})
+	return arr
+
+
+func get_project_resource_list(project_id : String, resource_type : int) -> Array:
+	for item in _available_projects:
+		if item.project_id == project_id:
+			if resource_type in item.resources:
+				return item.resources[resource_type].duplicate()
+			break;
+	return []
 
 
 func is_dirty() -> bool:
@@ -116,40 +135,15 @@ func import_project(os_path : String) -> bool:
 		return imp_proj.save({"path":path})
 	return false
 
-
-func load_info(path : String, only_header : bool = false):
-	var info = null
-	var file = File.new()
-	if file.open(PROJECT_FOLDER + path, File.READ) == OK:
-		info = _LoadProjectHeader(file, "load_header")
-		if info == null or only_header:
-			file.close()
-			return null if info == null else info
-
-		info["resources"] = {}
-		var idx_block_size = file.get_32()
-		var res_block_size = file.get_64()
-
-		var index = _ProcessIndexBuffer(file.get_buffer(idx_block_size))
-		if _errors.size() > 0:
-			# Not storing an error. It's assumed _ProcessIndexBuffer did that... hence the if statement we're in.
-			file.close()
-			return null
-
-		var blocks = file.get_buffer(res_block_size)
-		file.close()
-
-		for entry in index:
-			info.resources[entry.resid] = []
-			var idx = 0
-			for _i in range(0, entry.count):
-				var resource = _GetResourceChunkInfo(blocks, entry.offset + idx)
-				if resource != null:
-					idx += resource.chunk_size
-					resource.erase("chunk_size")
-					info.resources[entry.resid].append(resource)
-				else:
-					return null
-	return info
+func delete_project(id : String, force : bool = false) -> bool:
+	var proj : Project = Project.new(id)
+	var dir : Directory = Directory.new()
+	var filepath : String = proj.get_project_filepath()
+	if dir.file_exists(filepath):
+		if force:
+			dir.remove(filepath)
+			return true
+		emit_signal("verify_project_removal")
+	return false
 
 

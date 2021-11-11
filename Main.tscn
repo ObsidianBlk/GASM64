@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://UI/ASMEdit/ASMEdit.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Main.gd" type="Script" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://Scripts/Com/Clock.gd" type="Script" id=8]
 [ext_resource path="res://UI/MemoryMonitor/MemoryMonitor.tscn" type="PackedScene" id=9]
 [ext_resource path="res://Scripts/UI/EditorMenuBar/Menu_View.gd" type="Script" id=10]
+[ext_resource path="res://UI/ModeSelect/ModeSelect.tscn" type="PackedScene" id=11]
 
 [node name="Main" type="Node2D"]
 script = ExtResource( 2 )
@@ -47,40 +48,59 @@ page = 255
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="EditorModeUI" type="VBoxContainer" parent="UI"]
+[node name="OpChart" parent="UI" instance=ExtResource( 3 )]
+visible = false
+
+[node name="UIContainer" type="VBoxContainer" parent="UI"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ModeSelect" parent="UI/UIContainer" instance=ExtResource( 11 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 930.0
+margin_right = 990.0
+margin_bottom = 24.0
+
+[node name="EditorModeUI" type="VBoxContainer" parent="UI/UIContainer"]
+margin_top = 28.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+size_flags_vertical = 3
 custom_constants/separation = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="MenuBar" type="PanelContainer" parent="UI/EditorModeUI"]
+[node name="MenuBar" type="PanelContainer" parent="UI/UIContainer/EditorModeUI"]
 margin_right = 1920.0
 margin_bottom = 34.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HBC" type="HBoxContainer" parent="UI/EditorModeUI/MenuBar"]
+[node name="HBC" type="HBoxContainer" parent="UI/UIContainer/EditorModeUI/MenuBar"]
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 1913.0
 margin_bottom = 27.0
 
-[node name="Menu_File" type="MenuButton" parent="UI/EditorModeUI/MenuBar/HBC"]
+[node name="Menu_File" type="MenuButton" parent="UI/UIContainer/EditorModeUI/MenuBar/HBC"]
 margin_right = 35.0
 margin_bottom = 20.0
 text = "File"
 align = 0
 script = ExtResource( 4 )
 
-[node name="VSeparator" type="VSeparator" parent="UI/EditorModeUI/MenuBar/HBC"]
+[node name="VSeparator" type="VSeparator" parent="UI/UIContainer/EditorModeUI/MenuBar/HBC"]
 margin_left = 39.0
 margin_right = 43.0
 margin_bottom = 20.0
 
-[node name="Menu_View" type="MenuButton" parent="UI/EditorModeUI/MenuBar/HBC"]
+[node name="Menu_View" type="MenuButton" parent="UI/UIContainer/EditorModeUI/MenuBar/HBC"]
 margin_left = 47.0
 margin_right = 89.0
 margin_bottom = 20.0
@@ -89,29 +109,27 @@ text = "View"
 align = 0
 script = ExtResource( 10 )
 
-[node name="Main" type="HBoxContainer" parent="UI/EditorModeUI"]
+[node name="Main" type="HBoxContainer" parent="UI/UIContainer/EditorModeUI"]
 margin_top = 34.0
 margin_right = 1920.0
-margin_bottom = 1080.0
+margin_bottom = 1052.0
 size_flags_vertical = 3
 
-[node name="MemoryMonitor" parent="UI/EditorModeUI/Main" instance=ExtResource( 9 )]
+[node name="MemoryMonitor" parent="UI/UIContainer/EditorModeUI/Main" instance=ExtResource( 9 )]
 visible = false
 anchor_bottom = 0.0
 margin_right = 480.0
 margin_bottom = 1046.0
-bus_node_path = NodePath("../../../../Computer/Bus")
-cpu_node_path = NodePath("../../../../Computer/CPU6502")
+bus_node_path = NodePath("../../../../../Computer/Bus")
+cpu_node_path = NodePath("../../../../../Computer/CPU6502")
 
-[node name="ASMEdit" parent="UI/EditorModeUI/Main" instance=ExtResource( 1 )]
+[node name="ASMEdit" parent="UI/UIContainer/EditorModeUI/Main" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_right = 1920.0
-margin_bottom = 1046.0
-
-[node name="OpChart" parent="UI" instance=ExtResource( 3 )]
-visible = false
+margin_bottom = 1018.0
 
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
-[connection signal="quit" from="UI/EditorModeUI/MenuBar/HBC/Menu_File" to="." method="_on_quit"]
-[connection signal="memmon" from="UI/EditorModeUI/MenuBar/HBC/Menu_View" to="UI/EditorModeUI/Main/MemoryMonitor" method="set_visible"]
+[connection signal="mode_change" from="UI/UIContainer/ModeSelect" to="." method="_on_mode_change"]
+[connection signal="quit" from="UI/UIContainer/EditorModeUI/MenuBar/HBC/Menu_File" to="." method="_on_quit"]
+[connection signal="memmon" from="UI/UIContainer/EditorModeUI/MenuBar/HBC/Menu_View" to="UI/UIContainer/EditorModeUI/Main/MemoryMonitor" method="set_visible"]
