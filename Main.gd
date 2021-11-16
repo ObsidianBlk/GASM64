@@ -2,7 +2,7 @@ extends Node2D
 
 const HZ = 1000000
 
-onready var editormodeui_node = get_node("UI/UIContainer/EditorModeUI")
+onready var editormodeui_node = get_node("UI/Background/UIContainer/EditorModeUI")
 
 #onready var dv_node = get_node("UI/EditorModeUI/Main/DataView")
 

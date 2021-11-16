@@ -109,6 +109,10 @@ GASM_Project="*res://Scripts/Auto/GASM_Project.gd"
 window/size/width=1920
 window/size/height=1080
 
+[gui]
+
+theme/custom="res://Theme/GASM.theme"
+
 [physics]
 
 common/enable_pause_aware_picking=true
