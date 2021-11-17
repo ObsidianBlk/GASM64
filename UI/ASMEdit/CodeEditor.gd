@@ -1,4 +1,5 @@
-extends TextEdit
+extends "res://Theme/Scripts/Theme_TextEdit.gd"
+tool
 
 # ---------------------------------------------------------------------------
 # Signals
@@ -32,11 +33,11 @@ var last_end_line : int = -1
 # Override Methods
 # ---------------------------------------------------------------------------
 func _ready() -> void:
-	_UpdateSyntaxColors()
-	connect("resized", self, "_on_resized")
-	connect("cursor_changed", self, "_on_cursor_changed")
-	connect("text_changed", self, "_on_text_changed")
-	
+	if not Engine.editor_hint:
+		_UpdateSyntaxColors()
+		connect("resized", self, "_on_resized")
+		connect("cursor_changed", self, "_on_cursor_changed")
+		connect("text_changed", self, "_on_text_changed")
 
 # ---------------------------------------------------------------------------
 # Private Methods

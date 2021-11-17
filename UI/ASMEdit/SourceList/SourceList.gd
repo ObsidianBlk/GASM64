@@ -1,4 +1,5 @@
-extends Control
+extends "res://Theme/Scripts/Theme_PanelContainer.gd"
+tool
 
 
 # -------------------------------------------------------------------------

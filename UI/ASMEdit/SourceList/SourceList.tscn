@@ -1,24 +1,34 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://UI/ASMEdit/SourceList/SourceList.gd" type="Script" id=1]
 
+[sub_resource type="StyleBoxFlat" id=50]
+content_margin_left = 6.0
+content_margin_right = 6.0
+content_margin_top = 4.0
+content_margin_bottom = 4.0
+bg_color = Color( 0.14902, 0.172549, 0.231373, 1 )
+
 [node name="SourceList" type="PanelContainer"]
-self_modulate = Color( 0.784314, 0.784314, 0.784314, 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 rect_min_size = Vector2( 250, 0 )
+custom_styles/panel = SubResource( 50 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+theme_type = ""
+theme_styles/type = "GASM"
+theme_styles/panel = "ListBG"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 1913.0
-margin_bottom = 1073.0
+margin_left = 6.0
+margin_top = 4.0
+margin_right = 1914.0
+margin_bottom = 1076.0
 size_flags_horizontal = 3
 
 [node name="List" type="VBoxContainer" parent="ScrollContainer"]
-margin_right = 1906.0
+margin_right = 1908.0
 size_flags_horizontal = 3

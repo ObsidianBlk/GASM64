@@ -73,6 +73,14 @@ func _StoreError(msg : String, line : int, col : int) -> void:
 		"col": col
 	})
 
+func _Reset() -> void:
+	_lexer = null
+	_tidx = 0
+	_tidx_mem = -1
+	_skip_EOL = false
+	_ast = null
+	_errors.clear()
+
 func _BinaryPresidence(TokType : int) -> int:
 	if TokType in BINOP_INFO:
 		return BINOP_INFO[TokType].presidence
@@ -788,7 +796,7 @@ func is_valid() -> bool:
 
 func parse(lex : Lexer) -> bool:
 	if lex.is_valid():
-		_errors.clear()
+		_Reset()
 		_lexer = lex
 		_ast = _ParseBlock()
 		if _errors.size() <= 0:

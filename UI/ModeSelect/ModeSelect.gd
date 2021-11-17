@@ -1,14 +1,18 @@
 extends Container
+tool
 
 # -------------------------------------------------------------------------
 # Signals
 # -------------------------------------------------------------------------
 signal mode_change(mode)
 
+
 # -------------------------------------------------------------------------
 # Export Variables
 # -------------------------------------------------------------------------
 export (String, "game", "editor") var initial_mode = "game"
+export var game_mode_icon : String = "World"		setget set_game_mode_icon
+export var editor_mode_icon : String = "Edit"		setget set_editor_mode_icon
 
 # -------------------------------------------------------------------------
 # Variables
@@ -21,12 +25,6 @@ var available_modes : Dictionary = {
 	"editor": {"node":null, "enabled":true}
 }
 
-# -------------------------------------------------------------------------
-# Setter / Getter
-# -------------------------------------------------------------------------
-func set_visible(v : bool) -> void:
-	node_visible = v
-	_UpdateVisibility()
 
 # -------------------------------------------------------------------------
 # Onready Variables
@@ -35,9 +33,28 @@ onready var gamemode_node : ToolButton = get_node("GameMode")
 onready var editormode_node : ToolButton = get_node("EditorMode")
 
 # -------------------------------------------------------------------------
+# Setter / Getter
+# -------------------------------------------------------------------------
+func set_visible(v : bool) -> void:
+	node_visible = v
+	_UpdateVisibility()
+
+func set_game_mode_icon(ico : String) -> void:
+	game_mode_icon = ico
+	if gamemode_node:
+		gamemode_node.icon = get_icon(game_mode_icon, "EditorIcons")
+
+func set_editor_mode_icon(ico : String) -> void:
+	editor_mode_icon = ico
+	if editormode_node:
+		editormode_node.icon = get_icon(editor_mode_icon, "EditorIcons")
+
+# -------------------------------------------------------------------------
 # Override Methods
 # -------------------------------------------------------------------------
 func _ready() -> void:
+	set_game_mode_icon(game_mode_icon)
+	set_editor_mode_icon(editor_mode_icon)
 	button_group = ButtonGroup.new()
 	gamemode_node.group = button_group
 	editormode_node.group = button_group
@@ -46,7 +63,8 @@ func _ready() -> void:
 	
 	available_modes["game"].node = gamemode_node
 	available_modes["editor"].node = editormode_node
-	call_deferred("_EmitInitialChoice")
+	if not Engine.editor_hint:
+		call_deferred("_EmitInitialChoice")
 
 # -------------------------------------------------------------------------
 # Private Methods

@@ -34,6 +34,7 @@ func _ready() -> void:
 	dataview_node.available_lines = 10
 	#dataview_node.set_line(0, 0x8000, PoolByteArray([255, 110, 96]))
 	
+	codeeditor_node.connect("resized", self, "_on_CodeEditor_resized")
 	codeeditor_node.connect("source_change", self, "_on_source_change")
 	codeeditor_node.connect("visible_lines_change", self, "_on_visible_lines_change")
 
