@@ -1,8 +1,12 @@
-[gd_scene format=2]
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://UI/ProjectScreen/ProjectScreen.gd" type="Script" id=1]
 
 [node name="ProjectScreen" type="PanelContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+size_flags_horizontal = 3
+script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -28,7 +32,7 @@ margin_right = 123.0
 margin_bottom = 19.0
 text = "New Project Name:"
 
-[node name="LineEdit" type="LineEdit" parent="HBC/LeftControls/ProjectName"]
+[node name="Line" type="LineEdit" parent="HBC/LeftControls/ProjectName"]
 margin_left = 127.0
 margin_right = 1813.0
 margin_bottom = 24.0
@@ -110,3 +114,4 @@ margin_left = 7.0
 margin_top = 7.0
 margin_right = 1913.0
 margin_bottom = 1073.0
+popup_exclusive = true

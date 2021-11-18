@@ -5,7 +5,8 @@ class_name Project
 # -------------------------------------------------------------------------
 # Constants and ENUMs
 # -------------------------------------------------------------------------
-const FOLDER : String = "user://projects/"
+const FOLDER : String = "projects/"
+const DEFAULT_PATH : String = "user://" + FOLDER
 const FILE_VERSION : Array = [0, 1]
 enum RESOURCE_TYPE {ASSEMBLY}
 
@@ -26,11 +27,11 @@ var _errors : Array = []
 # Override Methods
 # -------------------------------------------------------------------------
 func _init(id : String = "") -> void:
-	if id == "":
-		if id.length() == 24 and id.is_valid_hex_number() :
+	if id != "":
+		if id.length() == 32 and id.is_valid_hex_number():
 			_project_id = id
-	if id == "":
-		id = Utils.uuidv4(true)
+	if _project_id == "":
+		_project_id = Utils.uuidv4(true)
 
 
 # -------------------------------------------------------------------------
@@ -250,7 +251,19 @@ func _ProcessAssemblyBuffer(buffer : PoolByteArray, offset : int, count : int) -
 		_StoreError("_ProcessAssemblyBuffer", "Offset outside of buffer boundry.")
 	return false
 
+func _ValidateProjectFolder() -> bool:
+	var dir : Directory = Directory.new()
+	if dir.open("user://") == OK:
+		if dir.dir_exists(FOLDER):
+			return true
+		if dir.make_dir(FOLDER) == OK:
+			return true
+	return false
+
 func _SaveProject(path : String) -> bool:
+	if not _ValidateProjectFolder():
+		return false
+	
 	var file = File.new()
 	if file.open(path, File.WRITE) == OK:
 		
@@ -279,7 +292,7 @@ func _SaveProject(path : String) -> bool:
 
 func _LoadProjectHeader(file : File, func_name : String):
 	var magic = file.get_buffer(4).get_string_from_utf8()
-	if magic != "GPROJ":
+	if magic != "GPRJ":
 		_StoreError(func_name, "File missing magic string 'GPROJ'.")
 		file.close()
 		return false
@@ -302,22 +315,6 @@ func _LoadProjectHeader(file : File, func_name : String):
 
 	return {"project_id":project_id, "project_name": project_name, "version": version}
 
-
-#func _LoadStub(path : String, headers_only : bool = false) -> bool:
-#	var file = File.new()
-#	if file.open(path, File.READ) == OK:
-#		var header = _LoadProjectHeader(file, "load")
-#		if header != null:
-#			_project_id = header.project_id
-#			_project_name = header.project_name
-#			if headers_only:
-#				_data_stubbed = true
-#				file.close()
-#				return true
-#
-#
-#
-#	return false
 
 
 func _LoadProject(path : String, options : Dictionary = {}) -> bool:
@@ -387,7 +384,7 @@ func get_project_name() -> String:
 func get_project_filepath(ignore_existing : bool = false) -> String:
 	if _filepath != "" and not ignore_existing:
 		return _filepath
-	return FOLDER + "GP_" + _project_id.to_upper() + ".gproj"
+	return DEFAULT_PATH + "GP_" + _project_id.to_upper() + ".gproj"
 
 func get_resource_names(resource_type : int) -> Array:
 	if resource_type in _data:
@@ -506,6 +503,7 @@ func save(options : Dictionary = {}) -> bool:
 				_filepath = path
 				if "clear_dirty" in options and options.clear_dirty:
 					_is_dirty = false
+				return true
 	return false
 
 
