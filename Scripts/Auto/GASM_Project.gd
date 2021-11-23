@@ -49,9 +49,7 @@ func _UpdateAvailableProject(proj : Project) -> void:
 	_available_projects.append({
 		"project_name": proj.get_project_name(),
 		"project_id": proj.get_project_id(),
-		"resources": {
-			Project.RESOURCE_TYPE.ASSEMBLY: proj.get_resource_names(Project.RESOURCE_TYPE.ASSEMBLY)
-		}
+		"resources": proj.get_resource_list()
 	})
 	emit_signal(
 		"project_added",
@@ -140,11 +138,10 @@ func save_project() -> bool:
 	return _active_project.save()
 
 
-func load_project(id : String, force : bool = false) -> bool:
-	if _active_project != null and _active_project.is_dirty() and force == false:
-		emit_signal("unsaved_project")
-		return false
-
+func load_project(id : String) -> bool:
+	if _active_project != null and _active_project.get_project_id() == id:
+		return true
+	
 	var nproj = Project.new(id)
 	if nproj.load():
 		_active_project = nproj

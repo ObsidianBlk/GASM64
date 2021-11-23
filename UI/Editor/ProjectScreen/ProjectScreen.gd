@@ -3,6 +3,9 @@ extends "res://Theme/Scripts/Theme_PanelContainer.gd"
 # -------------------------------------------------------------------------
 # Signals
 # -------------------------------------------------------------------------
+signal quit()
+signal edit_project()
+
 
 # -------------------------------------------------------------------------
 # Export Variables
@@ -23,6 +26,7 @@ onready var projectlist_node : ItemList = get_node("HBC/LeftControls/ProjectList
 onready var btn_create_node : Button = get_node("HBC/MarginContainer/Buttons/Create")
 onready var btn_edit_node : Button = get_node("HBC/MarginContainer/Buttons/Edit")
 onready var btn_remove_node : Button = get_node("HBC/MarginContainer/Buttons/Remove")
+onready var btn_quit_node : Button = get_node("HBC/MarginContainer/Buttons/Quit")
 
 # -------------------------------------------------------------------------
 # Override Methods
@@ -32,7 +36,9 @@ func _ready() -> void:
 	GASM_Project.connect("project_removed", self, "_on_project_removed")
 	
 	btn_create_node.connect("pressed", self, "_on_create_new_project")
+	btn_edit_node.connect("pressed", self, "_on_edit_project")
 	btn_remove_node.connect("pressed", self, "_on_remove_project")
+	btn_quit_node.connect("pressed", self, "_on_quit")
 	
 	projectnameline_node.connect("text_changed", self, "_on_projnameline_text_changed")
 	
@@ -102,3 +108,11 @@ func _on_remove_project() -> void:
 		var proj_id = projectlist_node.get_item_metadata(selected_project_idx)
 		GASM_Project.delete_project(proj_id)
 
+func _on_edit_project() -> void:
+	if selected_project_idx >= 0:
+		var proj_id = projectlist_node.get_item_metadata(selected_project_idx)
+		if GASM_Project.load_project(proj_id):
+			emit_signal("edit_project")
+
+func _on_quit() -> void:
+	emit_signal("quit")

@@ -1,11 +1,27 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://Theme/Fonts/RaMono_16pt.tres" type="DynamicFont" id=1]
-[ext_resource path="res://Theme/Fonts/raw/Ra-Mono.otf" type="DynamicFontData" id=2]
-[ext_resource path="res://UI/MemoryMonitor/PageDisplay/PageDisplay.gd" type="Script" id=3]
+[ext_resource path="res://UI/Editor/MemoryMonitor/PageDisplay/PageDisplay.gd" type="Script" id=3]
 
-[sub_resource type="DynamicFont" id=1]
-font_data = ExtResource( 2 )
+[sub_resource type="DynamicFontData" id=81]
+font_path = "res://Theme/Fonts/raw/Ra-Mono.otf"
+
+[sub_resource type="DynamicFont" id=82]
+font_data = SubResource( 81 )
+
+[sub_resource type="DynamicFontData" id=59]
+font_path = "res://Theme/Fonts/raw/Ra-Mono.otf"
+
+[sub_resource type="DynamicFont" id=60]
+size = 12
+outline_color = Color( 0.462745, 1, 0.494118, 1 )
+font_data = SubResource( 59 )
+
+[sub_resource type="DynamicFontData" id=71]
+font_path = "res://Theme/Fonts/raw/Ra-Mono.otf"
+
+[sub_resource type="DynamicFont" id=72]
+size = 12
+font_data = SubResource( 71 )
 
 [node name="PageDisplay" type="VBoxContainer"]
 anchor_bottom = 1.0
@@ -20,19 +36,19 @@ __meta__ = {
 
 [node name="Label" type="Label" parent="."]
 margin_right = 432.0
-margin_bottom = 23.0
-custom_fonts/font = SubResource( 1 )
+margin_bottom = 2.0
+custom_fonts/font = SubResource( 82 )
 text = "0x00"
 
 [node name="HSeparator" type="HSeparator" parent="."]
-margin_top = 23.0
+margin_top = 2.0
 margin_right = 432.0
-margin_bottom = 27.0
+margin_bottom = 6.0
 
 [node name="Page" type="MarginContainer" parent="."]
-margin_top = 27.0
+margin_top = 6.0
 margin_right = 432.0
-margin_bottom = 359.0
+margin_bottom = 338.0
 custom_constants/margin_left = 16
 
 [node name="Data" type="VBoxContainer" parent="Page"]
@@ -47,8 +63,8 @@ margin_bottom = 17.0
 [node name="Label" type="Label" parent="Page/Data/Row0"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "00:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row0"]
@@ -56,11 +72,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -74,8 +90,8 @@ margin_bottom = 38.0
 [node name="Label" type="Label" parent="Page/Data/Row1"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "10:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row1"]
@@ -83,11 +99,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -101,8 +117,8 @@ margin_bottom = 59.0
 [node name="Label" type="Label" parent="Page/Data/Row2"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "20:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row2"]
@@ -110,11 +126,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -128,8 +144,8 @@ margin_bottom = 80.0
 [node name="Label" type="Label" parent="Page/Data/Row3"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "30:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row3"]
@@ -137,11 +153,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -155,8 +171,8 @@ margin_bottom = 101.0
 [node name="Label" type="Label" parent="Page/Data/Row4"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "40:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row4"]
@@ -164,11 +180,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -182,8 +198,8 @@ margin_bottom = 122.0
 [node name="Label" type="Label" parent="Page/Data/Row5"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "50:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row5"]
@@ -191,11 +207,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -209,8 +225,8 @@ margin_bottom = 143.0
 [node name="Label" type="Label" parent="Page/Data/Row6"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "60:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row6"]
@@ -218,11 +234,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -236,8 +252,8 @@ margin_bottom = 164.0
 [node name="Label" type="Label" parent="Page/Data/Row7"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "70:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row7"]
@@ -245,11 +261,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -263,8 +279,8 @@ margin_bottom = 185.0
 [node name="Label" type="Label" parent="Page/Data/Row8"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "80:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row8"]
@@ -272,11 +288,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -290,8 +306,8 @@ margin_bottom = 206.0
 [node name="Label" type="Label" parent="Page/Data/Row9"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "90:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row9"]
@@ -299,11 +315,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -317,8 +333,8 @@ margin_bottom = 227.0
 [node name="Label" type="Label" parent="Page/Data/Row10"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "A0:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row10"]
@@ -326,11 +342,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -344,8 +360,8 @@ margin_bottom = 248.0
 [node name="Label" type="Label" parent="Page/Data/Row11"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "B0:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row11"]
@@ -353,11 +369,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -371,8 +387,8 @@ margin_bottom = 269.0
 [node name="Label" type="Label" parent="Page/Data/Row12"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "C0:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row12"]
@@ -380,11 +396,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -398,8 +414,8 @@ margin_bottom = 290.0
 [node name="Label" type="Label" parent="Page/Data/Row13"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "D0:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row13"]
@@ -407,11 +423,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -425,8 +441,8 @@ margin_bottom = 311.0
 [node name="Label" type="Label" parent="Page/Data/Row14"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "E0:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row14"]
@@ -434,11 +450,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
@@ -452,8 +468,8 @@ margin_bottom = 332.0
 [node name="Label" type="Label" parent="Page/Data/Row15"]
 margin_right = 24.0
 margin_bottom = 17.0
-custom_fonts/font = ExtResource( 1 )
 custom_colors/font_color = Color( 0.462745, 1, 0.494118, 1 )
+custom_fonts/font = SubResource( 60 )
 text = "F0:"
 
 [node name="Data" type="RichTextLabel" parent="Page/Data/Row15"]
@@ -461,11 +477,11 @@ margin_left = 28.0
 margin_right = 416.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
-custom_fonts/mono_font = ExtResource( 1 )
-custom_fonts/bold_italics_font = ExtResource( 1 )
-custom_fonts/italics_font = ExtResource( 1 )
-custom_fonts/bold_font = ExtResource( 1 )
-custom_fonts/normal_font = ExtResource( 1 )
+custom_fonts/mono_font = SubResource( 72 )
+custom_fonts/bold_italics_font = SubResource( 72 )
+custom_fonts/italics_font = SubResource( 72 )
+custom_fonts/bold_font = SubResource( 72 )
+custom_fonts/normal_font = SubResource( 72 )
 bbcode_enabled = true
 bbcode_text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
 text = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"

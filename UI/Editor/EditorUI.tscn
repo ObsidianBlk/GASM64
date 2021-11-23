@@ -1,0 +1,119 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://UI/Editor/EditorUI.gd" type="Script" id=1]
+[ext_resource path="res://UI/Editor/ASMEdit/SourceList/SourceList.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scripts/UI/EditorMenuBar/Menu_View.gd" type="Script" id=3]
+[ext_resource path="res://Scripts/UI/EditorMenuBar/Menu_File.gd" type="Script" id=4]
+[ext_resource path="res://UI/Editor/MemoryMonitor/MemoryMonitor.tscn" type="PackedScene" id=6]
+[ext_resource path="res://UI/Editor/ProjectScreen/ProjectScreen.tscn" type="PackedScene" id=7]
+[ext_resource path="res://UI/Editor/ASMEdit/ASMEdit.tscn" type="PackedScene" id=8]
+
+[sub_resource type="Image" id=4]
+data = {
+"data": PoolByteArray( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ),
+"format": "LumAlpha8",
+"height": 16,
+"mipmaps": false,
+"width": 16
+}
+
+[sub_resource type="ImageTexture" id=2]
+flags = 4
+flags = 4
+image = SubResource( 4 )
+size = Vector2( 16, 16 )
+
+[sub_resource type="StyleBoxTexture" id=3]
+texture = SubResource( 2 )
+region_rect = Rect2( 0, 0, 16, 16 )
+margin_left = 2.0
+margin_right = 2.0
+margin_top = 2.0
+margin_bottom = 2.0
+
+[node name="EditorUI" type="VBoxContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 3
+custom_constants/separation = 0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MenuBar" type="PanelContainer" parent="."]
+visible = false
+margin_right = 1920.0
+margin_bottom = 34.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBC" type="HBoxContainer" parent="MenuBar"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 1913.0
+margin_bottom = 27.0
+
+[node name="Menu_File" type="MenuButton" parent="MenuBar/HBC"]
+margin_right = 35.0
+margin_bottom = 20.0
+focus_mode = 2
+text = "File"
+align = 0
+script = ExtResource( 4 )
+
+[node name="VSeparator" type="VSeparator" parent="MenuBar/HBC"]
+margin_left = 39.0
+margin_right = 43.0
+margin_bottom = 20.0
+
+[node name="Menu_View" type="MenuButton" parent="MenuBar/HBC"]
+margin_left = 47.0
+margin_right = 89.0
+margin_bottom = 20.0
+focus_mode = 2
+text = "View"
+align = 0
+script = ExtResource( 3 )
+
+[node name="ProjectScreen" parent="." instance=ExtResource( 7 )]
+visible = false
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+
+[node name="Toolset" type="HBoxContainer" parent="."]
+margin_right = 1920.0
+margin_bottom = 1080.0
+size_flags_vertical = 3
+
+[node name="Sidebar" type="TabContainer" parent="Toolset"]
+margin_right = 264.0
+margin_bottom = 1080.0
+tab_align = 0
+
+[node name="Sources" parent="Toolset/Sidebar" instance=ExtResource( 2 )]
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+custom_styles/panel = SubResource( 3 )
+
+[node name="Monitor" parent="Toolset/Sidebar" instance=ExtResource( 6 )]
+visible = false
+anchor_right = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="ASMEdit" parent="Toolset" instance=ExtResource( 8 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 268.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+
+[connection signal="memmon" from="MenuBar/HBC/Menu_View" to="Toolset/Sidebar/Monitor" method="set_visible"]

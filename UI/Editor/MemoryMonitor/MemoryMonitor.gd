@@ -98,6 +98,8 @@ func _UpdateMonitor() -> void:
 
 
 func _UpdatePageDisplays() -> void:
+	if _bus == null:
+		return
 	PD1_node.set_page(_pageOffset)
 	PD1_node.set_data(_bus.page_dump(_pageOffset))
 		
@@ -105,6 +107,8 @@ func _UpdatePageDisplays() -> void:
 	PD2_node.set_data(_bus.page_dump(_pageOffset+1))
 
 func _UpdateCPUDisplays() -> void:
+	if _cpu == null:
+		return
 	var info = _cpu.get_state_info()
 	A_node.text = Utils.int_to_hex(info.A, 2)
 	X_node.text = Utils.int_to_hex(info.X, 2)

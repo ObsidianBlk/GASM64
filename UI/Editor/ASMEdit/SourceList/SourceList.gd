@@ -7,7 +7,7 @@ tool
 # -------------------------------------------------------------------------
 signal selected_source(source_name)
 
-const SOURCE_LIST_ITEM = preload("res://UI/ASMEdit/SourceList/SourceListItem.tscn")
+const SOURCE_LIST_ITEM = preload("res://UI/Editor/ASMEdit/SourceList/SourceListItem.tscn")
 
 # -------------------------------------------------------------------------
 # Export Variables

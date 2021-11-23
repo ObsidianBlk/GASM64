@@ -386,10 +386,20 @@ func get_project_filepath(ignore_existing : bool = false) -> String:
 		return _filepath
 	return DEFAULT_PATH + "GP_" + _project_id.to_upper() + ".gproj"
 
-func get_resource_names(resource_type : int) -> Array:
-	if resource_type in _data:
-		return _data[resource_type].keys()
-	return []
+func get_resource_list() -> Array:
+	var resource_list = []
+	for res_type_name in RESOURCE_TYPE.keys():
+		var rtype = RESOURCE_TYPE[res_type_name]
+		if rtype in _data:
+			var resources = _data[rtype]
+			for res_name in resources.keys():
+				if resources[res_name].alive == true:
+					resource_list.append({
+						type = rtype,
+						name = res_name,
+						ref = resources[res_name].ref != ""
+					})
+	return resource_list
 
 func add_assembly_resource(resource_name : String, options : Dictionary = {}) -> void:
 	if not RESOURCE_TYPE.ASSEMBLY in _data:
@@ -402,7 +412,7 @@ func add_assembly_resource(resource_name : String, options : Dictionary = {}) ->
 		if res.size() != 2:
 			_StoreError("add_assembly_resource", "Reference string malformed.")
 			return;
-		if res[0].size() != 24:
+		if res[0].size() != 32:
 			_StoreError("add_assembly_resource", "Reference project ID invalid.")
 			return
 		# TODO: Verify res[0] is a large hex value.
@@ -423,7 +433,8 @@ func add_assembly_resource(resource_name : String, options : Dictionary = {}) ->
 	if not (resource_name in asm):
 		if _data_stubbed:
 			asm[resource_name] = {
-				"stub": true
+				"stub": true,
+				"alive": true
 			}
 			if ref != "":
 				asm[resource_name].ref = ref
@@ -457,7 +468,7 @@ func get_assembly_resource(resource_name : String) -> Dictionary:
 			if asm[resource_name].alive:
 				# TODO: If Reg has a value, load that reference project to get the data.
 				return {
-					"source": asm[resource_name].text,
+					"source": asm[resource_name].source,
 					"assembler": asm[resource_name].assembler,
 					"main": asm[resource_name].main
 				}

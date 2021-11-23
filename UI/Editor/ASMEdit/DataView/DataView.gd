@@ -1,6 +1,6 @@
 extends Container
 
-const MCLINE = preload("res://UI/ASMEdit/DataView/MCLine.tscn")
+const MCLINE = preload("res://UI/Editor/ASMEdit/DataView/MCLine.tscn")
 
 # -----------------------------------------------------------------------------
 # Export Variables

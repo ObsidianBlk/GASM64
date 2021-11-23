@@ -12,7 +12,7 @@ _global_script_classes=[ {
 "base": "Control",
 "class": "ASMEdit",
 "language": "GDScript",
-"path": "res://UI/ASMEdit/ASMEdit.gd"
+"path": "res://UI/Editor/ASMEdit/ASMEdit.gd"
 }, {
 "base": "Reference",
 "class": "Assembler",
@@ -47,7 +47,7 @@ _global_script_classes=[ {
 "base": "Container",
 "class": "MCLine",
 "language": "GDScript",
-"path": "res://UI/ASMEdit/DataView/MCLine.gd"
+"path": "res://UI/Editor/ASMEdit/DataView/MCLine.gd"
 }, {
 "base": "Node",
 "class": "MemDevice",
@@ -108,10 +108,6 @@ GASM_Project="*res://Scripts/Auto/GASM_Project.gd"
 
 window/size/width=1920
 window/size/height=1080
-
-[gui]
-
-theme/custom="res://Theme/GASM.theme"
 
 [physics]
 

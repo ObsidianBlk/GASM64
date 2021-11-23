@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://UI/ASMEdit/SourceList/SourceList.gd" type="Script" id=1]
+[ext_resource path="res://UI/Editor/ASMEdit/SourceList/SourceList.gd" type="Script" id=1]
 
 [sub_resource type="StyleBoxFlat" id=50]
 content_margin_left = 6.0
@@ -12,7 +12,8 @@ bg_color = Color( 0.14902, 0.172549, 0.231373, 1 )
 [node name="SourceList" type="PanelContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_min_size = Vector2( 250, 0 )
+rect_min_size = Vector2( 256, 0 )
+size_flags_vertical = 3
 custom_styles/panel = SubResource( 50 )
 script = ExtResource( 1 )
 __meta__ = {
