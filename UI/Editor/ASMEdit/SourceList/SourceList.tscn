@@ -1,35 +1,56 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=2 format=2]
 
 [ext_resource path="res://UI/Editor/ASMEdit/SourceList/SourceList.gd" type="Script" id=1]
-
-[sub_resource type="StyleBoxFlat" id=50]
-content_margin_left = 6.0
-content_margin_right = 6.0
-content_margin_top = 4.0
-content_margin_bottom = 4.0
-bg_color = Color( 0.14902, 0.172549, 0.231373, 1 )
 
 [node name="SourceList" type="PanelContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 rect_min_size = Vector2( 256, 0 )
 size_flags_vertical = 3
-custom_styles/panel = SubResource( 50 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 theme_type = ""
-theme_styles/type = "GASM"
-theme_styles/panel = "ListBG"
+theme_styles/type = ""
+theme_styles/panel = ""
 
-[node name="ScrollContainer" type="ScrollContainer" parent="."]
-margin_left = 6.0
-margin_top = 4.0
-margin_right = 1914.0
-margin_bottom = 1076.0
+[node name="VBC" type="VBoxContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 1913.0
+margin_bottom = 1073.0
+
+[node name="Resources" type="HBoxContainer" parent="VBC"]
+margin_right = 1906.0
+margin_bottom = 20.0
+
+[node name="Label" type="Label" parent="VBC/Resources"]
+margin_top = 3.0
+margin_right = 41.0
+margin_bottom = 17.0
+text = "Filter: "
+
+[node name="ResourceFilter" type="OptionButton" parent="VBC/Resources"]
+margin_left = 45.0
+margin_right = 1890.0
+margin_bottom = 20.0
 size_flags_horizontal = 3
 
-[node name="List" type="VBoxContainer" parent="ScrollContainer"]
-margin_right = 1908.0
+[node name="Create" type="Button" parent="VBC/Resources"]
+margin_left = 1894.0
+margin_right = 1906.0
+margin_bottom = 20.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBC"]
+margin_top = 24.0
+margin_right = 1906.0
+margin_bottom = 1066.0
 size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="VBC/ScrollContainer"]
+margin_right = 1906.0
+margin_bottom = 1042.0
+size_flags_horizontal = 3
+size_flags_vertical = 3

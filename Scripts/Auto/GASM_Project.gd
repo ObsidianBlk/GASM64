@@ -6,11 +6,13 @@ extends Node
 # -------------------------------------------------------------------------
 signal project_added(id, name)
 signal project_removed(id)
+signal project_loaded()
+signal project_saved()
 
 # -------------------------------------------------------------------------
-# Constants
+# Constants and ENUMs
 # -------------------------------------------------------------------------
-
+enum RESOURCE_TYPE {ASSEMBLY}
 
 # -------------------------------------------------------------------------
 # Variables
@@ -100,6 +102,12 @@ func get_project_resource_list(project_id : String, resource_type : int) -> Arra
 	return []
 
 
+func get_active_project_resource_list(resource_type : int) -> Array:
+	if _active_project:
+		return get_project_resource_list(_active_project.get_project_id(), resource_type)
+	return []
+
+
 func is_dirty() -> bool:
 	if _active_project != null:
 		return _active_project.is_dirty()
@@ -135,7 +143,10 @@ func get_assembler(resource_name):
 func save_project() -> bool:
 	if _active_project == null:
 		return true
-	return _active_project.save()
+	var res = _active_project.save()
+	if res:
+		emit_signal("project_saved")
+	return res
 
 
 func load_project(id : String) -> bool:
@@ -145,6 +156,7 @@ func load_project(id : String) -> bool:
 	var nproj = Project.new(id)
 	if nproj.load():
 		_active_project = nproj
+		emit_signal("project_loaded")
 		return true
 	return false
 
@@ -158,6 +170,7 @@ func import_project(os_path : String) -> bool:
 	return false
 
 func delete_project(id : String) -> bool:
+	# TODO: Must handle if deleting _active_project
 	var proj : Project = Project.new(id)
 	var dir : Directory = Directory.new()
 	var filepath : String = proj.get_project_filepath()
