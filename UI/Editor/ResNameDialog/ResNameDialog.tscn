@@ -1,0 +1,69 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://UI/Editor/ResNameDialog/ResNameDialog.gd" type="Script" id=1]
+
+[node name="ResNameDialog" type="WindowDialog"]
+margin_right = 300.0
+margin_bottom = 76.0
+window_title = "Create Resource"
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MC" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 8
+custom_constants/margin_top = 8
+custom_constants/margin_left = 8
+custom_constants/margin_bottom = 8
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBC" type="VBoxContainer" parent="MC"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 292.0
+margin_bottom = 68.0
+custom_constants/separation = 12
+
+[node name="ResourceName" type="HBoxContainer" parent="MC/VBC"]
+margin_right = 284.0
+margin_bottom = 24.0
+
+[node name="Label" type="Label" parent="MC/VBC/ResourceName"]
+margin_top = 5.0
+margin_right = 42.0
+margin_bottom = 19.0
+text = "Name:"
+
+[node name="LineEdit" type="LineEdit" parent="MC/VBC/ResourceName"]
+margin_left = 46.0
+margin_right = 284.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+placeholder_text = "Name of Resource"
+
+[node name="Buttons" type="HBoxContainer" parent="MC/VBC"]
+margin_top = 36.0
+margin_right = 284.0
+margin_bottom = 56.0
+
+[node name="Accept" type="Button" parent="MC/VBC/Buttons"]
+margin_right = 56.0
+margin_bottom = 20.0
+text = "Accept"
+
+[node name="Control" type="Control" parent="MC/VBC/Buttons"]
+margin_left = 60.0
+margin_right = 226.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="Cancel" type="Button" parent="MC/VBC/Buttons"]
+margin_left = 230.0
+margin_right = 284.0
+margin_bottom = 20.0
+text = "Cancel"

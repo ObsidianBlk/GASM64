@@ -11,6 +11,9 @@ class_name ASMEdit
 # Variables
 # ---------------------------------------------------------------------------
 var _assem : Assembler = null
+var _project : Project = null
+var _resource_name : String = ""
+var _resource_info : Dictionary = {}
 
 # ---------------------------------------------------------------------------
 # Onready Variables
@@ -32,7 +35,9 @@ onready var codeeditor_node = get_node("Editor/CodeEditor")
 func _ready() -> void:
 	_assem = Assembler.new()
 	dataview_node.available_lines = 10
-	#dataview_node.set_line(0, 0x8000, PoolByteArray([255, 110, 96]))
+	
+	GASM_Project.connect("project_loaded", self, "_on_project_loaded")
+	_project = GASM_Project.get_project()
 	
 	codeeditor_node.connect("resized", self, "_on_CodeEditor_resized")
 	codeeditor_node.connect("source_change", self, "_on_source_change")
@@ -45,9 +50,19 @@ func _ready() -> void:
 func _UpdateDataView(start : int, end : int) -> void:
 	if dataview_node:
 		dataview_node.clear()
-		var lines = _assem.get_binary_lines(start, end)
-		for line in lines:
-			dataview_node.set_line(line.line - start, line.addr, line.data)
+		if "assembler" in _resource_info:
+			var lines = _resource_info.assembler.get_binary_lines(start, end)
+			for line in lines:
+				dataview_node.set_line(line.line - start, line.addr, line.data)
+
+func _SetCodeEditorText(source : String, resource_update : bool = true) -> void:
+	codeeditor_node.text = source
+	if "source" in _resource_info and resource_update:
+		_resource_info.source = source
+	_UpdateDataView(
+		codeeditor_node.get_current_start_line(),
+		codeeditor_node.get_current_end_line()
+	)
 
 # ---------------------------------------------------------------------------
 # Public Methods
@@ -104,20 +119,38 @@ func get_line_count() -> int:
 		return codeeditor_node.get_line_count()
 	return 0
 
+func set_source(source_name) -> void:
+	if _project != null:
+		if _project.has_resource(Project.RESOURCE_TYPE.ASSEMBLY, source_name):
+			_resource_name = source_name
+			_resource_info = _project.get_assembly_resource(source_name)
+			_SetCodeEditorText(_resource_info.source, false)
+
+
 # ---------------------------------------------------------------------------
 # Handler Methods
 # ---------------------------------------------------------------------------
 
+func _on_project_loaded(proj : Project) -> void:
+	_project = proj
+	_resource_info = {}
+	_SetCodeEditorText("", false)
+
+
 func _on_source_change() -> void:
 	var src = codeeditor_node.text
-	if _assem.process_from_source(src):
-		_UpdateDataView(
-			codeeditor_node.get_current_start_line(),
-			codeeditor_node.get_current_end_line()
-		)
-		#assem.print_binary()
-	else:
-		_assem.print_errors()
+	if _project:
+		_project.set_assembly_resource(_resource_name, {"source":src})
+	if "assembler" in _resource_info:
+		var asm = _resource_info.assembler
+		if asm.process_from_source(src):
+			_UpdateDataView(
+				codeeditor_node.get_current_start_line(),
+				codeeditor_node.get_current_end_line()
+			)
+			#assem.print_binary()
+		else:
+			asm.print_errors()
 
 func _on_visible_lines_change(start : int, end : int) -> void:
 	_UpdateDataView(start, end)

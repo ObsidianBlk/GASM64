@@ -15,6 +15,8 @@ const UNSELECT_COLOR = Color(1,1,1,0)
 # -------------------------------------------------------------------------
 # Variables
 # -------------------------------------------------------------------------
+var __label_text : String = ""
+
 var __theme_style_normal : StyleBox = null
 var __theme_style_selected : StyleBox = null
 var __theme_color_normal : Color = Color(0,0,0,1)
@@ -24,6 +26,9 @@ var __theme_color_selected_used : bool = false
 
 var __selected : bool = false
 var __source_type : int = -1
+
+var __ready : bool = false
+var __theme_waiting : bool = false
 
 # -------------------------------------------------------------------------
 # Onready Variables
@@ -40,6 +45,8 @@ onready var icon_node : TextureRect = get_node("Control/LBL/Icon")
 # Override Methods
 # -------------------------------------------------------------------------
 func _ready() -> void:
+	__ready = true
+	label_node.text = __label_text
 	set_process_input(false)
 	
 	if has_icon("file", "EditorIcons"):
@@ -82,7 +89,9 @@ func _set(property : String, value) -> bool:
 	match property:
 		"source_name":
 			if typeof(value) == TYPE_STRING:
-				label_node.text = value
+				__label_text = value
+				if label_node:
+					label_node.text = value
 			else : success = false
 		"source_type":
 			if typeof(value) == TYPE_INT:
@@ -210,6 +219,11 @@ func _UpdateLabelColor(target : String, source : String, color) -> void:
 		label_node.add_color_override(target, label_node.get_color(source))
 	
 func _UpdateLabelTheme() -> void:
+	if not __ready:
+		if not __theme_waiting:
+			__theme_waiting = true
+			call_deferred("_UpdateLabelTheme")
+	
 	if __selected:
 		var color = null if not __theme_color_selected_used else __theme_color_selected
 		_UpdateLabelColor("font_color", "font_color_selected", color)

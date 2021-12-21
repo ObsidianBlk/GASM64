@@ -19,6 +19,11 @@ onready var mem_monitor_node = get_node("Toolset/Sidebar/Monitor")
 
 onready var projectscreen_node = get_node("ProjectScreen")
 onready var toolset_node = get_node("Toolset")
+onready var sourcelist_node = get_node("Toolset/Sidebar/Sources")
+
+onready var toolset = {
+	asmedit_node = get_node("Toolset/ASMEdit")
+}
 
 
 # -------------------------------------------------------------------------
@@ -53,13 +58,21 @@ func _ready() -> void:
 	set_memory_monito_ups(memory_monitor_ups)
 	
 	projectscreen_node.connect("edit_project", self, "_on_edit_project")
+	sourcelist_node.connect("selected_source", self, "_on_selected_source")
 
 
 # -------------------------------------------------------------------------
 # Private Methods
 # -------------------------------------------------------------------------
+func _HideAllTools() -> void:
+	for tool_node in toolset:
+		tool_node.visible = false
 
-
+func _ShowTool(tool_name : String) -> void:
+	if tool_name in toolset:
+		if not toolset[tool_name].visible:
+			_HideAllTools()
+			toolset[tool_name].visible = true
 
 # -------------------------------------------------------------------------
 # Public Methods
@@ -70,6 +83,17 @@ func _ready() -> void:
 # Handler Methods
 # -------------------------------------------------------------------------
 
-func _on_edit_project():
+func _on_edit_project() -> void:
 	projectscreen_node.visible = false
 	toolset_node.visible = true
+
+
+func _on_selected_source(source_name, source_type) -> void:
+	var proj : Project = GASM_Project.get_project()
+	if proj:
+		if proj.has_resource(source_type, source_name):
+			var res_info = proj.get_resource(source_type, source_name)
+			match source_type:
+				Project.RESOURCE_TYPE.ASSEMBLY:
+					_ShowTool("asmedit_node")
+					toolset.asmedit_node.set_source(source_name)

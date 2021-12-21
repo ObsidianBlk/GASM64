@@ -55,13 +55,13 @@ align = 0
 script = ExtResource( 3 )
 
 [node name="ProjectScreen" parent="." instance=ExtResource( 7 )]
-visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_right = 1920.0
 margin_bottom = 1080.0
 
 [node name="Toolset" type="HBoxContainer" parent="."]
+visible = false
 margin_right = 1920.0
 margin_bottom = 1080.0
 size_flags_vertical = 3
@@ -76,8 +76,6 @@ margin_left = 4.0
 margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
-theme_styles/type = ""
-theme_styles/panel = ""
 
 [node name="Monitor" parent="Toolset/Sidebar" instance=ExtResource( 6 )]
 visible = false

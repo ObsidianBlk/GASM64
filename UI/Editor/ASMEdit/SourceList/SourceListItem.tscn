@@ -11,14 +11,6 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-source_name = null
-selected = false
-theme_overrides/styles/normal = null
-theme_overrides/styles/selected = null
-theme_overrides/colors/font_color_normal = Color( 0, 0, 0, 1 )
-theme_overrides/colors/use_font_color_normal = false
-theme_overrides/colors/font_color_selected = Color( 0, 0, 0, 1 )
-theme_overrides/colors/use_font_color_selected = false
 
 [node name="Control" type="MarginContainer" parent="."]
 margin_right = 1920.0

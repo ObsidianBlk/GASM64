@@ -36,6 +36,9 @@ margin_left = 45.0
 margin_right = 1890.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
+text = "ASSEMBLY"
+items = [ "ASSEMBLY", null, false, 0, null ]
+selected = 0
 
 [node name="Create" type="Button" parent="VBC/Resources"]
 margin_left = 1894.0

@@ -5,9 +5,10 @@ tool
 # -------------------------------------------------------------------------
 # Consts and Signals
 # -------------------------------------------------------------------------
-signal selected_source(source_name)
+signal selected_source(source_name, source_type)
 
 const SOURCE_LIST_ITEM = preload("res://UI/Editor/ASMEdit/SourceList/SourceListItem.tscn")
+const RESNAMEDIALOG = preload("res://UI/Editor/ResNameDialog/ResNameDialog.tscn")
 
 # -------------------------------------------------------------------------
 # Export Variables
@@ -18,6 +19,7 @@ const SOURCE_LIST_ITEM = preload("res://UI/Editor/ASMEdit/SourceList/SourceListI
 # Variables
 # -------------------------------------------------------------------------
 var _project : Project = null
+var _resource_dialog_node : WindowDialog = null
 
 # -------------------------------------------------------------------------
 # Onready Variables
@@ -34,6 +36,7 @@ func _ready() -> void:
 	
 	if has_icon("Add", "EditorIcons"):
 		createbtn_node.icon = get_icon("Add", "EditorIcons")
+	createbtn_node.connect("pressed", self, "_on_create_resource")
 	
 	var first_item = true
 	for key in GASM_Project.RESOURCE_TYPE.keys():
@@ -98,14 +101,39 @@ func _on_project_loaded() -> void:
 	if proj:
 		_project = proj
 
-func _on_new_source(source_name : String) -> void:
-	pass
-	#_CreateListItem(source_name)
+func _on_create_resource() -> void:
+	if not _project:
+		return
+	
+	if _resource_dialog_node == null:
+		_resource_dialog_node = RESNAMEDIALOG.instance()
+		add_child(_resource_dialog_node)
+		var res_type : int = resourcefilter_node.get_selected_id()
+		var res_type_name : String = resourcefilter_node.get_item_text(res_type)
+		_resource_dialog_node.window_title = "Create %s" % [res_type_name]
+		_resource_dialog_node.connect("accepted", self, "_on_new_resource", [res_type])
+		_resource_dialog_node.connect("canceled", self, "_on_cancel_create_resource")
+		_resource_dialog_node.popup_centered()
+
+func _on_cancel_create_resource() -> void:
+	if _resource_dialog_node != null:
+		remove_child(_resource_dialog_node)
+		_resource_dialog_node.queue_free()
+		_resource_dialog_node = null
+
+func _on_new_resource(res_name : String, res_type : int) -> void:
+	if not _project:
+		return
+
+	match res_type:
+		Project.RESOURCE_TYPE.ASSEMBLY:
+			_project.add_assembly_resource(res_name)
+			_CreateListItem(res_name, res_type)
+	_on_cancel_create_resource()
 
 func _on_source_item_selected(source_name : String, source_type : int) -> void:
 	for child in list_node.get_children():
 		if child.has_method("is_selected") and child.is_selected() and child.source_name != source_name and child.source_type == source_type:
 			child.select(false)
-	# TODO: Pass on selected item information! <source_type> might be used to select editor
-	#   ASSEMBLY = ASMEdit, GRAPHIC = GraphicEdit, etc
+	emit_signal("selected_source", source_name, source_type)
 

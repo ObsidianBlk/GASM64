@@ -401,6 +401,32 @@ func get_resource_list() -> Array:
 					})
 	return resource_list
 
+func has_resource(type : int, resource_name : String) -> bool:
+	if RESOURCE_TYPE.keys().find(type) >= 0:
+		return resource_name in _data[type]
+	return false
+
+func add_resource(type : int, resource_name : String, options : Dictionary = {}) -> void:
+	match type:
+		RESOURCE_TYPE.ASSEMBLY:
+			add_assembly_resource(resource_name, options)
+
+func drop_resource(type : int, resource_name : String) -> void:
+	match type:
+		RESOURCE_TYPE.ASSEMBLY:
+			drop_assembly_resource(resource_name)
+
+func get_resource(type : int, resource_name : String) -> Dictionary:
+	match type:
+		RESOURCE_TYPE.ASSEMBLY:
+			return get_assembly_resource(resource_name)
+	return {"type":-1}
+
+func set_resource(type : int, resource_name : String, options : Dictionary) -> void:
+	match type:
+		RESOURCE_TYPE.ASSEMBLY:
+			set_assembly_resource(resource_name, options)
+
 func add_assembly_resource(resource_name : String, options : Dictionary = {}) -> void:
 	if not RESOURCE_TYPE.ASSEMBLY in _data:
 		_data[RESOURCE_TYPE.ASSEMBLY] = {}
@@ -468,11 +494,12 @@ func get_assembly_resource(resource_name : String) -> Dictionary:
 			if asm[resource_name].alive:
 				# TODO: If Reg has a value, load that reference project to get the data.
 				return {
+					"type": RESOURCE_TYPE.ASSEMBLY,
 					"source": asm[resource_name].source,
 					"assembler": asm[resource_name].assembler,
 					"main": asm[resource_name].main
 				}
-	return {"source":"", "assembler":null, "main":false}
+	return {"type":-1}
 
 
 func set_assembly_resource(resource_name : String, options : Dictionary = {}) -> void:
