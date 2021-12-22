@@ -173,7 +173,7 @@ func _ProcessInstruction(node : Dictionary):
 	return inst
 
 func _ProcessAddrIMP(node : Dictionary):
-	var inst = {"data":[], "line":node.line, "col":node.col, "PC":_env.PC()}
+	var inst = {"data":[], "line":node.line, "col":node.col}
 	var op = GASM.get_instruction_code(node.inst, node.addr)
 	if op < 0:
 		_StoreError(

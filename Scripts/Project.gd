@@ -402,7 +402,7 @@ func get_resource_list() -> Array:
 	return resource_list
 
 func has_resource(type : int, resource_name : String) -> bool:
-	if RESOURCE_TYPE.keys().find(type) >= 0:
+	if RESOURCE_TYPE.values().find(type) >= 0:
 		return resource_name in _data[type]
 	return false
 
