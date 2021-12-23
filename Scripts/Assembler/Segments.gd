@@ -1,6 +1,8 @@
 extends Reference
 class_name Segments
 
+# TODO: Segment PC start values should be adjusted by an assembler.
+
 
 # -------------------------------------------------------------------------
 # Variables
@@ -42,6 +44,29 @@ func add_segment(seg_name : String, start : int, bytes : int, auto_activate : bo
 		if _active_segment == "" or auto_activate:
 			_active_segment = seg_name
 
+func get_segment_names() -> Array:
+	return _segments.keys()
+
+func get_segment_info(seg_name : String) -> Dictionary:
+	if seg_name in _segments:
+		return {"start":_segments[seg_name].start, "bytes":_segments[seg_name].bytes}
+	return {}
+
+func get_segment_start_address(seg_name : String) -> int:
+	if seg_name in _segments:
+		return _segments[seg_name].start
+	return 0
+
+func get_segment_byte_size(seg_name : String) -> int:
+	if seg_name in _segments:
+		return _segments[seg_name].bytes
+	return 0
+
+func get_segment_byte_count(seg_name : String) -> int:
+	if seg_name in _segments:
+		return _segments[seg_name].PC
+	return 0
+
 
 func process_counter(offset_only : bool = false) -> int:
 	if offset_only:
@@ -63,44 +88,83 @@ func get_active_segment() -> String:
 	return _active_segment
 
 
-func push_data_line(data : Array, owner_id : int, line : int, col : int) -> void:
+func push_assembler_segments(seg : Segments, line : int, col : int) -> void:
+	var seg_names : Array = seg.get_segment_names()
+	for seg_name in seg_names:
+		var process = true
+		
+		if not seg_name in _segments:
+			var seg_info = seg.get_segment_info(seg_name)
+			if seg_info.empty():
+				process = false
+			else:
+				add_segment(seg_name, seg_info.start, seg_info.bytes)
+		
+		if process:
+			_segments[seg_name].data.append({
+				"offset": _segments[seg_name].PC,
+				"segment": seg,
+				"line": line,
+				"col": col,
+			})
+			_segments[seg_name].PC += seg.get_segment_byte_count(seg_name)
+
+
+func push_data_line(data : Array, line : int, col : int) -> void:
 	if data.size() > 0:
 		_segments[_active_segment].data.append({
 			"offset": _segments[_active_segment].PC,
 			"data": data,
-			"owner_id": owner_id,
 			"line": line,
-			"col": col
+			"col": col,
 		})
 		_segments[_active_segment].PC += data.size()
 
 
-func find_line_in_segment(seg_name : String, owner_id : int, idx : int) -> Dictionary:
+func get_initial_bytes(seg_name : String, entry_count : int) -> Array:
+	var data : Array = []
+	if seg_name in _segments:
+		for e in range(entry_count):
+			if e < _segments[seg_name].data.size():
+				if "data" in _segments[seg_name].data[e]:
+					data.append_array(_segments[seg_name].data[e].data)
+				elif "segment" in _segments[seg_name].data[e]:
+					data.append_array(_segments[seg_name].data[e].segment /
+							.get_initial_bytes(seg_name, 2))
+	return data
+
+
+func find_line_in_segment(seg_name : String, idx : int) -> Dictionary:
 	if seg_name in _segments:
 		for e in _segments[seg_name].data:
-			if e is Dictionary and e.owner_id == owner_id and e.line == idx:
-				print(e)
+			if e is Dictionary and e.line == idx:
+				var data : Array
+				if "data" in e:
+					data = e.data
+				else:
+					data = e.segment.get_initial_bytes(seg_name, 2)
+				
 				return {
 					"addr": _segments[seg_name].start + e.offset,
 					"line": idx,
-					"data": PoolByteArray(e.data)
+					"data": PoolByteArray(data)
 				}
 	return {"addr": -1, "line": 0, "data": null}
 
 
-func find_line_in_segments(owner_id : int, idx : int) -> Dictionary:
+func find_line_in_segments(idx : int) -> Dictionary:
 	for seg_name in _segments:
-		var line = find_line_in_segment(seg_name, owner_id, idx)
+		var line = find_line_in_segment(seg_name, idx)
 		if line.data != null:
 			return line
 	return {"addr": -1, "line": 0, "data": null}
 
 
-func get_lines(owner_id : int, start : int, end :int) -> Array:
+func get_lines(start : int, end :int) -> Array:
 	var lines = []
 	if start >= 0 and end >= start:
 		for i in range(start, end + 1):
-			var line = find_line_in_segments(owner_id, i)
+			var line = find_line_in_segments(i)
 			if line.data != null:
 				lines.append(line)
 	return lines

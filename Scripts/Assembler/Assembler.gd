@@ -15,15 +15,10 @@ var _errors = []
 # ----------------------------------------------------------------------------
 # Override Methods
 # ----------------------------------------------------------------------------
-func _init(parent : Assembler = null) -> void:
+func _init() -> void:
 	_parser = Parser.new()
-	if parent != null:
-		_parent = parent
-		_env = _parent.get_child_environment()
-		_segments = _parent.get_segments()
-	else:
-		_env = Environ.new(Environ.new())
-		_segments = Segments.new()
+	_env = Environ.new()
+	_segments = Segments.new()
 
 
 # ----------------------------------------------------------------------------
@@ -73,7 +68,7 @@ func _ProcessBlock(node : Dictionary):
 		var e = _ProcessNode(ex)
 		if _errors.size() <= 0:
 			if e is Dictionary and "data" in e:
-				_segments.push_data_line(e.data, get_instance_id(), e.line, e.col)
+				_segments.push_data_line(e.data, e.line, e.col)
 		else:
 			break
 	return null
@@ -458,9 +453,6 @@ func get_root() -> Assembler:
 		return _parent.get_root()
 	return self
 
-func get_child_environment() -> Environ:
-	return Environ.new(_env)
-
 
 func get_segments() -> Segments:
 	return _segments
@@ -508,8 +500,8 @@ func process_from_source(source : String) -> bool:
 
 func process() -> bool:
 	if not _ast.empty():
-		if _parent == null:
-			_segments.reset()
+		_env.reset()
+		_segments.reset()
 		_ProcessNode(_ast)
 		if _errors.size() <= 0:
 			return true
@@ -517,10 +509,10 @@ func process() -> bool:
 
 
 func get_binary_line(idx : int) -> Dictionary:
-	return _segments.find_line_in_segments(get_instance_id(), idx)
+	return _segments.find_line_in_segments(idx)
 
 func get_binary_lines(start : int, end :int) -> Array:
-	return _segments.get_lines(get_instance_id(), start, end)
+	return _segments.get_lines(start, end)
 
 func get_binary() -> PoolByteArray:
 	var data = []
